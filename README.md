@@ -176,7 +176,7 @@ Este projeto está licenciado sob a **GNU General Public License v3.0** - veja o
 - **Materials Project** - Base de dados de materiais
 - **Crystallography Open Database (COD)** - Estruturas cristalinas
 - **Open Quantum Materials Database (OQMD)**
-- **Raman Open Database (ROD)
+- **Raman Open Database (ROD)**
 - **Pymatgen** - Framework de análise de materiais
 - **Comunidade Python** - Ferramentas e bibliotecas de código aberto
 
