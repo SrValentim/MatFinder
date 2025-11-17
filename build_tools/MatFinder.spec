@@ -16,8 +16,8 @@ from PyInstaller.utils.hooks import collect_data_files, collect_submodules
 
 block_cipher = None
 
-# Caminho base do projeto
-base_path = os.path.abspath('.')
+# Caminho base do projeto (subir um nível pois o spec está em build_tools)
+base_path = os.path.abspath('..')
 
 # Coletar dados do projeto
 matfinder_datas = [
@@ -29,7 +29,7 @@ added_files = [
     ('matfinder/assets/icons/polvo.ico', 'matfinder/assets/icons'),
     ('matfinder/assets/logos/*', 'matfinder/assets/logos'),
     ('matfinder/assets/config/*', 'matfinder/assets/config'),
-    ('LICENSE_FULL.txt', '.'),
+    ('licenses/LICENSE_FULL.txt', '.'),
 ]
 
 # Hidden imports - módulos que precisam ser incluídos explicitamente

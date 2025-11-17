@@ -17,7 +17,7 @@ from pathlib import Path
 # Configurações
 APP_NAME = "MatFinder"
 APP_VERSION = "3.23.0"
-SPEC_FILE = "MatFinder.spec"
+SPEC_FILE = "build_tools/MatFinder.spec"
 
 # Cores para output no terminal
 class Colors:

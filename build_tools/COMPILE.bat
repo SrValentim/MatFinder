@@ -6,13 +6,14 @@ echo ============================================================
 echo.
 
 echo [1/3] Limpando builds anteriores...
+cd ..
 if exist build rmdir /s /q build
 if exist dist rmdir /s /q dist
 echo OK!
 echo.
 
 echo [2/3] Compilando com PyInstaller (isso pode levar 5-10 minutos)...
-python build_optimized.py
+python build_tools\build_optimized.py
 echo.
 
 if exist dist\MatFinder\MatFinder.exe (

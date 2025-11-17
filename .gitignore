@@ -22,7 +22,7 @@ ENV/
 /scripts/dist/
 /scripts/build/
 # Manter .spec no repositório
-!MatFinder.spec
+!build_tools/MatFinder.spec
 
 # Ficheiros de Log e Dados do Utilizador
 *.log
