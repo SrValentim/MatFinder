@@ -1,7 +1,7 @@
 # MatFinder v3.23.0
 
 <div align="center">
-  <img src="matfinder/assets/logos/logo-polvo-verde.png" alt="MatFinder Logo" width="200"/>
+  <img src="matfinder/assets/logos/splash.png" alt="MatFinder Logo" width="200"/>
   
   **Ferramenta Avançada de Busca e Análise de Materiais Cristalinos**
   
