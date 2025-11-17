@@ -3,7 +3,7 @@
 <div align="center">
   <img src="matfinder/assets/logos/splash.png" alt="MatFinder Logo" width="200"/>
   
-  **Ferramenta Avançada de Busca e Análise de Materiais Cristalinos**
+  **Busca e Análise de Materiais Cristalinos**
   
   [![License](https://img.shields.io/badge/license-GPL%20v3-blue.svg)](licenses/LICENSE)
   [![Python](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/)
@@ -16,22 +16,22 @@
 
 MatFinder é uma aplicação desktop completa para pesquisa, visualização e análise de estruturas cristalinas de materiais. Desenvolvido na Universidade Federal do Amazonas (UFAM), integra múltiplas bases de dados cristalográficas e ferramentas de análise de difração de raios-X.
 
-### 🎯 Funcionalidades Principais
+###  Funcionalidades Principais
 
-- 🔍 **Busca Integrada**: Materials Project, COD (Crystallography Open Database)
-- 📊 **Análise XRD**: Simulação e comparação de padrões de difração
-- 🧪 **Ferramentas de Análise**:
+-  **Busca Integrada**: Materials Project, COD (Crystallography Open Database), OQMD, ROD (Raman Open Database)
+-  **Análise XRD**: Simulação e comparação de padrões de difração
+-  **Ferramentas de Análise**:
   - Editor de arquivos CIF
   - Calculadora estequiométrica
   - Tabela periódica interativa
   - Remoção de background (SNIP, Rolling Ball, Polynomial)
   - Normalização de dados (múltiplos métodos)
-- 📈 **Visualização Avançada**: Gráficos interativos com customização completa
-- 💾 **Gerenciamento**: Sistema de favoritos e histórico de buscas
+-  **Visualização**: Gráficos interativos com customização
+-  **Gerenciamento**: Sistema de favoritos e histórico de buscas
 
 ---
 
-## 🚀 Instalação
+##  Instalação
 
 ### Requisitos
 
@@ -130,7 +130,7 @@ Para mais detalhes, consulte [`docs/compilation/BUILD_GUIDE.md`](docs/compilatio
 | **Gráficos** | Matplotlib |
 | **Computação Científica** | NumPy, SciPy, Pandas |
 | **Cristalografia** | Pymatgen |
-| **APIs** | mp-api (Materials Project) |
+| **APIs** | mp-api (Materials Project), OQMD, COD (Crystallography Open Database) e ROD (Raman Open Database) |
 | **Compilação** | PyInstaller |
 
 ---
@@ -153,29 +153,30 @@ Este projeto está licenciado sob a **GNU General Public License v3.0** - veja o
 
 ### Resumo da Licença
 
-- ✅ Uso comercial permitido
-- ✅ Modificação permitida
-- ✅ Distribuição permitida
-- ✅ Uso privado permitido
-- ⚠️ Mudanças devem ser documentadas
-- ⚠️ Código-fonte deve ser disponibilizado
-- ⚠️ Mesma licença deve ser usada em trabalhos derivados
+-  Modificação permitida
+-  Distribuição permitida
+-  Uso privado permitido
+-  Mudanças devem ser documentadas
+-  Código-fonte deve ser disponibilizado
+-  Mesma licença deve ser usada em trabalhos derivados
 
 ---
 
 ## 👨‍💻 Autor
 
 **Raynner Valentim**
-- 🎓 Universidade Federal do Amazonas (UFAM)
+- 🎓 Universidade Federal do Amazonas (UFAM) | Departamento de Física | Departamento de Física de Materiais
 - 📧 Email: [Raynnervalentim@hotmail.com](mailto:Raynnervalentim@hotmail.com)
 - 🐙 GitHub: [@SrValentim](https://github.com/SrValentim)
 
 ---
 
-## 🙏 Agradecimentos
+##  Agradecimentos
 
 - **Materials Project** - Base de dados de materiais
 - **Crystallography Open Database (COD)** - Estruturas cristalinas
+- **Open Quantum Materials Database (OQMD)**
+- **Raman Open Database (ROD)
 - **Pymatgen** - Framework de análise de materiais
 - **Comunidade Python** - Ferramentas e bibliotecas de código aberto
 
@@ -188,12 +189,12 @@ Este projeto está licenciado sob a **GNU General Public License v3.0** - veja o
 ### Versão Atual: 3.23.0
 
 **Últimas Atualizações**:
-- ✨ Normalização por pico específico
-- ✨ Diálogo de legenda interativa
-- ✨ Remoção de background (SNIP, Rolling Ball, Polynomial)
-- 🔧 Correção de bugs no editor de CIF
-- 🔧 Melhorias de performance na plotagem
-- 📄 Integração da licença GPL v3
+-  Normalização por pico específico
+-  Diálogo de legenda interativa
+-  Remoção de background (SNIP, Rolling Ball, Polynomial)
+-  Correção de bugs no editor de CIF
+-  Melhorias de performance na plotagem
+-  Integração da licença GPL v3
 
 ---
 
@@ -204,6 +205,6 @@ Encontrou um bug? Tem uma sugestão? Abra uma [issue](https://github.com/SrValen
 ---
 
 <div align="center">
-  <sub>Desenvolvido com ❤️ na UFAM</sub>
+  <sub>A excelência é um hábito</sub>
 </div>
 
