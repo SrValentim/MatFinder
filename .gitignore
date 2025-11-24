@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.spec
+
+# Ambiente Virtual
+.venv/
+venv/
+ENV/
+
+# Ficheiros do PyCharm
+.idea/
+
+# Ficheiros de Build e Compilação
+/dist/
+/build/
+*.msi
+*.cab
+*.exe
+/scripts/dist/
+/scripts/build/
+# Manter .spec no repositório
+!build_tools/MatFinder.spec
+
+# Ficheiros de Log e Dados do Utilizador
+*.log
+historico_buscas.json
+favorites.json
