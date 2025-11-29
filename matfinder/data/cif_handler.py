@@ -55,6 +55,28 @@ class CifHandler:
         """Retorna o sistema cristalino da estrutura."""
         return self.analyzer.get_crystal_system().lower()
 
+    def get_space_group_info(self) -> dict:
+        """
+        Retorna informações do grupo espacial da estrutura.
+
+        Returns:
+            dict: Dicionário com 'number' (int) e 'symbol' (str) do grupo espacial
+        """
+        try:
+            spacegroup = self.analyzer.get_space_group_symbol()
+            spacegroup_number = self.analyzer.get_space_group_number()
+
+            return {
+                'number': spacegroup_number,
+                'symbol': spacegroup
+            }
+        except Exception as e:
+            logging.warning(f"Não foi possível obter informações do grupo espacial: {e}")
+            return {
+                'number': None,
+                'symbol': 'Desconhecido'
+            }
+
     def update_lattice_params(self, a=None, b=None, c=None, alpha=None, beta=None, gamma=None):
         """
         Atualiza a estrutura com novos parâmetros de rede, respeitando as restrições
@@ -85,9 +107,24 @@ class CifHandler:
             new_b = new_a
             new_alpha, new_beta, new_gamma = 90.0, 90.0, 120.0
         elif crystal_system in ['trigonal', 'rhombohedral']:
-            # Trigonal/Romboédrico: a = b = c, α = β = γ ≠ 90°
-            new_b, new_c = new_a, new_a
-            new_beta, new_gamma = new_alpha, new_alpha
+            # Trigonal pode ter duas configurações:
+            # 1. Hexagonal: a = b ≠ c, α = β = 90°, γ = 120°
+            # 2. Romboédrica: a = b = c, α = β = γ ≠ 90°
+            # Detectar qual configuração baseado nos parâmetros atuais
+            is_rhombohedral = (abs(current_params['a'] - current_params['c']) < 0.01 and
+                              abs(current_params['alpha'] - current_params['gamma']) < 0.1 and
+                              abs(current_params['alpha'] - 90.0) > 0.1)
+
+            if is_rhombohedral or crystal_system == 'rhombohedral':
+                # Romboédrico: a = b = c, α = β = γ ≠ 90°
+                new_b, new_c = new_a, new_a
+                new_beta, new_gamma = new_alpha, new_alpha
+                logging.debug("Trigonal/Romboédrico detectado: configuração romboédrica")
+            else:
+                # Hexagonal: a = b ≠ c, α = β = 90°, γ = 120°
+                new_b = new_a
+                new_alpha, new_beta, new_gamma = 90.0, 90.0, 120.0
+                logging.debug("Trigonal detectado: configuração hexagonal")
         elif crystal_system == 'orthorhombic':
             # Ortorrômbico: a ≠ b ≠ c, α = β = γ = 90°
             new_alpha, new_beta, new_gamma = 90.0, 90.0, 90.0
@@ -97,6 +134,9 @@ class CifHandler:
         # Triclínico: a ≠ b ≠ c, α ≠ β ≠ γ (sem restrições)
 
         try:
+            # Salvar sistema cristalino antigo para detectar mudanças
+            old_crystal_system = crystal_system
+
             new_lattice = Lattice.from_parameters(
                 a=new_a, b=new_b, c=new_c,
                 alpha=new_alpha, beta=new_beta, gamma=new_gamma
@@ -107,6 +147,16 @@ class CifHandler:
                 self.structure.frac_coords,
                 coords_are_cartesian=False
             )
+
+            # CRÍTICO: Atualizar analyzer com nova estrutura
+            self.analyzer = SpacegroupAnalyzer(self.structure)
+            new_crystal_system = self.get_crystal_system()
+
+            # Validar se o sistema cristalino mudou
+            if old_crystal_system != new_crystal_system:
+                logging.warning(f"⚠️ Sistema cristalino mudou após edição: {old_crystal_system} → {new_crystal_system}")
+                logging.warning(f"   Parâmetros: a={new_a:.3f}, b={new_b:.3f}, c={new_c:.3f}, α={new_alpha:.2f}°, β={new_beta:.2f}°, γ={new_gamma:.2f}°")
+
             logging.info(f"Parâmetros de rede atualizados para: a={new_a:.3f}, b={new_b:.3f}, c={new_c:.3f}")
         except Exception as e:
             logging.error(f"Erro ao criar nova rede com os parâmetros fornecidos: {e}")
@@ -118,8 +168,14 @@ class CifHandler:
         """
         if new_volume <= 0:
             raise ValueError("O novo volume deve ser um número positivo.")
+
+        old_volume = self.structure.lattice.volume
         self.structure.scale_lattice(new_volume)
-        logging.info(f"Volume escalado para {self.structure.lattice.volume:.2f}")
+
+        # CRÍTICO: Atualizar analyzer com nova estrutura
+        self.analyzer = SpacegroupAnalyzer(self.structure)
+
+        logging.info(f"Volume escalado de {old_volume:.2f} para {self.structure.lattice.volume:.2f} Å³")
 
     def get_cif_string(self) -> str:
         """

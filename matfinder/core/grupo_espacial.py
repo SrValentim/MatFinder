@@ -1,92 +1,253 @@
 # grupo_espacial.py
-# Este módulo armazena informações sobre grupos espaciais e seus sistemas cristalinos.
-
-# NOTA: Esta lista é um subconjunto representativo e não contém todos os 230 grupos espaciais.
-# A numeração e os detalhes completos devem ser verificados com as Tabelas Internacionais de Cristalografia.
-# Símbolos com "₁", "₂", "₃", "₄" são representados com "_" (ex: P2_1/c) para facilidade de uso em código.
+# Biblioteca Completa de Grupos Espaciais
+# 
+# Contém TODOS os 230 grupos espaciais da União Internacional de Cristalografia (IUCr)
 
 LISTA_GRUPOS_ESPACIAIS = [
-    # --- Triclínico ---
-    {"numero": 1, "simbolo_hm": "P1", "simbolos_alternativos": [], "sistema_cristalino": "Triclínico", "ponto_grupo": "1", "descricao_adicional": "Sem simetria adicional além da translação."},
-    {"numero": 2, "simbolo_hm": "P-1", "simbolos_alternativos": ["Pī"], "sistema_cristalino": "Triclínico", "ponto_grupo": "-1 (ī)", "descricao_adicional": "Com centro de inversão."},
-
-    # --- Monoclínico ---
-    # (O PDF lista 13 grupos monoclínicos. Aqui estão alguns exemplos)
-    {"numero": 3, "simbolo_hm": "P2", "simbolos_alternativos": [], "sistema_cristalino": "Monoclínico", "ponto_grupo": "2", "descricao_adicional": "Eixo binário único."},
-    {"numero": 4, "simbolo_hm": "P2_1", "simbolos_alternativos": ["P21"], "sistema_cristalino": "Monoclínico", "ponto_grupo": "2", "descricao_adicional": "Eixo helicoidal binário."},
-    {"numero": 5, "simbolo_hm": "C2", "simbolos_alternativos": [], "sistema_cristalino": "Monoclínico", "ponto_grupo": "2", "descricao_adicional": "Centrado na face C, eixo binário."},
-    {"numero": 10, "simbolo_hm": "P2/m", "simbolos_alternativos": [], "sistema_cristalino": "Monoclínico", "ponto_grupo": "2/m", "descricao_adicional": "Eixo binário perpendicular a um plano de espelho."},
-    {"numero": 11, "simbolo_hm": "P2_1/m", "simbolos_alternativos": ["P21/m"], "sistema_cristalino": "Monoclínico", "ponto_grupo": "2/m", "descricao_adicional": "Eixo helicoidal binário perpendicular a um plano de espelho."},
-    {"numero": 12, "simbolo_hm": "C2/m", "simbolos_alternativos": [], "sistema_cristalino": "Monoclínico", "ponto_grupo": "2/m", "descricao_adicional": "Centrado C, eixo binário perpendicular a plano de espelho."},
-    {"numero": 13, "simbolo_hm": "P2/c", "simbolos_alternativos": [], "sistema_cristalino": "Monoclínico", "ponto_grupo": "2/m", "descricao_adicional": "Eixo binário perpendicular a plano de deslizamento c."},
-    {"numero": 14, "simbolo_hm": "P2_1/c", "simbolos_alternativos": ["P21/c"], "sistema_cristalino": "Monoclínico", "ponto_grupo": "2/m", "descricao_adicional": "Muito comum; eixo helicoidal binário perpendicular a plano de deslizamento c."},
-    {"numero": 15, "simbolo_hm": "C2/c", "simbolos_alternativos": [], "sistema_cristalino": "Monoclínico", "ponto_grupo": "2/m", "descricao_adicional": "Centrado C, eixo binário perpendicular a plano de deslizamento c."},
-
-    # --- Ortorrômbico ---
-    # (O PDF lista 59 grupos ortorrômbicos. Aqui estão alguns exemplos)
-    {"numero": 16, "simbolo_hm": "P222", "simbolos_alternativos": [], "sistema_cristalino": "Ortorrômbico", "ponto_grupo": "222", "descricao_adicional": "Três eixos binários perpendiculares."},
-    {"numero": 17, "simbolo_hm": "P222_1", "simbolos_alternativos": ["P2221"], "sistema_cristalino": "Ortorrômbico", "ponto_grupo": "222", "descricao_adicional": ""},
-    {"numero": 18, "simbolo_hm": "P2_12_12", "simbolos_alternativos": ["P21212"], "sistema_cristalino": "Ortorrômbico", "ponto_grupo": "222", "descricao_adicional": ""},
-    {"numero": 19, "simbolo_hm": "P2_12_12_1", "simbolos_alternativos": ["P212121"], "sistema_cristalino": "Ortorrômbico", "ponto_grupo": "222", "descricao_adicional": "Comum para moléculas quirais."},
-    {"numero": 25, "simbolo_hm": "Pmm2", "simbolos_alternativos": [], "sistema_cristalino": "Ortorrômbico", "ponto_grupo": "mm2", "descricao_adicional": "Polar."},
-    {"numero": 36, "simbolo_hm": "Cmc2_1", "simbolos_alternativos": ["Cmc21"], "sistema_cristalino": "Ortorrômbico", "ponto_grupo": "mm2", "descricao_adicional": "Comum em materiais ferroelétricos."},
-    {"numero": 47, "simbolo_hm": "Pmmm", "simbolos_alternativos": [], "sistema_cristalino": "Ortorrômbico", "ponto_grupo": "mmm", "descricao_adicional": "Centrossimétrico."},
-    {"numero": 62, "simbolo_hm": "Pnma", "simbolos_alternativos": [], "sistema_cristalino": "Ortorrômbico", "ponto_grupo": "mmm", "descricao_adicional": "Muito comum, estrutura da perovskita distorcida (ex: GdFeO₃)."},
-    {"numero": 71, "simbolo_hm": "Immm", "simbolos_alternativos": [], "sistema_cristalino": "Ortorrômbico", "ponto_grupo": "mmm", "descricao_adicional": "De corpo centrado."},
-
-    # --- Tetragonal ---
-    # (O PDF lista 68 grupos. Exemplos:)
-    {"numero": 75, "simbolo_hm": "P4", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal", "ponto_grupo": "4", "descricao_adicional": ""},
-    {"numero": 76, "simbolo_hm": "P4_1", "simbolos_alternativos": ["P41"], "sistema_cristalino": "Tetragonal", "ponto_grupo": "4", "descricao_adicional": ""},
-    {"numero": 83, "simbolo_hm": "P4/m", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal", "ponto_grupo": "4/m", "descricao_adicional": ""},
-    {"numero": 123, "simbolo_hm": "P4/mmm", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal", "ponto_grupo": "4/mmm", "descricao_adicional": "Célula tetragonal primitiva simples."},
-    {"numero": 139, "simbolo_hm": "I4/mmm", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal", "ponto_grupo": "4/mmm", "descricao_adicional": "De corpo centrado, comum em supercondutores."},
-    {"numero": 141, "simbolo_hm": "I4_1/amd", "simbolos_alternativos": ["I41/amd"], "sistema_cristalino": "Tetragonal", "ponto_grupo": "4/mmm", "descricao_adicional": "Estrutura da anatásio (TiO₂)."},
-
-
-    # --- Trigonal ---
-    # (O PDF lista 25 grupos. Exemplos:)
-    {"numero": 143, "simbolo_hm": "P3", "simbolos_alternativos": [], "sistema_cristalino": "Trigonal", "ponto_grupo": "3", "descricao_adicional": ""},
-    {"numero": 147, "simbolo_hm": "P-3", "simbolos_alternativos": ["P3bar"], "sistema_cristalino": "Trigonal", "ponto_grupo": "-3", "descricao_adicional": ""},
-    {"numero": 160, "simbolo_hm": "R3m", "simbolos_alternativos": [], "sistema_cristalino": "Trigonal", "ponto_grupo": "3m", "descricao_adicional": "Configuração romboédrica ou hexagonal (ex: BiFeO₃)."},
-    {"numero": 166, "simbolo_hm": "R-3m", "simbolos_alternativos": ["R3barm"], "sistema_cristalino": "Trigonal", "ponto_grupo": "-3m", "descricao_adicional": "Configuração romboédrica ou hexagonal (ex: α-Al₂O₃ - Coríndon)."},
-
-    # --- Hexagonal ---
-    # (O PDF lista 27 grupos. Exemplos:)
-    {"numero": 168, "simbolo_hm": "P6", "simbolos_alternativos": [], "sistema_cristalino": "Hexagonal", "ponto_grupo": "6", "descricao_adicional": ""},
-    {"numero": 177, "simbolo_hm": "P6/m", "simbolos_alternativos": [], "sistema_cristalino": "Hexagonal", "ponto_grupo": "6/m", "descricao_adicional": ""},
-    {"numero": 191, "simbolo_hm": "P6/mmm", "simbolos_alternativos": [], "sistema_cristalino": "Hexagonal", "ponto_grupo": "6/mmm", "descricao_adicional": ""},
-    {"numero": 194, "simbolo_hm": "P6_3/mmc", "simbolos_alternativos": ["P63/mmc"], "sistema_cristalino": "Hexagonal", "ponto_grupo": "6/mmm", "descricao_adicional": "Grafite, Wurtzita (ZnS), Mg."},
-
-    # --- Cúbico ---
-    # (O PDF lista 36 grupos. Exemplos:)
-    {"numero": 195, "simbolo_hm": "P23", "simbolos_alternativos": [], "sistema_cristalino": "Cúbico", "ponto_grupo": "23", "descricao_adicional": ""},
-    {"numero": 200, "simbolo_hm": "Pm-3", "simbolos_alternativos": ["Pm3"], "sistema_cristalino": "Cúbico", "ponto_grupo": "m-3", "descricao_adicional": ""}, # Pm₃
-    {"numero": 207, "simbolo_hm": "P432", "simbolos_alternativos": [], "sistema_cristalino": "Cúbico", "ponto_grupo": "432", "descricao_adicional": ""},
-    {"numero": 221, "simbolo_hm": "Pm-3m", "simbolos_alternativos": ["Pm3m"], "sistema_cristalino": "Cúbico", "ponto_grupo": "m-3m", "descricao_adicional": "Perovskita cúbica ideal (ex: SrTiO₃)."}, # Pm₃m
-    {"numero": 225, "simbolo_hm": "Fm-3m", "simbolos_alternativos": ["Fm3m"], "sistema_cristalino": "Cúbico", "ponto_grupo": "m-3m", "descricao_adicional": "Estrutura do sal de rocha (NaCl), blenda de zinco (ZnS)."}, # Fm₃m
-    {"numero": 227, "simbolo_hm": "Fd-3m", "simbolos_alternativos": ["Fd3m"], "sistema_cristalino": "Cúbico", "ponto_grupo": "m-3m", "descricao_adicional": "Estrutura do diamante, espinélio (MgAl₂O₄)."}, # Fd₃m
-    {"numero": 230, "simbolo_hm": "Ia-3d", "simbolos_alternativos": ["Ia3d"], "sistema_cristalino": "Cúbico", "ponto_grupo": "m-3m", "descricao_adicional": "Estrutura da granada (ex: Y₃Al₅O₁₂)."}, # Ia₃d
+    {"numero": 1, "simbolo_hm": "P1", "simbolos_alternativos": [], "sistema_cristalino": "Triclínico"},
+    {"numero": 2, "simbolo_hm": "P-1", "simbolos_alternativos": [], "sistema_cristalino": "Triclínico"},
+    {"numero": 3, "simbolo_hm": "P2", "simbolos_alternativos": [], "sistema_cristalino": "Monoclínico"},
+    {"numero": 4, "simbolo_hm": "P2_1", "simbolos_alternativos": [], "sistema_cristalino": "Monoclínico"},
+    {"numero": 5, "simbolo_hm": "C2", "simbolos_alternativos": [], "sistema_cristalino": "Monoclínico"},
+    {"numero": 6, "simbolo_hm": "Pm", "simbolos_alternativos": [], "sistema_cristalino": "Monoclínico"},
+    {"numero": 7, "simbolo_hm": "Pc", "simbolos_alternativos": [], "sistema_cristalino": "Monoclínico"},
+    {"numero": 8, "simbolo_hm": "Cm", "simbolos_alternativos": [], "sistema_cristalino": "Monoclínico"},
+    {"numero": 9, "simbolo_hm": "Cc", "simbolos_alternativos": [], "sistema_cristalino": "Monoclínico"},
+    {"numero": 10, "simbolo_hm": "P2/m", "simbolos_alternativos": [], "sistema_cristalino": "Monoclínico"},
+    {"numero": 11, "simbolo_hm": "P2_1/m", "simbolos_alternativos": [], "sistema_cristalino": "Monoclínico"},
+    {"numero": 12, "simbolo_hm": "C2/m", "simbolos_alternativos": [], "sistema_cristalino": "Monoclínico"},
+    {"numero": 13, "simbolo_hm": "P2/c", "simbolos_alternativos": [], "sistema_cristalino": "Monoclínico"},
+    {"numero": 14, "simbolo_hm": "P2_1/c", "simbolos_alternativos": [], "sistema_cristalino": "Monoclínico"},
+    {"numero": 15, "simbolo_hm": "C2/c", "simbolos_alternativos": [], "sistema_cristalino": "Monoclínico"},
+    {"numero": 16, "simbolo_hm": "P222", "simbolos_alternativos": [], "sistema_cristalino": "Ortorrômbico"},
+    {"numero": 17, "simbolo_hm": "P222_1", "simbolos_alternativos": [], "sistema_cristalino": "Ortorrômbico"},
+    {"numero": 18, "simbolo_hm": "P2_12_12", "simbolos_alternativos": [], "sistema_cristalino": "Ortorrômbico"},
+    {"numero": 19, "simbolo_hm": "P2_12_12_1", "simbolos_alternativos": [], "sistema_cristalino": "Ortorrômbico"},
+    {"numero": 20, "simbolo_hm": "C222_1", "simbolos_alternativos": [], "sistema_cristalino": "Ortorrômbico"},
+    {"numero": 21, "simbolo_hm": "C222", "simbolos_alternativos": [], "sistema_cristalino": "Ortorrômbico"},
+    {"numero": 22, "simbolo_hm": "F222", "simbolos_alternativos": [], "sistema_cristalino": "Ortorrômbico"},
+    {"numero": 23, "simbolo_hm": "I222", "simbolos_alternativos": [], "sistema_cristalino": "Ortorrômbico"},
+    {"numero": 24, "simbolo_hm": "I2_12_12_1", "simbolos_alternativos": [], "sistema_cristalino": "Ortorrômbico"},
+    {"numero": 25, "simbolo_hm": "Pmm2", "simbolos_alternativos": [], "sistema_cristalino": "Ortorrômbico"},
+    {"numero": 26, "simbolo_hm": "Pmc2_1", "simbolos_alternativos": [], "sistema_cristalino": "Ortorrômbico"},
+    {"numero": 27, "simbolo_hm": "Pcc2", "simbolos_alternativos": [], "sistema_cristalino": "Ortorrômbico"},
+    {"numero": 28, "simbolo_hm": "Pma2", "simbolos_alternativos": [], "sistema_cristalino": "Ortorrômbico"},
+    {"numero": 29, "simbolo_hm": "Pca2_1", "simbolos_alternativos": [], "sistema_cristalino": "Ortorrômbico"},
+    {"numero": 30, "simbolo_hm": "Pnc2", "simbolos_alternativos": [], "sistema_cristalino": "Ortorrômbico"},
+    {"numero": 31, "simbolo_hm": "Pmn2_1", "simbolos_alternativos": [], "sistema_cristalino": "Ortorrômbico"},
+    {"numero": 32, "simbolo_hm": "Pba2", "simbolos_alternativos": [], "sistema_cristalino": "Ortorrômbico"},
+    {"numero": 33, "simbolo_hm": "Pna2_1", "simbolos_alternativos": [], "sistema_cristalino": "Ortorrômbico"},
+    {"numero": 34, "simbolo_hm": "Pnn2", "simbolos_alternativos": [], "sistema_cristalino": "Ortorrômbico"},
+    {"numero": 35, "simbolo_hm": "Cmm2", "simbolos_alternativos": [], "sistema_cristalino": "Ortorrômbico"},
+    {"numero": 36, "simbolo_hm": "Cmc2_1", "simbolos_alternativos": [], "sistema_cristalino": "Ortorrômbico"},
+    {"numero": 37, "simbolo_hm": "Ccc2", "simbolos_alternativos": [], "sistema_cristalino": "Ortorrômbico"},
+    {"numero": 38, "simbolo_hm": "Amm2", "simbolos_alternativos": [], "sistema_cristalino": "Ortorrômbico"},
+    {"numero": 39, "simbolo_hm": "Aem2", "simbolos_alternativos": [], "sistema_cristalino": "Ortorrômbico"},
+    {"numero": 40, "simbolo_hm": "Ama2", "simbolos_alternativos": [], "sistema_cristalino": "Ortorrômbico"},
+    {"numero": 41, "simbolo_hm": "Aea2", "simbolos_alternativos": [], "sistema_cristalino": "Ortorrômbico"},
+    {"numero": 42, "simbolo_hm": "Fmm2", "simbolos_alternativos": [], "sistema_cristalino": "Ortorrômbico"},
+    {"numero": 43, "simbolo_hm": "Fdd2", "simbolos_alternativos": [], "sistema_cristalino": "Ortorrômbico"},
+    {"numero": 44, "simbolo_hm": "Imm2", "simbolos_alternativos": [], "sistema_cristalino": "Ortorrômbico"},
+    {"numero": 45, "simbolo_hm": "Iba2", "simbolos_alternativos": [], "sistema_cristalino": "Ortorrômbico"},
+    {"numero": 46, "simbolo_hm": "Ima2", "simbolos_alternativos": [], "sistema_cristalino": "Ortorrômbico"},
+    {"numero": 47, "simbolo_hm": "Pmmm", "simbolos_alternativos": [], "sistema_cristalino": "Ortorrômbico"},
+    {"numero": 48, "simbolo_hm": "Pnnn", "simbolos_alternativos": [], "sistema_cristalino": "Ortorrômbico"},
+    {"numero": 49, "simbolo_hm": "Pccm", "simbolos_alternativos": [], "sistema_cristalino": "Ortorrômbico"},
+    {"numero": 50, "simbolo_hm": "Pban", "simbolos_alternativos": [], "sistema_cristalino": "Ortorrômbico"},
+    {"numero": 51, "simbolo_hm": "Pmma", "simbolos_alternativos": [], "sistema_cristalino": "Ortorrômbico"},
+    {"numero": 52, "simbolo_hm": "Pnna", "simbolos_alternativos": [], "sistema_cristalino": "Ortorrômbico"},
+    {"numero": 53, "simbolo_hm": "Pmna", "simbolos_alternativos": [], "sistema_cristalino": "Ortorrômbico"},
+    {"numero": 54, "simbolo_hm": "Pcca", "simbolos_alternativos": [], "sistema_cristalino": "Ortorrômbico"},
+    {"numero": 55, "simbolo_hm": "Pbam", "simbolos_alternativos": [], "sistema_cristalino": "Ortorrômbico"},
+    {"numero": 56, "simbolo_hm": "Pccn", "simbolos_alternativos": [], "sistema_cristalino": "Ortorrômbico"},
+    {"numero": 57, "simbolo_hm": "Pbcm", "simbolos_alternativos": [], "sistema_cristalino": "Ortorrômbico"},
+    {"numero": 58, "simbolo_hm": "Pnnm", "simbolos_alternativos": [], "sistema_cristalino": "Ortorrômbico"},
+    {"numero": 59, "simbolo_hm": "Pmmn", "simbolos_alternativos": [], "sistema_cristalino": "Ortorrômbico"},
+    {"numero": 60, "simbolo_hm": "Pbcn", "simbolos_alternativos": [], "sistema_cristalino": "Ortorrômbico"},
+    {"numero": 61, "simbolo_hm": "Pbca", "simbolos_alternativos": [], "sistema_cristalino": "Ortorrômbico"},
+    {"numero": 62, "simbolo_hm": "Pnma", "simbolos_alternativos": [], "sistema_cristalino": "Ortorrômbico"},
+    {"numero": 63, "simbolo_hm": "Cmcm", "simbolos_alternativos": [], "sistema_cristalino": "Ortorrômbico"},
+    {"numero": 64, "simbolo_hm": "Cmce", "simbolos_alternativos": [], "sistema_cristalino": "Ortorrômbico"},
+    {"numero": 65, "simbolo_hm": "Cmmm", "simbolos_alternativos": [], "sistema_cristalino": "Ortorrômbico"},
+    {"numero": 66, "simbolo_hm": "Cccm", "simbolos_alternativos": [], "sistema_cristalino": "Ortorrômbico"},
+    {"numero": 67, "simbolo_hm": "Cmme", "simbolos_alternativos": [], "sistema_cristalino": "Ortorrômbico"},
+    {"numero": 68, "simbolo_hm": "Ccce", "simbolos_alternativos": [], "sistema_cristalino": "Ortorrômbico"},
+    {"numero": 69, "simbolo_hm": "Fmmm", "simbolos_alternativos": [], "sistema_cristalino": "Ortorrômbico"},
+    {"numero": 70, "simbolo_hm": "Fddd", "simbolos_alternativos": [], "sistema_cristalino": "Ortorrômbico"},
+    {"numero": 71, "simbolo_hm": "Immm", "simbolos_alternativos": [], "sistema_cristalino": "Ortorrômbico"},
+    {"numero": 72, "simbolo_hm": "Ibam", "simbolos_alternativos": [], "sistema_cristalino": "Ortorrômbico"},
+    {"numero": 73, "simbolo_hm": "Ibca", "simbolos_alternativos": [], "sistema_cristalino": "Ortorrômbico"},
+    {"numero": 74, "simbolo_hm": "Imma", "simbolos_alternativos": [], "sistema_cristalino": "Ortorrômbico"},
+    {"numero": 75, "simbolo_hm": "P4", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal"},
+    {"numero": 76, "simbolo_hm": "P4_1", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal"},
+    {"numero": 77, "simbolo_hm": "P4_2", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal"},
+    {"numero": 78, "simbolo_hm": "P4_3", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal"},
+    {"numero": 79, "simbolo_hm": "I4", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal"},
+    {"numero": 80, "simbolo_hm": "I4_1", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal"},
+    {"numero": 81, "simbolo_hm": "P-4", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal"},
+    {"numero": 82, "simbolo_hm": "I-4", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal"},
+    {"numero": 83, "simbolo_hm": "P4/m", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal"},
+    {"numero": 84, "simbolo_hm": "P4_2/m", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal"},
+    {"numero": 85, "simbolo_hm": "P4/n", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal"},
+    {"numero": 86, "simbolo_hm": "P4_2/n", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal"},
+    {"numero": 87, "simbolo_hm": "I4/m", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal"},
+    {"numero": 88, "simbolo_hm": "I4_1/a", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal"},
+    {"numero": 89, "simbolo_hm": "P422", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal"},
+    {"numero": 90, "simbolo_hm": "P42_12", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal"},
+    {"numero": 91, "simbolo_hm": "P4_122", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal"},
+    {"numero": 92, "simbolo_hm": "P4_12_12", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal"},
+    {"numero": 93, "simbolo_hm": "P4_222", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal"},
+    {"numero": 94, "simbolo_hm": "P4_22_12", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal"},
+    {"numero": 95, "simbolo_hm": "P4_322", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal"},
+    {"numero": 96, "simbolo_hm": "P4_32_12", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal"},
+    {"numero": 97, "simbolo_hm": "I422", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal"},
+    {"numero": 98, "simbolo_hm": "I4_122", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal"},
+    {"numero": 99, "simbolo_hm": "P4mm", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal"},
+    {"numero": 100, "simbolo_hm": "P4bm", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal"},
+    {"numero": 101, "simbolo_hm": "P4_2cm", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal"},
+    {"numero": 102, "simbolo_hm": "P4_2nm", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal"},
+    {"numero": 103, "simbolo_hm": "P4cc", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal"},
+    {"numero": 104, "simbolo_hm": "P4nc", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal"},
+    {"numero": 105, "simbolo_hm": "P4_2mc", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal"},
+    {"numero": 106, "simbolo_hm": "P4_2bc", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal"},
+    {"numero": 107, "simbolo_hm": "I4mm", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal"},
+    {"numero": 108, "simbolo_hm": "I4cm", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal"},
+    {"numero": 109, "simbolo_hm": "I4_1md", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal"},
+    {"numero": 110, "simbolo_hm": "I4_1cd", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal"},
+    {"numero": 111, "simbolo_hm": "P-42m", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal"},
+    {"numero": 112, "simbolo_hm": "P-42c", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal"},
+    {"numero": 113, "simbolo_hm": "P-42_1m", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal"},
+    {"numero": 114, "simbolo_hm": "P-42_1c", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal"},
+    {"numero": 115, "simbolo_hm": "P-4m2", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal"},
+    {"numero": 116, "simbolo_hm": "P-4c2", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal"},
+    {"numero": 117, "simbolo_hm": "P-4b2", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal"},
+    {"numero": 118, "simbolo_hm": "P-4n2", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal"},
+    {"numero": 119, "simbolo_hm": "I-4m2", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal"},
+    {"numero": 120, "simbolo_hm": "I-4c2", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal"},
+    {"numero": 121, "simbolo_hm": "I-42m", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal"},
+    {"numero": 122, "simbolo_hm": "I-42d", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal"},
+    {"numero": 123, "simbolo_hm": "P4/mmm", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal"},
+    {"numero": 124, "simbolo_hm": "P4/mcc", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal"},
+    {"numero": 125, "simbolo_hm": "P4/nbm", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal"},
+    {"numero": 126, "simbolo_hm": "P4/nnc", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal"},
+    {"numero": 127, "simbolo_hm": "P4/mbm", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal"},
+    {"numero": 128, "simbolo_hm": "P4/mnc", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal"},
+    {"numero": 129, "simbolo_hm": "P4/nmm", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal"},
+    {"numero": 130, "simbolo_hm": "P4/ncc", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal"},
+    {"numero": 131, "simbolo_hm": "P4_2/mmc", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal"},
+    {"numero": 132, "simbolo_hm": "P4_2/mcm", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal"},
+    {"numero": 133, "simbolo_hm": "P4_2/nbc", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal"},
+    {"numero": 134, "simbolo_hm": "P4_2/nnm", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal"},
+    {"numero": 135, "simbolo_hm": "P4_2/mbc", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal"},
+    {"numero": 136, "simbolo_hm": "P4_2/mnm", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal"},
+    {"numero": 137, "simbolo_hm": "P4_2/nmc", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal"},
+    {"numero": 138, "simbolo_hm": "P4_2/ncm", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal"},
+    {"numero": 139, "simbolo_hm": "I4/mmm", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal"},
+    {"numero": 140, "simbolo_hm": "I4/mcm", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal"},
+    {"numero": 141, "simbolo_hm": "I4_1/amd", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal"},
+    {"numero": 142, "simbolo_hm": "I4_1/acd", "simbolos_alternativos": [], "sistema_cristalino": "Tetragonal"},
+    {"numero": 143, "simbolo_hm": "P3", "simbolos_alternativos": [], "sistema_cristalino": "Trigonal"},
+    {"numero": 144, "simbolo_hm": "P3_1", "simbolos_alternativos": [], "sistema_cristalino": "Trigonal"},
+    {"numero": 145, "simbolo_hm": "P3_2", "simbolos_alternativos": [], "sistema_cristalino": "Trigonal"},
+    {"numero": 146, "simbolo_hm": "R3", "simbolos_alternativos": [], "sistema_cristalino": "Trigonal"},
+    {"numero": 147, "simbolo_hm": "P-3", "simbolos_alternativos": [], "sistema_cristalino": "Trigonal"},
+    {"numero": 148, "simbolo_hm": "R-3", "simbolos_alternativos": [], "sistema_cristalino": "Trigonal"},
+    {"numero": 149, "simbolo_hm": "P312", "simbolos_alternativos": [], "sistema_cristalino": "Trigonal"},
+    {"numero": 150, "simbolo_hm": "P321", "simbolos_alternativos": [], "sistema_cristalino": "Trigonal"},
+    {"numero": 151, "simbolo_hm": "P3_112", "simbolos_alternativos": [], "sistema_cristalino": "Trigonal"},
+    {"numero": 152, "simbolo_hm": "P3_121", "simbolos_alternativos": [], "sistema_cristalino": "Trigonal"},
+    {"numero": 153, "simbolo_hm": "P3_212", "simbolos_alternativos": [], "sistema_cristalino": "Trigonal"},
+    {"numero": 154, "simbolo_hm": "P3_221", "simbolos_alternativos": [], "sistema_cristalino": "Trigonal"},
+    {"numero": 155, "simbolo_hm": "R32", "simbolos_alternativos": [], "sistema_cristalino": "Trigonal"},
+    {"numero": 156, "simbolo_hm": "P3m1", "simbolos_alternativos": [], "sistema_cristalino": "Trigonal"},
+    {"numero": 157, "simbolo_hm": "P31m", "simbolos_alternativos": [], "sistema_cristalino": "Trigonal"},
+    {"numero": 158, "simbolo_hm": "P3c1", "simbolos_alternativos": [], "sistema_cristalino": "Trigonal"},
+    {"numero": 159, "simbolo_hm": "P31c", "simbolos_alternativos": [], "sistema_cristalino": "Trigonal"},
+    {"numero": 160, "simbolo_hm": "R3m", "simbolos_alternativos": [], "sistema_cristalino": "Trigonal"},
+    {"numero": 161, "simbolo_hm": "R3c", "simbolos_alternativos": [], "sistema_cristalino": "Trigonal"},
+    {"numero": 162, "simbolo_hm": "P-31m", "simbolos_alternativos": [], "sistema_cristalino": "Trigonal"},
+    {"numero": 163, "simbolo_hm": "P-31c", "simbolos_alternativos": [], "sistema_cristalino": "Trigonal"},
+    {"numero": 164, "simbolo_hm": "P-3m1", "simbolos_alternativos": [], "sistema_cristalino": "Trigonal"},
+    {"numero": 165, "simbolo_hm": "P-3c1", "simbolos_alternativos": [], "sistema_cristalino": "Trigonal"},
+    {"numero": 166, "simbolo_hm": "R-3m", "simbolos_alternativos": [], "sistema_cristalino": "Trigonal"},
+    {"numero": 167, "simbolo_hm": "R-3c", "simbolos_alternativos": [], "sistema_cristalino": "Trigonal"},
+    {"numero": 168, "simbolo_hm": "P6", "simbolos_alternativos": [], "sistema_cristalino": "Hexagonal"},
+    {"numero": 169, "simbolo_hm": "P6_1", "simbolos_alternativos": [], "sistema_cristalino": "Hexagonal"},
+    {"numero": 170, "simbolo_hm": "P6_5", "simbolos_alternativos": [], "sistema_cristalino": "Hexagonal"},
+    {"numero": 171, "simbolo_hm": "P6_2", "simbolos_alternativos": [], "sistema_cristalino": "Hexagonal"},
+    {"numero": 172, "simbolo_hm": "P6_4", "simbolos_alternativos": [], "sistema_cristalino": "Hexagonal"},
+    {"numero": 173, "simbolo_hm": "P6_3", "simbolos_alternativos": [], "sistema_cristalino": "Hexagonal"},
+    {"numero": 174, "simbolo_hm": "P-6", "simbolos_alternativos": [], "sistema_cristalino": "Hexagonal"},
+    {"numero": 175, "simbolo_hm": "P6/m", "simbolos_alternativos": [], "sistema_cristalino": "Hexagonal"},
+    {"numero": 176, "simbolo_hm": "P6_3/m", "simbolos_alternativos": [], "sistema_cristalino": "Hexagonal"},
+    {"numero": 177, "simbolo_hm": "P622", "simbolos_alternativos": [], "sistema_cristalino": "Hexagonal"},
+    {"numero": 178, "simbolo_hm": "P6_122", "simbolos_alternativos": [], "sistema_cristalino": "Hexagonal"},
+    {"numero": 179, "simbolo_hm": "P6_522", "simbolos_alternativos": [], "sistema_cristalino": "Hexagonal"},
+    {"numero": 180, "simbolo_hm": "P6_222", "simbolos_alternativos": [], "sistema_cristalino": "Hexagonal"},
+    {"numero": 181, "simbolo_hm": "P6_422", "simbolos_alternativos": [], "sistema_cristalino": "Hexagonal"},
+    {"numero": 182, "simbolo_hm": "P6_322", "simbolos_alternativos": [], "sistema_cristalino": "Hexagonal"},
+    {"numero": 183, "simbolo_hm": "P6mm", "simbolos_alternativos": [], "sistema_cristalino": "Hexagonal"},
+    {"numero": 184, "simbolo_hm": "P6cc", "simbolos_alternativos": [], "sistema_cristalino": "Hexagonal"},
+    {"numero": 185, "simbolo_hm": "P6_3cm", "simbolos_alternativos": [], "sistema_cristalino": "Hexagonal"},
+    {"numero": 186, "simbolo_hm": "P6_3mc", "simbolos_alternativos": [], "sistema_cristalino": "Hexagonal"},
+    {"numero": 187, "simbolo_hm": "P-6m2", "simbolos_alternativos": [], "sistema_cristalino": "Hexagonal"},
+    {"numero": 188, "simbolo_hm": "P-6c2", "simbolos_alternativos": [], "sistema_cristalino": "Hexagonal"},
+    {"numero": 189, "simbolo_hm": "P-62m", "simbolos_alternativos": [], "sistema_cristalino": "Hexagonal"},
+    {"numero": 190, "simbolo_hm": "P-62c", "simbolos_alternativos": [], "sistema_cristalino": "Hexagonal"},
+    {"numero": 191, "simbolo_hm": "P6/mmm", "simbolos_alternativos": [], "sistema_cristalino": "Hexagonal"},
+    {"numero": 192, "simbolo_hm": "P6/mcc", "simbolos_alternativos": [], "sistema_cristalino": "Hexagonal"},
+    {"numero": 193, "simbolo_hm": "P6_3/mcm", "simbolos_alternativos": [], "sistema_cristalino": "Hexagonal"},
+    {"numero": 194, "simbolo_hm": "P6_3/mmc", "simbolos_alternativos": [], "sistema_cristalino": "Hexagonal"},
+    {"numero": 195, "simbolo_hm": "P23", "simbolos_alternativos": [], "sistema_cristalino": "Cúbico"},
+    {"numero": 196, "simbolo_hm": "F23", "simbolos_alternativos": [], "sistema_cristalino": "Cúbico"},
+    {"numero": 197, "simbolo_hm": "I23", "simbolos_alternativos": [], "sistema_cristalino": "Cúbico"},
+    {"numero": 198, "simbolo_hm": "P2_13", "simbolos_alternativos": [], "sistema_cristalino": "Cúbico"},
+    {"numero": 199, "simbolo_hm": "I2_13", "simbolos_alternativos": [], "sistema_cristalino": "Cúbico"},
+    {"numero": 200, "simbolo_hm": "Pm-3", "simbolos_alternativos": [], "sistema_cristalino": "Cúbico"},
+    {"numero": 201, "simbolo_hm": "Pn-3", "simbolos_alternativos": [], "sistema_cristalino": "Cúbico"},
+    {"numero": 202, "simbolo_hm": "Fm-3", "simbolos_alternativos": [], "sistema_cristalino": "Cúbico"},
+    {"numero": 203, "simbolo_hm": "Fd-3", "simbolos_alternativos": [], "sistema_cristalino": "Cúbico"},
+    {"numero": 204, "simbolo_hm": "Im-3", "simbolos_alternativos": [], "sistema_cristalino": "Cúbico"},
+    {"numero": 205, "simbolo_hm": "Pa-3", "simbolos_alternativos": [], "sistema_cristalino": "Cúbico"},
+    {"numero": 206, "simbolo_hm": "Ia-3", "simbolos_alternativos": [], "sistema_cristalino": "Cúbico"},
+    {"numero": 207, "simbolo_hm": "P432", "simbolos_alternativos": [], "sistema_cristalino": "Cúbico"},
+    {"numero": 208, "simbolo_hm": "P4_232", "simbolos_alternativos": [], "sistema_cristalino": "Cúbico"},
+    {"numero": 209, "simbolo_hm": "F432", "simbolos_alternativos": [], "sistema_cristalino": "Cúbico"},
+    {"numero": 210, "simbolo_hm": "F4_132", "simbolos_alternativos": [], "sistema_cristalino": "Cúbico"},
+    {"numero": 211, "simbolo_hm": "I432", "simbolos_alternativos": [], "sistema_cristalino": "Cúbico"},
+    {"numero": 212, "simbolo_hm": "P4_332", "simbolos_alternativos": [], "sistema_cristalino": "Cúbico"},
+    {"numero": 213, "simbolo_hm": "P4_132", "simbolos_alternativos": [], "sistema_cristalino": "Cúbico"},
+    {"numero": 214, "simbolo_hm": "I4_132", "simbolos_alternativos": [], "sistema_cristalino": "Cúbico"},
+    {"numero": 215, "simbolo_hm": "P-43m", "simbolos_alternativos": [], "sistema_cristalino": "Cúbico"},
+    {"numero": 216, "simbolo_hm": "F-43m", "simbolos_alternativos": [], "sistema_cristalino": "Cúbico"},
+    {"numero": 217, "simbolo_hm": "I-43m", "simbolos_alternativos": [], "sistema_cristalino": "Cúbico"},
+    {"numero": 218, "simbolo_hm": "P-43n", "simbolos_alternativos": [], "sistema_cristalino": "Cúbico"},
+    {"numero": 219, "simbolo_hm": "F-43c", "simbolos_alternativos": [], "sistema_cristalino": "Cúbico"},
+    {"numero": 220, "simbolo_hm": "I-43d", "simbolos_alternativos": [], "sistema_cristalino": "Cúbico"},
+    {"numero": 221, "simbolo_hm": "Pm-3m", "simbolos_alternativos": [], "sistema_cristalino": "Cúbico"},
+    {"numero": 222, "simbolo_hm": "Pn-3n", "simbolos_alternativos": [], "sistema_cristalino": "Cúbico"},
+    {"numero": 223, "simbolo_hm": "Pm-3n", "simbolos_alternativos": [], "sistema_cristalino": "Cúbico"},
+    {"numero": 224, "simbolo_hm": "Pn-3m", "simbolos_alternativos": [], "sistema_cristalino": "Cúbico"},
+    {"numero": 225, "simbolo_hm": "Fm-3m", "simbolos_alternativos": [], "sistema_cristalino": "Cúbico"},
+    {"numero": 226, "simbolo_hm": "Fm-3c", "simbolos_alternativos": [], "sistema_cristalino": "Cúbico"},
+    {"numero": 227, "simbolo_hm": "Fd-3m", "simbolos_alternativos": [], "sistema_cristalino": "Cúbico"},
+    {"numero": 228, "simbolo_hm": "Fd-3c", "simbolos_alternativos": [], "sistema_cristalino": "Cúbico"},
+    {"numero": 229, "simbolo_hm": "Im-3m", "simbolos_alternativos": [], "sistema_cristalino": "Cúbico"},
+    {"numero": 230, "simbolo_hm": "Ia-3d", "simbolos_alternativos": [], "sistema_cristalino": "Cúbico"},
 ]
 
 def obter_info_grupo_espacial(identificador):
     """
-    Busca informações de um grupo espacial pelo seu símbolo Hermann-Mauguin ou número.
-
+    Busca informações de um grupo espacial pelo símbolo Hermann-Mauguin ou número.
+    
     Args:
-        identificador (str ou int): O símbolo HM (ex: "Pnma", "P2_1/c") ou o número internacional.
-
+        identificador (str ou int): Símbolo HM ou número internacional (1-230)
+    
     Returns:
-        dict: Um dicionário com as informações do grupo espacial encontrado,
-              ou None se não for encontrado.
-              O dicionário contém: 'numero', 'simbolo_hm', 'simbolos_alternativos',
-                                   'sistema_cristalino', 'ponto_grupo', 'descricao_adicional'.
+        dict ou None: Informações do grupo espacial encontrado
     """
     if isinstance(identificador, str):
         identificador_lower = identificador.lower()
-        # Normalizar traços e barras para consistência na busca, se necessário
-        # (ex: "R-3m" vs "R 3m", "P6_3/mmc" vs "P63/mmc")
-        # Para esta implementação, a busca será literal nos símbolos principais e alternativos.
         for grupo in LISTA_GRUPOS_ESPACIAIS:
             if grupo["simbolo_hm"].lower() == identificador_lower:
                 return grupo
@@ -98,34 +259,3 @@ def obter_info_grupo_espacial(identificador):
             if grupo["numero"] == identificador:
                 return grupo
     return None
-
-if __name__ == '__main__':
-    # Exemplos de uso:
-    print("--- Testando obter_info_grupo_espacial ---")
-
-    simbolos_para_testar = ["Pnma", "P2_1/c", "P21/c", "Fm-3m", "P6_3/mmc", "P1", "R-3m", "NaoExiste"]
-    numeros_para_testar = [1, 14, 62, 225, 230, 999]
-
-    for s in simbolos_para_testar:
-        info = obter_info_grupo_espacial(s)
-        if info:
-            print(f"Info para '{s}': Número {info['numero']}, Sistema: {info['sistema_cristalino']}, Ponto: {info.get('ponto_grupo', 'N/A')}, Desc: {info.get('descricao_adicional', 'N/A')}")
-        else:
-            print(f"Nenhuma informação encontrada para o símbolo: '{s}'")
-
-    print("\n")
-    for n in numeros_para_testar:
-        info = obter_info_grupo_espacial(n)
-        if info:
-            print(f"Info para número {n}: Símbolo {info['simbolo_hm']}, Sistema: {info['sistema_cristalino']}, Ponto: {info.get('ponto_grupo', 'N/A')}, Desc: {info.get('descricao_adicional', 'N/A')}")
-        else:
-            print(f"Nenhuma informação encontrada para o número: {n}")
-
-    # Teste específico para Pnma
-    info_pnma = obter_info_grupo_espacial("Pnma")
-    if info_pnma:
-        print(f"\nTeste Pnma: {info_pnma}")
-
-    info_ia3d = obter_info_grupo_espacial("Ia-3d")
-    if info_ia3d:
-        print(f"\nTeste Ia-3d: {info_ia3d}")

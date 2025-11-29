@@ -10,8 +10,9 @@ __pycache__/
 venv/
 ENV/
 
-# Ficheiros do PyCharm
+# Ficheiros do PyCharm / VS Code
 .idea/
+.vscode/
 
 # Ficheiros de Build e Compilação
 /dist/
@@ -21,6 +22,8 @@ ENV/
 *.exe
 /scripts/dist/
 /scripts/build/
+/build_tools/build/
+/build_tools/dist/
 # Manter .spec no repositório
 !build_tools/MatFinder.spec
 
@@ -28,3 +31,19 @@ ENV/
 *.log
 historico_buscas.json
 favorites.json
+matfinder.log
+
+# Ficheiros Temporários
+temp_cifs/*.cif
+*.bak
+*_old.py
+*_backup.py
+test_grupos.py
+requirements_backup.txt
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Configurações locais
+matfinder/assets/config/config.txt

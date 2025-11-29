@@ -6,12 +6,15 @@ Parte do projeto MatFinder - Copyright (C) 2025 Raynner Valentim (UFAM)
 
 import numpy as np
 import logging
+import sys
+import os
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
     QLabel, QSlider, QCheckBox, QMessageBox, QDialog,
-    QGroupBox, QDialogButtonBox, QFrame, QComboBox
+    QGroupBox, QDialogButtonBox, QFrame, QComboBox, QSpinBox
 )
 from PySide6.QtCore import Qt, Slot
+from PySide6.QtGui import QIcon
 import pyqtgraph.opengl as gl
 import pyqtgraph as pg
 
@@ -21,6 +24,15 @@ try:
 except ImportError:
     PYMATGEN_AVAILABLE = False
     logging.warning("pymatgen não disponível. Instale com: pip install pymatgen")
+
+# Importar biblioteca universal de distâncias de ligações
+try:
+    from .bond_library import get_bond_distance, validate_bond, get_library_stats
+    BOND_LIBRARY_AVAILABLE = True
+    logging.info("✅ Biblioteca de ligações químicas carregada")
+except ImportError:
+    BOND_LIBRARY_AVAILABLE = False
+    logging.warning("⚠️  Biblioteca de ligações não disponível - usando fallback genérico")
 
 
 class StructureViewer3D(QWidget):
@@ -148,19 +160,25 @@ class StructureViewer3D(QWidget):
         self.atom_meshes = []
         self.bond_meshes = []
         self.unit_cell_lines = []
-        self.atom_scale = 1.0
+
+        # AJUSTE: Tamanho padrão dos átomos em 70% para melhor visualização
+        # (antes era 100% = 1.0, agora 70% = 0.7)
+        self.atom_scale = 0.7
+
         self.bond_radius = 0.15  # Raio padrão dos cilindros de ligação (em Angstroms)
         self.supercell_expansion = [1, 1, 1]  # Expansão da célula [a, b, c]
 
         # Variáveis de controle de visibilidade
         self._show_bonds = True
         self._show_cell = True
+        self._merge_cells = False  # Mesclar células (mostrar apenas caixa externa da supercélula)
 
         # Variáveis para animação
         self._animation_timer = None
         self._animation_angle = 0
         self._animation_type = None  # 'rotation_x', 'rotation_y', 'rotation_z', 'vibration'
         self._original_atom_positions = []
+
 
         self._init_ui()
 
@@ -591,6 +609,14 @@ class StructureViewer3D(QWidget):
         self._gizmo_sync_timer.timeout.connect(self._sync_orientation_gizmo)
         self._gizmo_sync_timer.start(50)  # Sincronizar a cada 50ms (~20 FPS)
 
+    def resource_path(self, relative_path):
+        """Retorna caminho absoluto do recurso (funciona em dev e produção)."""
+        try:
+            base_path = sys._MEIPASS  # PyInstaller
+        except AttributeError:
+            base_path = os.path.abspath(".")
+        return os.path.join(base_path, relative_path)
+
     def resizeEvent(self, event):
         """Reposiciona o gizmo e a legenda quando a janela é redimensionada."""
         super().resizeEvent(event)
@@ -664,6 +690,7 @@ class StructureViewer3D(QWidget):
 
             # Atualizar legenda de elementos
             self._update_element_legend()
+
 
             return True
 
@@ -771,7 +798,19 @@ class StructureViewer3D(QWidget):
         # 2. Depois célula unitária
         # 3. Por último átomos (ficam "na frente")
 
-        logging.info(f"Renderizando estrutura: {self.structure.composition.reduced_formula}")
+        formula = self.structure.composition.reduced_formula
+        logging.info(f"Renderizando estrutura: {formula}")
+
+        # DEBUG: Verificar limites das coordenadas
+        if logging.getLogger().level <= logging.DEBUG:
+            all_coords = np.array([site.coords for site in self.structure])
+            all_frac = np.array([site.frac_coords for site in self.structure])
+            logging.debug(f"Coordenadas cartesianas - X: [{all_coords[:, 0].min():.3f}, {all_coords[:, 0].max():.3f}]")
+            logging.debug(f"Coordenadas cartesianas - Y: [{all_coords[:, 1].min():.3f}, {all_coords[:, 1].max():.3f}]")
+            logging.debug(f"Coordenadas cartesianas - Z: [{all_coords[:, 2].min():.3f}, {all_coords[:, 2].max():.3f}]")
+            logging.debug(f"Coordenadas fracionárias - a: [{all_frac[:, 0].min():.3f}, {all_frac[:, 0].max():.3f}]")
+            logging.debug(f"Coordenadas fracionárias - b: [{all_frac[:, 1].min():.3f}, {all_frac[:, 1].max():.3f}]")
+            logging.debug(f"Coordenadas fracionárias - c: [{all_frac[:, 2].min():.3f}, {all_frac[:, 2].max():.3f}]")
 
         # Renderizar ligações (sempre ativo por padrão)
         self._render_bonds()
@@ -785,14 +824,20 @@ class StructureViewer3D(QWidget):
         na, nb, nc = self.supercell_expansion
         lattice = self.structure.lattice
 
+        # Vetores de rede (mesmos usados na célula unitária)
+        a_vec = lattice.matrix[0]
+        b_vec = lattice.matrix[1]
+        c_vec = lattice.matrix[2]
+
         for i in range(na):
             for j in range(nb):
                 for k in range(nc):
-                    # Vetor de translação para esta célula
-                    translation = lattice.matrix[0] * i + lattice.matrix[1] * j + lattice.matrix[2] * k
+                    # Vetor de translação para esta célula (IDÊNTICO ao da célula unitária)
+                    translation = a_vec * i + b_vec * j + c_vec * k
 
                     # Renderizar todos os átomos da célula unitária transladados
                     for site in self.structure:
+                        # IMPORTANTE: site.coords já está em coordenadas cartesianas
                         pos = site.coords + translation
                         element = site.specie.symbol
 
@@ -837,6 +882,11 @@ class StructureViewer3D(QWidget):
             n_sites = len(self.structure)
             n_total_atoms = n_sites * na * nb * nc
 
+            # Vetores de rede (mesmos usados nos átomos e célula unitária)
+            a_vec = lattice.matrix[0]
+            b_vec = lattice.matrix[1]
+            c_vec = lattice.matrix[2]
+
             logging.info(f"Calculando ligações para supercélula {na}×{nb}×{nc} = {n_total_atoms} átomos")
 
             # Dicionário para rastrear pares já adicionados (evitar duplicatas)
@@ -847,7 +897,8 @@ class StructureViewer3D(QWidget):
             for i in range(na):
                 for j in range(nb):
                     for k in range(nc):
-                        translation = lattice.matrix[0] * i + lattice.matrix[1] * j + lattice.matrix[2] * k
+                        # Vetor de translação (IDÊNTICO ao usado nos átomos)
+                        translation = a_vec * i + b_vec * j + c_vec * k
                         for idx, site in enumerate(self.structure):
                             pos = site.coords + translation
                             all_atoms.append({
@@ -863,25 +914,32 @@ class StructureViewer3D(QWidget):
                 pos1 = atom1['pos']
                 element1 = atom1['element']
 
-                # Definir distância máxima de ligação
-                max_bond_dist = self._get_max_bond_distance(element1)
+                # BUSCA INICIAL: usar raio conservador para encontrar candidatos
+                search_radius = self._get_max_bond_distance(element1)
 
-                # Buscar vizinhos próximos
+                # Buscar vizinhos próximos CANDIDATOS
                 neighbor_data = []
                 for idx2, atom2 in enumerate(all_atoms):
                     if idx2 <= idx1:  # Evitar duplicatas e auto-ligação
                         continue
 
                     pos2 = atom2['pos']
+                    element2 = atom2['element']
                     dist = np.linalg.norm(pos2 - pos1)
 
-                    if dist < max_bond_dist:
-                        neighbor_data.append((idx2, dist, pos2, atom2['element']))
+                    # Primeira triagem: distância de busca
+                    if dist < search_radius * 2:  # Buscar com margem
+                        # VALIDAÇÃO ESPECÍFICA: distância máxima para este PAR de elementos
+                        max_bond_for_pair = self._get_max_bond_distance(element1, element2)
+
+                        if dist <= max_bond_for_pair:
+                            neighbor_data.append((idx2, dist, pos2, element2))
 
                 # Ordenar por distância
                 neighbor_data.sort(key=lambda x: x[1])
 
                 # Usar critério: vizinhos até 1.35x da distância do mais próximo
+                # IMPORTANTE: Este critério adicional previne ligações excessivas
                 if neighbor_data:
                     min_dist = neighbor_data[0][1]
                     max_neighbor_dist = min_dist * 1.35
@@ -889,6 +947,10 @@ class StructureViewer3D(QWidget):
                     for idx2, dist, pos2, element2 in neighbor_data:
                         if dist > max_neighbor_dist:
                             break
+
+                        # ✅ Validação DUPLA aprovada:
+                        # 1. dist <= max_bond_for_pair (específico por elementos)
+                        # 2. dist <= min_dist * 1.35 (critério VESTA)
 
                         # Criar cilindro 3D para a ligação
                         bond_cylinder = self._create_bond_cylinder(pos1, pos2)
@@ -906,28 +968,239 @@ class StructureViewer3D(QWidget):
             if len(self.bond_meshes) == 0:
                 logging.warning(f"⚠️  Nenhuma ligação encontrada")
 
+            # VALIDAÇÃO AUTOMÁTICA: Verificar se há ligações suspeitas
+            if BOND_LIBRARY_AVAILABLE:
+                self._validate_rendered_bonds(all_atoms)
+
         except Exception as e:
             logging.error(f"❌ Erro ao renderizar ligações: {e}")
             import traceback
             traceback.print_exc()
 
-    def _get_max_bond_distance(self, element):
+    def _validate_rendered_bonds(self, all_atoms):
         """
-        Retorna a distância máxima de busca para ligações baseada no elemento.
-        Usa raios covalentes típicos.
+        Valida todas as ligações renderizadas contra a biblioteca científica.
+        Alerta se encontrar ligações suspeitas ou fantasmas.
         """
-        # Raios covalentes aproximados (em Å) + margem de segurança
-        max_distances = {
-            'H': 1.5, 'He': 1.5,
-            'Li': 2.5, 'Be': 2.5, 'B': 2.5, 'C': 2.5, 'N': 2.5, 'O': 2.5, 'F': 2.5,
-            'Na': 3.0, 'Mg': 3.0, 'Al': 3.0, 'Si': 3.0, 'P': 3.0, 'S': 3.0, 'Cl': 3.0,
-            'K': 3.5, 'Ca': 3.5, 'Sc': 3.5, 'Ti': 3.5, 'V': 3.5, 'Cr': 3.5,
-            'Mn': 3.5, 'Fe': 3.5, 'Co': 3.5, 'Ni': 3.5, 'Cu': 3.5, 'Zn': 3.5,
-            'Ga': 3.5, 'Ge': 3.5, 'As': 3.5, 'Se': 3.5, 'Br': 3.5,
-            'Rb': 4.0, 'Sr': 4.0, 'Y': 4.0, 'Zr': 4.0, 'Nb': 4.0, 'Mo': 4.0,
-            'Sm': 4.0, 'Gd': 4.0, 'Tb': 4.0, 'Dy': 4.0, 'Ho': 4.0, 'Er': 4.0,
+        if not BOND_LIBRARY_AVAILABLE:
+            return
+
+        suspicious_bonds = []
+        invalid_bonds = []
+        untabulated_pairs = set()
+
+        # Analisar todas as ligações criadas
+        for bond in self.bond_meshes:
+            if not hasattr(bond, '_bond_atoms'):
+                continue
+
+            idx1, idx2 = bond._bond_atoms
+            if idx1 >= len(all_atoms) or idx2 >= len(all_atoms):
+                continue
+
+            atom1 = all_atoms[idx1]
+            atom2 = all_atoms[idx2]
+
+            elem1 = atom1['element']
+            elem2 = atom2['element']
+            dist = np.linalg.norm(atom2['pos'] - atom1['pos'])
+
+            # Validar com biblioteca
+            validation = validate_bond(elem1, elem2, dist)
+
+            if not validation['is_valid']:
+                invalid_bonds.append((elem1, elem2, dist, validation))
+            elif validation['confidence'] == 'low':
+                suspicious_bonds.append((elem1, elem2, dist, validation))
+
+            if not validation['is_tabulated']:
+                untabulated_pairs.add(tuple(sorted([elem1, elem2])))
+
+        # Reportar resultados
+        total_bonds = len(self.bond_meshes)
+
+        if invalid_bonds:
+            logging.error(f"❌ LIGAÇÕES FANTASMAS DETECTADAS: {len(invalid_bonds)}/{total_bonds}")
+            for elem1, elem2, dist, val in invalid_bonds[:5]:  # Mostrar até 5
+                logging.error(f"  {elem1}-{elem2}: {dist:.3f} Å > {val['max_expected']:.3f} Å (máximo)")
+
+        if suspicious_bonds:
+            logging.warning(f"⚠️  Ligações suspeitas: {len(suspicious_bonds)}/{total_bonds}")
+            for elem1, elem2, dist, val in suspicious_bonds[:3]:
+                logging.warning(f"  {elem1}-{elem2}: {dist:.3f} Å (confiança baixa)")
+
+        if untabulated_pairs:
+            logging.info(f"ℹ️  Pares não tabelados (usando fallback): {len(untabulated_pairs)}")
+            for pair in list(untabulated_pairs)[:5]:
+                logging.info(f"  {pair[0]}-{pair[1]}")
+
+        if not invalid_bonds and not suspicious_bonds:
+            logging.info(f"✅ Todas as {total_bonds} ligações validadas cientificamente")
+
+    def _get_max_bond_distance(self, element1, element2=None):
+        """
+        WRAPPER: Usa biblioteca universal se disponível, senão fallback local.
+        """
+        if BOND_LIBRARY_AVAILABLE and element2 is not None:
+            # Usar biblioteca universal (>200 pares + validação científica)
+            return get_bond_distance(element1, element2)
+
+        # Fallback para método local (compatibilidade)
+        return self._get_max_bond_distance_fallback(element1, element2)
+
+    def _get_max_bond_distance_fallback(self, element1, element2=None):
+        """
+        Retorna a distância máxima REAL para ligação entre dois elementos.
+
+        CORREÇÃO CRÍTICA: Usa distâncias específicas por PAR de elementos
+        para evitar ligações fantasmas (ex: entre camadas no grafite).
+
+        Args:
+            element1 (str): Símbolo do primeiro elemento
+            element2 (str, optional): Símbolo do segundo elemento. Se None, retorna raio individual.
+
+        Returns:
+            float: Distância máxima em Angstroms para considerar ligação
+
+        Referências:
+            - Pyykko & Atsumi, Chem. Eur. J. 15, 186 (2009) - Raios covalentes
+            - VESTA: Algoritmo de ligações químicas
+            - CSD (Cambridge Structural Database): Distâncias experimentais
+        """
+
+        # Se element2 não fornecido, retornar busca conservadora
+        if element2 is None:
+            # Raios covalentes conservadores para BUSCA inicial
+            search_radii = {
+                'H': 1.5, 'He': 1.5,
+                'Li': 2.0, 'Be': 2.0, 'B': 2.0, 'C': 2.0, 'N': 2.0, 'O': 2.0, 'F': 2.0,
+                'Na': 2.5, 'Mg': 2.5, 'Al': 2.5, 'Si': 2.5, 'P': 2.5, 'S': 2.5, 'Cl': 2.5,
+                'K': 3.0, 'Ca': 3.0, 'Sc': 3.0, 'Ti': 3.0, 'V': 3.0, 'Cr': 3.0,
+                'Mn': 3.0, 'Fe': 3.0, 'Co': 3.0, 'Ni': 3.0, 'Cu': 3.0, 'Zn': 3.0,
+                'Ga': 3.0, 'Ge': 3.0, 'As': 3.0, 'Se': 3.0, 'Br': 3.0,
+                'Rb': 3.5, 'Sr': 3.5, 'Y': 3.5, 'Zr': 3.5, 'Nb': 3.5, 'Mo': 3.5,
+                'Sm': 3.5, 'Gd': 3.5, 'Tb': 3.5, 'Dy': 3.5, 'Ho': 3.5, 'Er': 3.5,
+                'Ce': 3.5, 'Nd': 3.5, 'W': 3.5,
+            }
+            return search_radii.get(element1, 3.0)
+
+        # ====================================================================
+        # TABELA DE DISTÂNCIAS MÁXIMAS POR PAR DE ELEMENTOS
+        # Baseado em raios covalentes + margem de segurança (20-30%)
+        # ====================================================================
+
+        # Normalizar ordem (sempre alfabética para consistência)
+        pair = tuple(sorted([element1, element2]))
+
+        # Distâncias máximas específicas (em Angstroms)
+        # Format: (elem1, elem2): max_distance
+        pair_distances = {
+            # === CARBONO (casos críticos!) ===
+            ('C', 'C'): 1.70,    # 🔴 CRÍTICO: Grafite/grafeno (1.42 Å típico, max 1.70)
+                                  # Evita ligações inter-camadas (3.35 Å)
+            ('C', 'H'): 1.20,    # C-H em orgânicos
+            ('C', 'N'): 1.60,    # C-N em aminas, amidas
+            ('C', 'O'): 1.60,    # C-O em álcoois, éteres
+            ('C', 'S'): 2.00,    # C-S em tióis
+            ('C', 'Si'): 2.00,   # C-Si em organosilanos
+            ('C', 'W'): 2.30,    # Carbeto de tungstênio
+
+            # === OXIGÊNIO (óxidos metálicos) ===
+            ('O', 'O'): 1.60,    # Peróxidos (1.48 Å típico)
+            ('H', 'O'): 1.10,    # OH em hidróxidos
+            ('N', 'O'): 1.55,    # Óxidos de nitrogênio
+            ('O', 'S'): 1.80,    # Sulfatos, sulfitos
+            ('O', 'P'): 1.80,    # Fosfatos
+            ('O', 'Si'): 1.90,   # Silicatos
+
+            # === METAIS ALCALINOS E ALCALINO-TERROSOS ===
+            ('Li', 'O'): 2.20,   # Óxido de lítio
+            ('Na', 'O'): 2.60,   # Óxido de sódio
+            ('K', 'O'): 3.00,    # Óxido de potássio
+            ('Mg', 'O'): 2.30,   # Óxido de magnésio
+            ('Ca', 'O'): 2.60,   # Óxido de cálcio
+            ('Sr', 'O'): 2.80,   # Óxido de estrôncio
+
+            # === METAIS DE TRANSIÇÃO - ÓXIDOS ===
+            ('Ti', 'O'): 2.20,   # TiO2 (1.95 Å típico)
+            ('V', 'O'): 2.10,    # Óxidos de vanádio
+            ('Cr', 'O'): 2.10,   # Óxidos de cromo
+            ('Mn', 'O'): 2.20,   # Óxidos de manganês
+            ('Fe', 'O'): 2.20,   # Óxidos de ferro (1.95-2.05 Å)
+            ('Co', 'O'): 2.20,   # Óxidos de cobalto
+            ('Ni', 'O'): 2.20,   # Óxidos de níquel
+            ('Cu', 'O'): 2.10,   # Óxidos de cobre
+            ('Zn', 'O'): 2.20,   # Óxido de zinco
+            ('Zr', 'O'): 2.30,   # Zircônia
+            ('Nb', 'O'): 2.30,   # Óxidos de nióbio
+            ('Mo', 'O'): 2.20,   # Óxidos de molibdênio
+            ('W', 'O'): 2.20,    # Óxidos de tungstênio
+
+            # === LANTANÍDEOS - ÓXIDOS ===
+            ('Ce', 'O'): 2.60,   # CeO2 (2.34 Å típico)
+            ('Nd', 'O'): 2.60,   # Óxidos de neodímio
+            ('Sm', 'O'): 2.60,   # Óxidos de samário
+            ('Gd', 'O'): 2.60,   # Óxidos de gadolínio
+
+            # === SEMICONDUTORES ===
+            ('Si', 'Si'): 2.50,  # Silício cristalino (2.35 Å)
+            ('Ge', 'Ge'): 2.60,  # Germânio
+            ('Si', 'O'): 1.90,   # Silicatos, quartzo
+            ('Ge', 'O'): 2.00,   # Óxidos de germânio
+
+            # === NITRETOS E SULFETOS ===
+            ('Si', 'N'): 2.00,   # Nitreto de silício
+            ('B', 'N'): 1.70,    # Nitreto de boro (grafítico)
+            ('Fe', 'S'): 2.50,   # Sulfetos de ferro
+            ('Cu', 'S'): 2.40,   # Sulfetos de cobre
+            ('Zn', 'S'): 2.50,   # Sulfeto de zinco
+
+            # === LIGAÇÕES METÁLICAS ===
+            ('Fe', 'Fe'): 2.80,  # Ferro metálico
+            ('Cu', 'Cu'): 2.80,  # Cobre metálico
+            ('Al', 'Al'): 3.00,  # Alumínio metálico
+            ('Au', 'Au'): 3.00,  # Ouro metálico
+            ('Ag', 'Ag'): 3.00,  # Prata metálica
         }
-        return max_distances.get(element, 3.5)  # Padrão: 3.5 Å
+
+        # Buscar distância específica
+        if pair in pair_distances:
+            return pair_distances[pair]
+
+        # ====================================================================
+        # FALLBACK: Calcular baseado em raios covalentes + margem
+        # ====================================================================
+
+        # Raios covalentes padrão (Pyykko & Atsumi, 2009)
+        covalent_radii = {
+            'H': 0.31, 'He': 0.28, 'Li': 1.28, 'Be': 0.96, 'B': 0.84,
+            'C': 0.76, 'N': 0.71, 'O': 0.66, 'F': 0.57, 'Ne': 0.58,
+            'Na': 1.66, 'Mg': 1.41, 'Al': 1.21, 'Si': 1.11, 'P': 1.07,
+            'S': 1.05, 'Cl': 1.02, 'Ar': 1.06, 'K': 2.03, 'Ca': 1.76,
+            'Sc': 1.70, 'Ti': 1.60, 'V': 1.53, 'Cr': 1.39, 'Mn': 1.39,
+            'Fe': 1.32, 'Co': 1.26, 'Ni': 1.24, 'Cu': 1.32, 'Zn': 1.22,
+            'Ga': 1.22, 'Ge': 1.20, 'As': 1.19, 'Se': 1.20, 'Br': 1.20,
+            'Kr': 1.16, 'Rb': 2.20, 'Sr': 1.95, 'Y': 1.90, 'Zr': 1.75,
+            'Nb': 1.64, 'Mo': 1.54, 'Tc': 1.47, 'Ru': 1.46, 'Rh': 1.42,
+            'Pd': 1.39, 'Ag': 1.45, 'Cd': 1.44, 'In': 1.42, 'Sn': 1.39,
+            'Sb': 1.39, 'Te': 1.38, 'I': 1.39, 'Xe': 1.40, 'Cs': 2.44,
+            'Ba': 2.15, 'La': 2.07, 'Ce': 2.04, 'Pr': 2.03, 'Nd': 2.01,
+            'Pm': 1.99, 'Sm': 1.98, 'Eu': 1.98, 'Gd': 1.96, 'Tb': 1.94,
+            'Dy': 1.92, 'Ho': 1.92, 'Er': 1.89, 'Tm': 1.90, 'Yb': 1.87,
+            'Lu': 1.87, 'Hf': 1.75, 'Ta': 1.70, 'W': 1.62, 'Re': 1.51,
+            'Os': 1.44, 'Ir': 1.41, 'Pt': 1.36, 'Au': 1.36, 'Hg': 1.32,
+            'Tl': 1.45, 'Pb': 1.46, 'Bi': 1.48, 'Po': 1.40, 'At': 1.50,
+        }
+
+        r1 = covalent_radii.get(element1, 1.5)
+        r2 = covalent_radii.get(element2, 1.5)
+
+        # Margem de segurança: 30% para ligações covalentes/iônicas
+        max_distance = (r1 + r2) * 1.30
+
+        logging.debug(f"Distância calculada {element1}-{element2}: {max_distance:.3f} Å (r1={r1:.3f}, r2={r2:.3f})")
+
+        return max_distance
 
     def _create_bond_cylinder(self, pos1, pos2, radius=None):
         """
@@ -1031,7 +1304,13 @@ class StructureViewer3D(QWidget):
 
     def _render_unit_cell(self):
         """
-        Renderiza as arestas da célula unitária.
+        Renderiza as arestas da célula unitária CORRETAMENTE.
+
+        IMPORTANTE: Em cristalografia, a célula unitária é definida pelos vetores
+        de rede a, b, c partindo da ORIGEM (0,0,0). Os 8 vértices são:
+        - Origem: (0,0,0)
+        - 7 combinações: a, b, c, a+b, a+c, b+c, a+b+c
+
         Se houver expansão de supercélula, desenha TODAS as células.
         """
         if not self.structure:
@@ -1045,42 +1324,93 @@ class StructureViewer3D(QWidget):
         lattice = self.structure.lattice
         na, nb, nc = self.supercell_expansion
 
-        # Vértices da célula unitária (coordenadas fracionárias)
-        vertices = np.array([
-            [0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0],  # Base inferior
-            [0, 0, 1], [1, 0, 1], [1, 1, 1], [0, 1, 1],  # Base superior
+        # Vetores de rede (base da célula unitária em coordenadas cartesianas)
+        a_vec = lattice.matrix[0]
+        b_vec = lattice.matrix[1]
+        c_vec = lattice.matrix[2]
+
+        # IMPORTANTE: A célula unitária SEMPRE começa em (0,0,0) na cristalografia
+        # Os 8 vértices do paralelepípedo (NÃO necessariamente um cubo!)
+        origin = np.array([0.0, 0.0, 0.0])
+        vertices_base = np.array([
+            origin,                    # Vértice 0: (0, 0, 0)
+            a_vec,                     # Vértice 1: (1, 0, 0) em frac
+            a_vec + b_vec,             # Vértice 2: (1, 1, 0)
+            b_vec,                     # Vértice 3: (0, 1, 0)
+            c_vec,                     # Vértice 4: (0, 0, 1)
+            a_vec + c_vec,             # Vértice 5: (1, 0, 1)
+            a_vec + b_vec + c_vec,     # Vértice 6: (1, 1, 1)
+            b_vec + c_vec,             # Vértice 7: (0, 1, 1)
         ])
 
-        # Definir arestas (pares de índices de vértices)
+        # Definir as 12 arestas do paralelepípedo
         edges = [
-            (0, 1), (1, 2), (2, 3), (3, 0),  # Base inferior
-            (4, 5), (5, 6), (6, 7), (7, 4),  # Base superior
-            (0, 4), (1, 5), (2, 6), (3, 7),  # Arestas verticais
+            (0, 1), (1, 2), (2, 3), (3, 0),  # Face inferior (z=0)
+            (4, 5), (5, 6), (6, 7), (7, 4),  # Face superior (z=1)
+            (0, 4), (1, 5), (2, 6), (3, 7),  # Arestas verticais conectando as faces
         ]
 
-        # Desenhar TODAS as células da supercélula
-        for i in range(na):
-            for j in range(nb):
-                for k in range(nc):
-                    # Vetor de translação para esta célula
-                    translation = lattice.matrix[0] * i + lattice.matrix[1] * j + lattice.matrix[2] * k
+        # DECISÃO: Mesclar células ou mostrar todas individualmente?
+        if self._merge_cells and (na > 1 or nb > 1 or nc > 1):
+            # MODO MESCLADO: Mostrar apenas UMA caixa gigante englobando toda a supercélula
+            # Útil didaticamente para visualização mais limpa
 
-                    # Converter vértices para coordenadas cartesianas e transladar
-                    cart_vertices = np.array([lattice.get_cartesian_coords(v) + translation for v in vertices])
+            # Vértices da supercélula mesclada (8 vértices do paralelepípedo grande)
+            merged_vertices = np.array([
+                origin,                              # (0, 0, 0)
+                a_vec * na,                          # (na, 0, 0)
+                a_vec * na + b_vec * nb,             # (na, nb, 0)
+                b_vec * nb,                          # (0, nb, 0)
+                c_vec * nc,                          # (0, 0, nc)
+                a_vec * na + c_vec * nc,             # (na, 0, nc)
+                a_vec * na + b_vec * nb + c_vec * nc,  # (na, nb, nc)
+                b_vec * nb + c_vec * nc,             # (0, nb, nc)
+            ])
 
-                    # Criar linhas para cada aresta
-                    for edge_i, edge_j in edges:
-                        pts = np.array([cart_vertices[edge_i], cart_vertices[edge_j]])
-                        line = gl.GLLinePlotItem(
-                            pos=pts,
-                            color=(0.0, 0.0, 0.0, 1.0),
-                            width=1.5,  # Linhas finas e discretas
-                            antialias=True
-                        )
-                        self.view_widget.addItem(line)
-                        self.unit_cell_lines.append(line)
+            # Criar linhas para as 12 arestas da caixa mesclada
+            for edge_i, edge_j in edges:
+                pts = np.array([merged_vertices[edge_i], merged_vertices[edge_j]])
+                line = gl.GLLinePlotItem(
+                    pos=pts,
+                    color=(0.2, 0.2, 0.8, 1.0),  # Azul escuro para diferenciar
+                    width=2.5,  # Mais grossa para destacar
+                    antialias=True
+                )
+                self.view_widget.addItem(line)
+                self.unit_cell_lines.append(line)
 
-        logging.info(f"✅ Renderizadas {len(self.unit_cell_lines)} arestas para supercélula {na}×{nb}×{nc}")
+            logging.info(
+                f"✅ Renderizada 1 caixa mesclada (12 arestas) para supercélula {na}×{nb}×{nc}"
+            )
+
+        else:
+            # MODO NORMAL: Desenhar TODAS as células individuais da supercélula
+            for i in range(na):
+                for j in range(nb):
+                    for k in range(nc):
+                        # Vetor de translação para esta célula
+                        # Usa os MESMOS vetores que os átomos (garantindo alinhamento)
+                        translation = a_vec * i + b_vec * j + c_vec * k
+
+                        # Vértices da célula transladada
+                        cart_vertices = vertices_base + translation
+
+                        # Criar linhas para cada aresta
+                        for edge_i, edge_j in edges:
+                            pts = np.array([cart_vertices[edge_i], cart_vertices[edge_j]])
+                            line = gl.GLLinePlotItem(
+                                pos=pts,
+                                color=(0.0, 0.0, 0.0, 1.0),
+                                width=1.5,
+                                antialias=True
+                            )
+                            self.view_widget.addItem(line)
+                            self.unit_cell_lines.append(line)
+
+            logging.info(
+                f"✅ Renderizadas {len(self.unit_cell_lines)} arestas "
+                f"({na}×{nb}×{nc} células individuais)"
+            )
 
     # NOTA: Função _render_lattice_arrows removida
     # As setas a,b,c agora aparecem APENAS no gizmo de orientação (canto inferior esquerdo)
@@ -1356,6 +1686,7 @@ class StructureViewer3D(QWidget):
         finally:
             super().closeEvent(event)
 
+
     def start_rotation_animation(self, axis='z', speed=1.0):
         """
         Inicia animação de rotação CONTÍNUA em torno de um eixo.
@@ -1568,11 +1899,12 @@ class Viewer3DToolsDialog(QDialog):
 
         self.size_slider = QSlider(Qt.Orientation.Horizontal)
         self.size_slider.setRange(25, 200)
-        self.size_slider.setValue(int(viewer.atom_scale * 100))
+        # Normalizar: 0.7 (real) = 100% (mostrado)
+        self.size_slider.setValue(int((viewer.atom_scale / 0.7) * 100))
         self.size_slider.valueChanged.connect(self._update_size_label)
         size_controls.addWidget(self.size_slider)
 
-        self.size_label = QLabel(f"{viewer.atom_scale * 100:.0f}%")
+        self.size_label = QLabel(f"{int((viewer.atom_scale / 0.7) * 100)}%")
         self.size_label.setMinimumWidth(50)
         size_controls.addWidget(self.size_label)
 
@@ -1585,12 +1917,23 @@ class Viewer3DToolsDialog(QDialog):
 
         self.show_cell_check = QCheckBox("Mostrar Célula Unitária")
         self.show_cell_check.setChecked(viewer._show_cell)
+        self.show_cell_check.setToolTip("Mostra/oculta as arestas da célula unitária")
         visibility_layout.addWidget(self.show_cell_check)
 
         self.show_bonds_check = QCheckBox("Mostrar Ligações")
         self.show_bonds_check.setChecked(viewer._show_bonds)
+        self.show_bonds_check.setToolTip("Mostra/oculta as ligações químicas entre átomos")
         visibility_layout.addWidget(self.show_bonds_check)
 
+        # NOVO: Mesclar células (mostrar apenas caixa externa da supercélula)
+        self.merge_cells_check = QCheckBox("Mesclar Células (Caixa Única)")
+        self.merge_cells_check.setChecked(getattr(viewer, '_merge_cells', False))
+        self.merge_cells_check.setToolTip(
+            "Mostra apenas uma caixa englobando toda a supercélula\n"
+            "ao invés de mostrar cada célula unitária individualmente.\n"
+            "Útil para visualização mais limpa e didática."
+        )
+        visibility_layout.addWidget(self.merge_cells_check)
 
         layout.addWidget(visibility_group)
 
@@ -1638,21 +1981,76 @@ class Viewer3DToolsDialog(QDialog):
 
     def _apply_settings(self):
         """Aplica as configurações sem fechar o diálogo."""
-        self.viewer.atom_scale = self.size_slider.value() / 100.0
+        # Salvar estrutura antes de aplicar configurações (proteção extra)
+        saved_structure = self.viewer.structure
 
-        # Atualizar visibilidade
-        self.viewer._show_cell = self.show_cell_check.isChecked()
-        self.viewer._show_bonds = self.show_bonds_check.isChecked()
+        if not saved_structure:
+            QMessageBox.warning(
+                self,
+                "Nenhuma Estrutura",
+                "Não há estrutura carregada para aplicar configurações."
+            )
+            return
 
-        # Atualizar espessura das ligações
-        self.viewer.bond_radius = self.bonds_slider.value() / 100.0
+        try:
+            # Converter de porcentagem mostrada para escala real
+            # 100% mostrado = 0.7 real (tamanho padrão otimizado)
+            slider_percent = self.size_slider.value()
+            self.viewer.atom_scale = (slider_percent / 100.0) * 0.7
 
-        # Re-renderizar se houver estrutura
-        # IMPORTANTE: NÃO chamar _clear_structure() pois apaga self.structure
-        # _render_structure() já faz a limpeza automática dos elementos visuais
-        if self.viewer.structure:
+            # Atualizar flags de visibilidade
+            self.viewer._show_cell = self.show_cell_check.isChecked()
+            self.viewer._show_bonds = self.show_bonds_check.isChecked()
+            self.viewer._merge_cells = self.merge_cells_check.isChecked()
+
+            # Atualizar espessura das ligações
+            self.viewer.bond_radius = self.bonds_slider.value() / 100.0
+
+            # CRÍTICO: Garantir que estrutura não seja perdida
+            self.viewer.structure = saved_structure
+
+            # Re-renderizar estrutura com novas configurações
+            # _render_structure() limpa elementos visuais mas preserva self.viewer.structure
             self.viewer._render_structure()
-            logging.info("✅ Configurações 3D aplicadas e estrutura re-renderizada")
+
+            # Aplicar visibilidade APÓS renderização
+            self._apply_visibility()
+
+            logging.info(
+                f"✅ Configurações 3D aplicadas: "
+                f"tamanho={slider_percent}%, "
+                f"células={'mescladas' if self.viewer._merge_cells else 'individuais'}, "
+                f"ligações={'visíveis' if self.viewer._show_bonds else 'ocultas'}, "
+                f"célula={'visível' if self.viewer._show_cell else 'oculta'}"
+            )
+
+        except Exception as e:
+            logging.error(f"Erro ao aplicar configurações 3D: {e}")
+            import traceback
+            traceback.print_exc()
+            # Restaurar estrutura em caso de erro
+            self.viewer.structure = saved_structure
+            QMessageBox.critical(
+                self,
+                "Erro",
+                f"Erro ao aplicar configurações: {e}"
+            )
+
+    def _apply_visibility(self):
+        """Aplica configurações de visibilidade aos elementos já renderizados."""
+        # Mostrar/ocultar ligações
+        for bond in self.viewer.bond_meshes:
+            bond.setVisible(self.viewer._show_bonds)
+
+        # Mostrar/ocultar células unitárias
+        for line in self.viewer.unit_cell_lines:
+            line.setVisible(self.viewer._show_cell)
+
+        logging.debug(
+            f"Visibilidade aplicada: "
+            f"{len(self.viewer.bond_meshes)} ligações ({'vis' if self.viewer._show_bonds else 'oculto'}), "
+            f"{len(self.viewer.unit_cell_lines)} linhas ({'vis' if self.viewer._show_cell else 'oculto'})"
+        )
 
     def accept(self):
         """Aplicar e fechar."""
@@ -1769,87 +2167,305 @@ class Viewer3DAnimationDialog(QDialog):
 
 # Diálogo de Expansão de Célula (Supercélula)
 class SupercellDialog(QDialog):
-    """Diálogo para selecionar expansão da célula unitária (supercélula)."""
+    """
+    Diálogo avançado para expansão estrutural (supercélula).
+
+    Permite:
+    - Controle individual de expansão em a, b, c
+    - Expansão incremental a partir da configuração atual
+    - Validação científica em tempo real
+    - Estimativa de átomos e ligações
+    - Aplicação com preview antes de confirmar
+    """
 
     def __init__(self, viewer, current_expansion, parent=None):
         super().__init__(parent)
         self.viewer = viewer
-        self.current_expansion = current_expansion
-        self.setWindowTitle("Expansão da Célula Unitária")
-        self.setMinimumWidth(320)
+        self.current_expansion = list(current_expansion)  # [na, nb, nc]
+        self.preview_expansion = list(current_expansion)  # Para preview
 
+        self.setWindowTitle("Expansão Estrutural (Supercélula)")
+        self.setFixedSize(420, 420)  # Tamanho fixo, não redimensionável
+
+        # Configurar ícone
+        try:
+            icon_path = self.resource_path(os.path.join("matfinder", "assets", "icons", "polvo.ico"))
+            if os.path.exists(icon_path):
+                self.setWindowIcon(QIcon(icon_path))
+        except:
+            pass
+
+        self._setup_ui()
+        self._update_preview()
+
+    def resource_path(self, relative_path):
+        """Retorna caminho absoluto do recurso."""
+        try:
+            base_path = sys._MEIPASS
+        except AttributeError:
+            base_path = os.path.abspath(".")
+        return os.path.join(base_path, relative_path)
+
+    def _setup_ui(self):
+        """Configura a interface do diálogo."""
         layout = QVBoxLayout(self)
+        layout.setSpacing(8)
+        layout.setContentsMargins(10, 10, 10, 10)
 
-        # Título informativo
-        info_label = QLabel(
-            "Selecione a expansão da célula unitária (supercélula).\n"
-            "Valores maiores mostram mais células repetidas."
+        # Configuração atual (compacta)
+        current_group = QGroupBox("Configuração Atual")
+        current_layout = QVBoxLayout(current_group)
+        current_layout.setContentsMargins(8, 8, 8, 8)
+
+        self.current_info_label = QLabel()
+        self.current_info_label.setStyleSheet("font-size: 9pt; padding: 3px;")
+        current_layout.addWidget(self.current_info_label)
+
+        layout.addWidget(current_group)
+
+        # Controles de expansão (minimalistas com cores)
+        controls_group = QGroupBox("Expansão Estrutural")
+        controls_layout = QVBoxLayout(controls_group)
+        controls_layout.setSpacing(5)
+        controls_layout.setContentsMargins(8, 8, 8, 8)
+
+        # Direção A
+        self.a_spinbox = self._create_expansion_control(
+            controls_layout,
+            "a:",
+            self.current_expansion[0],
+            "#FFCCCC"  # Vermelho claro
         )
-        info_label.setWordWrap(True)
-        info_label.setStyleSheet("color: #555; font-size: 9pt; padding: 5px;")
-        layout.addWidget(info_label)
 
-        # Opções predefinidas (comuns em cristalografia)
-        options_group = QGroupBox("Expansões Predefinidas")
-        options_layout = QVBoxLayout(options_group)
-
-        self.preset_buttons = []
-
-        # Opções baseadas no VESTA e Mercury
-        presets = [
-            ("1×1×1", [1, 1, 1], "Célula unitária original"),
-            ("2×2×2", [2, 2, 2], "2× em todas as direções"),
-            ("2×2×1", [2, 2, 1], "2× em a e b"),
-            ("2×1×1", [2, 1, 1], "2× apenas em a"),
-            ("1×2×1", [1, 2, 1], "2× apenas em b"),
-            ("1×1×2", [1, 1, 2], "2× apenas em c"),
-            ("3×3×3", [3, 3, 3], "3× em todas as direções"),
-        ]
-
-        from PySide6.QtWidgets import QRadioButton, QButtonGroup
-        self.button_group = QButtonGroup(self)
-
-        for i, (label, expansion, tooltip) in enumerate(presets):
-            # Calcular número de átomos
-            n_atoms_unit = len(viewer.structure) if viewer.structure else 0
-            n_atoms_total = n_atoms_unit * expansion[0] * expansion[1] * expansion[2]
-
-            radio = QRadioButton(f"{label} ({n_atoms_total} átomos)")
-            radio.setToolTip(tooltip)
-            radio.expansion = expansion
-
-            # Marcar se for a expansão atual
-            if expansion == current_expansion:
-                radio.setChecked(True)
-
-            self.button_group.addButton(radio, i)
-            options_layout.addWidget(radio)
-            self.preset_buttons.append(radio)
-
-        layout.addWidget(options_group)
-
-        # Aviso para muitos átomos
-        warning_label = QLabel(
-            "⚠️ Expansões grandes (>500 átomos) podem ficar lentas"
+        # Direção B
+        self.b_spinbox = self._create_expansion_control(
+            controls_layout,
+            "b:",
+            self.current_expansion[1],
+            "#CCFFCC"  # Verde claro
         )
-        warning_label.setStyleSheet("color: #CC6600; font-size: 8pt; font-style: italic;")
-        layout.addWidget(warning_label)
 
-        # Botões
+        # Direção C
+        self.c_spinbox = self._create_expansion_control(
+            controls_layout,
+            "c:",
+            self.current_expansion[2],
+            "#CCCCFF"  # Azul claro
+        )
+
+        layout.addWidget(controls_group)
+
+        # Expansões predefinidas
+        presets_group = QGroupBox("Expansão Predefinida")
+        presets_layout = QHBoxLayout(presets_group)
+        presets_layout.setContentsMargins(8, 8, 8, 8)
+
+        preset_btn1 = QPushButton("1×1×1")
+        preset_btn1.clicked.connect(lambda: self._apply_preset(1, 1, 1))
+        presets_layout.addWidget(preset_btn1)
+
+        preset_btn2 = QPushButton("2×2×2")
+        preset_btn2.clicked.connect(lambda: self._apply_preset(2, 2, 2))
+        presets_layout.addWidget(preset_btn2)
+
+        preset_btn3 = QPushButton("3×3×3")
+        preset_btn3.clicked.connect(lambda: self._apply_preset(3, 3, 3))
+        presets_layout.addWidget(preset_btn3)
+
+        reset_btn = QPushButton("Resetar")
+        reset_btn.clicked.connect(self._reset_to_original)
+        presets_layout.addWidget(reset_btn)
+
+        layout.addWidget(presets_group)
+
+        # Info dinâmica (sem preview fixo)
+        self.info_label = QLabel()
+        self.info_label.setWordWrap(True)
+        self.info_label.setStyleSheet(
+            "background: #F5F5F5; padding: 8px; border: 1px solid #DDD; "
+            "border-radius: 3px; font-size: 9pt;"
+        )
+        layout.addWidget(self.info_label)
+
+        # Botões de ação
         from PySide6.QtWidgets import QDialogButtonBox
-        button_box = QDialogButtonBox(
-            QDialogButtonBox.StandardButton.Ok |
-            QDialogButtonBox.StandardButton.Cancel
-        )
-        button_box.accepted.connect(self.accept)
-        button_box.rejected.connect(self.reject)
+        button_box = QDialogButtonBox()
+
+        # Botão Preview
+        preview_btn = button_box.addButton("Preview", QDialogButtonBox.ButtonRole.ApplyRole)
+        preview_btn.clicked.connect(self._apply_preview)
+
+        # Botão Aceitar
+        ok_btn = button_box.addButton("Aceitar", QDialogButtonBox.ButtonRole.AcceptRole)
+        ok_btn.clicked.connect(self.accept)
+
+        # Botão Cancelar
+        cancel_btn = button_box.addButton("Cancelar", QDialogButtonBox.ButtonRole.RejectRole)
+        cancel_btn.clicked.connect(self.reject)
+
         layout.addWidget(button_box)
+
+        # Conectar sinais de atualização
+        self.a_spinbox.valueChanged.connect(self._update_preview)
+        self.b_spinbox.valueChanged.connect(self._update_preview)
+        self.c_spinbox.valueChanged.connect(self._update_preview)
+
+    def _create_expansion_control(self, parent_layout, label_text, initial_value, bg_color):
+        """Cria um controle de expansão minimalista."""
+        container = QWidget()
+        container.setStyleSheet(f"background: {bg_color}; padding: 5px; border-radius: 3px;")
+        hlayout = QHBoxLayout(container)
+        hlayout.setContentsMargins(5, 3, 5, 3)
+        hlayout.setSpacing(8)
+
+        # Label
+        label = QLabel(label_text)
+        label.setStyleSheet("font-weight: bold; font-size: 10pt;")
+        label.setMinimumWidth(20)
+        hlayout.addWidget(label)
+
+        # Botão -
+        minus_btn = QPushButton("−")
+        minus_btn.setFixedSize(25, 22)
+        hlayout.addWidget(minus_btn)
+
+        # SpinBox
+        spinbox = QSpinBox()
+        spinbox.setRange(1, 10)
+        spinbox.setValue(initial_value)
+        spinbox.setFixedWidth(50)
+        spinbox.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        spinbox.setStyleSheet("background: white; font-weight: bold;")
+        hlayout.addWidget(spinbox)
+
+        # Botão +
+        plus_btn = QPushButton("+")
+        plus_btn.setFixedSize(25, 22)
+        hlayout.addWidget(plus_btn)
+
+        hlayout.addStretch()
+
+        # Label de multiplicador
+        mult_label = QLabel(f"x{initial_value}")
+        mult_label.setStyleSheet("font-weight: bold; color: #555;")
+        mult_label.setMinimumWidth(35)
+        hlayout.addWidget(mult_label)
+
+        # Conectar botões
+        minus_btn.clicked.connect(lambda: spinbox.setValue(max(1, spinbox.value() - 1)))
+        plus_btn.clicked.connect(lambda: spinbox.setValue(min(10, spinbox.value() + 1)))
+        spinbox.valueChanged.connect(lambda v: mult_label.setText(f"x{v}"))
+
+        parent_layout.addWidget(container)
+        return spinbox
+
+    def _apply_preset(self, na, nb, nc):
+        """Aplica um preset rápido."""
+        self.a_spinbox.setValue(na)
+        self.b_spinbox.setValue(nb)
+        self.c_spinbox.setValue(nc)
+
+    def _reset_to_original(self):
+        """Reseta para a configuração original."""
+        self.a_spinbox.setValue(self.current_expansion[0])
+        self.b_spinbox.setValue(self.current_expansion[1])
+        self.c_spinbox.setValue(self.current_expansion[2])
+
+    def _update_preview(self):
+        """Atualiza informações dinâmicas da expansão."""
+        na = self.a_spinbox.value()
+        nb = self.b_spinbox.value()
+        nc = self.c_spinbox.value()
+
+        self.preview_expansion = [na, nb, nc]
+
+        if not self.viewer.structure:
+            return
+
+        # Atualizar info atual
+        n_unit = len(self.viewer.structure)
+        n_current = n_unit * self.current_expansion[0] * self.current_expansion[1] * self.current_expansion[2]
+
+        current_text = (
+            f"Expansão: <b>{self.current_expansion[0]}x{self.current_expansion[1]}x{self.current_expansion[2]}</b> | "
+            f"Átomos: <b>{n_current}</b>"
+        )
+        self.current_info_label.setText(current_text)
+
+        # Calcular nova configuração
+        n_new = n_unit * na * nb * nc
+        n_cells = na * nb * nc
+
+        # Estimativa de ligações
+        avg_bonds_per_atom = 6
+        est_bonds = (n_new * avg_bonds_per_atom) // 2
+
+        # Estimativa de uso de memória (aproximada)
+        # Cada átomo: ~200 bytes (coords, mesh, etc)
+        # Cada ligação: ~100 bytes (cilindro mesh)
+        mem_mb = (n_new * 200 + est_bonds * 100) / (1024 * 1024)
+
+        # Status de performance
+        if n_new <= 50:
+            perf_status = "<span style='color:green;'><b>Rápida</b></span>"
+            perf_detail = "Renderização instantânea"
+        elif n_new <= 200:
+            perf_status = "<span style='color:green;'><b>Boa</b></span>"
+            perf_detail = "Performance adequada"
+        elif n_new <= 500:
+            perf_status = "<span style='color:orange;'><b>Moderada</b></span>"
+            perf_detail = "Pode apresentar lentidão"
+        else:
+            perf_status = "<span style='color:red;'><b>Lenta</b></span>"
+            perf_detail = "Renderização pode travar"
+
+        # Texto informativo
+        info_text = (
+            f"<b>Nova Configuração: {na}x{nb}x{nc}</b><br>"
+            f"<b>Átomos Totais:</b> {n_new} ({n_cells} células)<br>"
+            f"<b>Ligações:</b> ~{est_bonds}<br>"
+            f"<b>Memória:</b> ~{mem_mb:.1f} MB<br>"
+            f"<b>Performance:</b> {perf_status} - {perf_detail}"
+        )
+
+        self.info_label.setText(info_text)
+
+    def _apply_preview(self):
+        """Aplica a expansão como preview (temporário)."""
+        if not self.viewer.structure:
+            return
+
+        # Obter nova expansão
+        new_expansion = self.get_expansion()
+
+        # Aplicar temporariamente
+        self.viewer.supercell_expansion = new_expansion
+        self.viewer._render_structure()
+
+        # Atualizar label do viewer
+        formula = self.viewer.structure.composition.reduced_formula
+        n_atoms_unit = len(self.viewer.structure)
+        n_atoms_total = n_atoms_unit * new_expansion[0] * new_expansion[1] * new_expansion[2]
+        lattice = self.viewer.structure.lattice
+        a, b, c = lattice.a, lattice.b, lattice.c
+
+        info_html = f"""
+        <div style='color: green; font-weight: bold;'>
+            {formula} • {n_atoms_total} átomos ({new_expansion[0]}x{new_expansion[1]}x{new_expansion[2]})<br>
+            <span style='color: #FF0000;'>a={a:.3f}</span> 
+            <span style='color: #00AA00;'>b={b:.3f}</span> 
+            <span style='color: #0000FF;'>c={c:.3f}</span> Å
+        </div>
+        """
+        self.viewer.info_label.setText(info_html)
+        self.viewer.info_label.setTextFormat(Qt.TextFormat.RichText)
 
     def get_expansion(self):
         """Retorna a expansão selecionada [na, nb, nc]."""
-        for button in self.preset_buttons:
-            if button.isChecked():
-                return button.expansion
-        return self.current_expansion
+        return [
+            self.a_spinbox.value(),
+            self.b_spinbox.value(),
+            self.c_spinbox.value()
+        ]
 
 

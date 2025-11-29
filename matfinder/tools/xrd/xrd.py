@@ -189,7 +189,8 @@ class PlotCanvas(FigureCanvas):
         self.setParent(parent)
         self.axes.set_xlabel("2θ (Graus)")
         self.axes.set_ylabel("Intensidade (Unid. arb.)")
-        self.figure.tight_layout()
+        # NÃO usar tight_layout aqui - será aplicado apenas quando necessário
+        # para evitar problemas com legendas customizadas
 
 
 
@@ -1040,22 +1041,157 @@ class PhaseDRXTool(QMainWindow):
         line_edit.setStyleSheet("background: transparent;")
         line_edit.setCursor(Qt.CursorShape.PointingHandCursor)
 
+    def _is_event_in_legend_zone(self, event, margin_pixels=20):
+        """
+        Verifica se o evento do mouse está na legenda ou em uma zona de segurança ao redor dela.
+
+        Args:
+            event: Evento do mouse do matplotlib
+            margin_pixels: Margem em pixels ao redor da legenda (padrão: 20)
+
+        Returns:
+            bool: True se o evento está na zona da legenda, False caso contrário
+        """
+        if not self._legend_ref or not hasattr(event, 'x') or not hasattr(event, 'y'):
+            return False
+
+        try:
+            # Obter bounding box da legenda em coordenadas de tela (pixels)
+            bbox = self._legend_ref.get_window_extent(renderer=self.plot_canvas.figure.canvas.get_renderer())
+
+            # Expandir bbox com margem de segurança
+            x_min = bbox.x0 - margin_pixels
+            x_max = bbox.x1 + margin_pixels
+            y_min = bbox.y0 - margin_pixels
+            y_max = bbox.y1 + margin_pixels
+
+            # Verificar se o evento está dentro da zona expandida
+            event_x = event.x
+            event_y = event.y
+
+            is_in_zone = (x_min <= event_x <= x_max) and (y_min <= event_y <= y_max)
+
+            if is_in_zone:
+                logging.debug(f"Evento na zona da legenda: ({event_x:.0f}, {event_y:.0f})")
+
+            return is_in_zone
+
+        except Exception as e:
+            logging.debug(f"Erro ao verificar zona da legenda: {e}")
+            return False
+
     def _setup_zoom_selector(self):
-        self.zoom_selector = RectangleSelector(
-            self.plot_canvas.axes, self._on_zoom_select, useblit=False, button=[1],
-            minspanx=5, minspany=5, spancoords='pixels', interactive=True,
-            props=dict(facecolor='lightblue', edgecolor='blue', alpha=0.4, fill=True)
-        )
-        self.zoom_selector.set_active(True)
+        """Configura o seletor retangular para zoom com visualização clara ESTILO WINDOWS XP."""
+        # Variáveis para controle manual do retângulo de seleção
+        self._zoom_rect = None  # Patch do retângulo visual
+        self._zoom_start_point = None  # Ponto inicial do clique (x0, y0)
+        self._last_zoom_point = None  # Última posição válida durante movimento
+        self._is_selecting_zoom = False  # Flag de seleção ativa
 
-    def _on_zoom_select(self, eclick, erelease):
-        x1, y1 = eclick.xdata, eclick.ydata
-        x2, y2 = erelease.xdata, erelease.ydata
+        # Os eventos de mouse já estão conectados em _init_ui()
+        # Vamos usar os handlers existentes: _on_mouse_press, _on_mouse_move, _on_mouse_release
 
-        if x1 is None or x2 is None or y1 is None or y2 is None or abs(x1 - x2) < 1e-6 or abs(y1 - y2) < 1e-6:
-            self.zoom_selector.set_active(True)
+        logging.debug("✅ Zoom selector manual configurado (estilo Windows XP)")
+
+    def _on_zoom_press(self, event):
+        """Início da seleção de zoom - ao pressionar botão esquerdo."""
+        # Ignorar se não for botão esquerdo ou não estiver no axes
+        if event.button != 1 or not event.inaxes:
             return
 
+        # Ignorar se estiver na zona da legenda
+        if self._is_event_in_legend_zone(event, margin_pixels=30):
+            logging.debug("✋ Seleção de zoom ignorada - clique na zona da legenda")
+            return
+
+        # Ignorar se estiver em modo de seleção de pico
+        if self._peak_selection_mode:
+            return
+
+        # Iniciar seleção
+        self._is_selecting_zoom = True
+        self._zoom_start_point = (event.xdata, event.ydata)
+        logging.debug(f"🔍 Início da seleção de zoom: ({event.xdata:.2f}, {event.ydata:.2f})")
+
+    def _on_zoom_motion(self, event):
+        """Durante a seleção - desenhar retângulo enquanto arrasta."""
+        if not self._is_selecting_zoom or not event.inaxes:
+            return
+
+        if self._zoom_start_point is None:
+            return
+
+        x0, y0 = self._zoom_start_point
+        x1, y1 = event.xdata, event.ydata
+
+        if x1 is None or y1 is None:
+            return
+
+        # Remover retângulo anterior se existir
+        if self._zoom_rect is not None:
+            try:
+                self._zoom_rect.remove()
+            except:
+                pass
+
+        # Criar novo retângulo (estilo Windows XP)
+        from matplotlib.patches import Rectangle
+        width = x1 - x0
+        height = y1 - y0
+
+        self._zoom_rect = Rectangle(
+            (x0, y0), width, height,
+            linewidth=2,
+            edgecolor='#0078D7',  # Azul Windows (moderno)
+            facecolor='#CCE8FF',  # Azul claro Windows
+            alpha=0.3,
+            linestyle='-',
+            fill=True
+        )
+
+        self.plot_canvas.axes.add_patch(self._zoom_rect)
+        self.plot_canvas.draw_idle()
+
+    def _on_zoom_release(self, event):
+        """Fim da seleção - aplicar zoom."""
+        if not self._is_selecting_zoom:
+            return
+
+        self._is_selecting_zoom = False
+
+        # Remover retângulo visual
+        if self._zoom_rect is not None:
+            try:
+                self._zoom_rect.remove()
+            except:
+                pass
+            self._zoom_rect = None
+
+        # Verificar se a seleção é válida
+        if self._zoom_start_point is None or not event.inaxes:
+            self._zoom_start_point = None
+            self.plot_canvas.draw_idle()
+            return
+
+        x1, y1 = self._zoom_start_point
+        x2, y2 = event.xdata, event.ydata
+
+        if x2 is None or y2 is None:
+            self._zoom_start_point = None
+            self.plot_canvas.draw_idle()
+            return
+
+        # Verificar área mínima (10 pixels em cada direção)
+        dx_pixels = abs(event.x - self.plot_canvas.axes.transData.transform((x1, y1))[0])
+        dy_pixels = abs(event.y - self.plot_canvas.axes.transData.transform((x1, y1))[1])
+
+        if dx_pixels < 10 or dy_pixels < 10:
+            logging.debug("⚠️ Zoom cancelado - área muito pequena")
+            self._zoom_start_point = None
+            self.plot_canvas.draw_idle()
+            return
+
+        # Aplicar zoom
         if not self._is_zoomed:
             self._original_x_lim = self.plot_canvas.axes.get_xlim()
             self._original_y_lim = self.plot_canvas.axes.get_ylim()
@@ -1064,9 +1200,10 @@ class PhaseDRXTool(QMainWindow):
         self.plot_canvas.axes.set_ylim(sorted((y1, y2)))
         self._is_zoomed = True
 
-        self.zoom_selector.set_active(False)
-        self.zoom_selector.set_visible(False)
+        self._zoom_start_point = None
         self.plot_canvas.draw_idle()
+
+        logging.debug(f"✅ Zoom aplicado: X[{min(x1,x2):.2f}, {max(x1,x2):.2f}], Y[{min(y1,y2):.2f}, {max(y1,y2):.2f}]")
 
     def _on_mouse_press(self, event):
         # PRIORIDADE: Modo de seleção de pico
@@ -1081,14 +1218,25 @@ class PhaseDRXTool(QMainWindow):
                 self.open_legend_dialog()
                 return
 
-        # Comportamento normal
+        # BOTÃO ESQUERDO: Iniciar seleção de zoom
         if event.inaxes and event.button == 1:
             self._is_dragging = False
 
+            # Verificar se NÃO está na zona da legenda
+            if not self._is_event_in_legend_zone(event, margin_pixels=30):
+                # Iniciar seleção de zoom
+                self._is_selecting_zoom = True
+                self._zoom_start_point = (event.xdata, event.ydata)
+                logging.debug(f"🔍 Início da seleção de zoom: ({event.xdata:.2f}, {event.ydata:.2f})")
+
         if event.inaxes and event.button == 3:
             if self.point_annotation:
-                self.point_annotation.remove()
-                self.annotation_dot[0].remove()
+                try:
+                    self.point_annotation.set_visible(False)
+                    if self.annotation_dot and len(self.annotation_dot) > 0:
+                        self.annotation_dot[0].set_visible(False)
+                except:
+                    pass
                 self.point_annotation = None
                 self.annotation_dot = None
 
@@ -1096,20 +1244,176 @@ class PhaseDRXTool(QMainWindow):
                 self.plot_canvas.axes.set_xlim(self._original_x_lim)
                 self.plot_canvas.axes.set_ylim(self._original_y_lim)
                 self._is_zoomed = False
-                self.zoom_selector.set_active(True)
-                self.zoom_selector.set_visible(True)
                 self.plot_canvas.draw_idle()
-            else:
-                self.zoom_selector.set_active(True)
-                self.zoom_selector.set_visible(True)
+                logging.debug("✅ Zoom desfeito com botão direito")
 
     def _on_mouse_move(self, event):
-        if event.inaxes and event.button == 1:
-            self._is_dragging = True
+        # DESENHAR RETÂNGULO DE SELEÇÃO DE ZOOM (ESTILO WINDOWS XP)
+        # Funciona mesmo quando o mouse está FORA do axes
+        if event.button == 1:
+            if event.inaxes:
+                self._is_dragging = True
+
+            if self._is_selecting_zoom and self._zoom_start_point is not None:
+                x0, y0 = self._zoom_start_point
+
+                # Se está dentro do axes, usar coordenadas normais
+                if event.inaxes:
+                    x1, y1 = event.xdata, event.ydata
+                else:
+                    # Mouse saiu do axes - clipar coordenadas aos limites
+                    xlim = self.plot_canvas.axes.get_xlim()
+                    ylim = self.plot_canvas.axes.get_ylim()
+
+                    # Converter posição do mouse (pixels) para coordenadas de dados
+                    try:
+                        inv = self.plot_canvas.axes.transData.inverted()
+                        x_data, y_data = inv.transform((event.x, event.y))
+
+                        # Clipar aos limites do axes
+                        x1 = max(xlim[0], min(xlim[1], x_data))
+                        y1 = max(ylim[0], min(ylim[1], y_data))
+                    except:
+                        # Se falhar, manter última posição conhecida
+                        if hasattr(self, '_last_zoom_point'):
+                            x1, y1 = self._last_zoom_point
+                        else:
+                            return
+
+                if x1 is not None and y1 is not None:
+                    # Salvar última posição válida
+                    self._last_zoom_point = (x1, y1)
+
+                    # Remover retângulo anterior
+                    if self._zoom_rect is not None:
+                        try:
+                            self._zoom_rect.remove()
+                        except:
+                            pass
+
+                    # Criar novo retângulo (estilo Windows XP)
+                    from matplotlib.patches import Rectangle
+                    width = x1 - x0
+                    height = y1 - y0
+
+                    self._zoom_rect = Rectangle(
+                        (x0, y0), width, height,
+                        linewidth=1.0,        # Borda fina e minimalista
+                        edgecolor='#0078D7',  # Azul Windows 10
+                        facecolor='#CCE8FF',  # Azul claro Windows
+                        alpha=0.15,           # Bem transparente (15%)
+                        linestyle='-',
+                        fill=True,
+                        zorder=1000  # Desenhar por cima de tudo
+                    )
+
+                    self.plot_canvas.axes.add_patch(self._zoom_rect)
+                    self.plot_canvas.draw_idle()
 
     def _on_mouse_release(self, event):
-        if event.inaxes and event.button == 1 and not self._is_dragging:
-            self._toggle_annotation(event)
+        # Salvar estado do dragging antes de resetar
+        was_dragging = self._is_dragging
+
+        # ========== CALCULAR MOVIMENTO (disponível em todo o escopo) ==========
+        has_significant_movement = False
+        if self._is_selecting_zoom and self._zoom_start_point is not None:
+            try:
+                x1, y1 = self._zoom_start_point
+
+                # Obter posição final
+                if event.inaxes:
+                    x2, y2 = event.xdata, event.ydata
+                elif hasattr(self, '_last_zoom_point'):
+                    x2, y2 = self._last_zoom_point
+                else:
+                    x2, y2 = None, None
+
+                # Calcular movimento em pixels
+                if x2 is not None and y2 is not None:
+                    pt1 = self.plot_canvas.axes.transData.transform((x1, y1))
+                    pt2 = self.plot_canvas.axes.transData.transform((x2, y2))
+                    dx_pixels = abs(pt2[0] - pt1[0])
+                    dy_pixels = abs(pt2[1] - pt1[1])
+
+                    # Movimento significativo = mais de 5 pixels em qualquer direção
+                    has_significant_movement = (dx_pixels > 5 or dy_pixels > 5)
+                    logging.debug(f"📏 Movimento: {dx_pixels:.1f}px H, {dy_pixels:.1f}px V → {'ZOOM' if has_significant_movement else 'CLIQUE'}")
+            except Exception as e:
+                logging.debug(f"Erro ao calcular movimento: {e}")
+
+        # ========== PROCESSAR BOTÃO ESQUERDO ==========
+        if event.button == 1:
+            # CASO 1: ZOOM (movimento significativo)
+            if self._is_selecting_zoom and self._zoom_start_point is not None and has_significant_movement:
+                # Remover retângulo visual
+                if self._zoom_rect is not None:
+                    try:
+                        self._zoom_rect.remove()
+                    except:
+                        pass
+                    self._zoom_rect = None
+
+                x1, y1 = self._zoom_start_point
+
+                # Obter coordenadas finais
+                if event.inaxes:
+                    x2, y2 = event.xdata, event.ydata
+                elif hasattr(self, '_last_zoom_point'):
+                    x2, y2 = self._last_zoom_point
+                    logging.debug(f"🎯 Mouse solto FORA do axes - usando última posição válida")
+                else:
+                    x2, y2 = None, None
+
+                if x2 is not None and y2 is not None:
+                    # Verificar área mínima (10 pixels)
+                    try:
+                        pt1 = self.plot_canvas.axes.transData.transform((x1, y1))
+                        pt2 = self.plot_canvas.axes.transData.transform((x2, y2))
+                        dx_pixels = abs(pt2[0] - pt1[0])
+                        dy_pixels = abs(pt2[1] - pt1[1])
+
+                        if dx_pixels >= 10 and dy_pixels >= 10:
+                            # Aplicar zoom
+                            if not self._is_zoomed:
+                                self._original_x_lim = self.plot_canvas.axes.get_xlim()
+                                self._original_y_lim = self.plot_canvas.axes.get_ylim()
+
+                            self.plot_canvas.axes.set_xlim(sorted((x1, x2)))
+                            self.plot_canvas.axes.set_ylim(sorted((y1, y2)))
+                            self._is_zoomed = True
+
+                            logging.debug(f"✅ Zoom aplicado: X[{min(x1,x2):.2f}, {max(x1,x2):.2f}], Y[{min(y1,y2):.2f}, {max(y1,y2):.2f}]")
+                        else:
+                            logging.debug("⚠️ Zoom cancelado - área muito pequena")
+                    except:
+                        pass
+
+                # Limpar estado da seleção
+                self._is_selecting_zoom = False
+                self._zoom_start_point = None
+                self._last_zoom_point = None
+                self.plot_canvas.draw_idle()
+
+            # CASO 2: CLIQUE ÚNICO (sem movimento significativo)
+            elif event.inaxes:
+                # Limpar retângulo se existir
+                if self._zoom_rect is not None:
+                    try:
+                        self._zoom_rect.remove()
+                    except:
+                        pass
+                    self._zoom_rect = None
+
+                # Mostrar anotação
+                self._toggle_annotation(event)
+                logging.debug("👆 Clique único detectado - mostrando anotação")
+
+                # Limpar estado de zoom
+                self._is_selecting_zoom = False
+                self._zoom_start_point = None
+                self._last_zoom_point = None
+                self.plot_canvas.draw_idle()
+
         self._is_dragging = False
 
     def _on_canvas_resize(self, event):
@@ -1120,9 +1424,14 @@ class PhaseDRXTool(QMainWindow):
             self._redraw_all_plots()
 
     def _toggle_annotation(self, event):
+        """Mostra/oculta anotação com informações do ponto clicado (2θ, Intensidade, d)."""
         if self.point_annotation:
-            self.point_annotation.remove()
-            self.annotation_dot[0].remove()
+            try:
+                self.point_annotation.set_visible(False)
+                if self.annotation_dot and len(self.annotation_dot) > 0:
+                    self.annotation_dot[0].set_visible(False)
+            except Exception as e:
+                logging.debug(f"Erro ao ocultar anotação: {e}")
             self.point_annotation = None
             self.annotation_dot = None
             self.plot_canvas.draw_idle()
@@ -1130,14 +1439,58 @@ class PhaseDRXTool(QMainWindow):
 
         ax = self.plot_canvas.axes
         x, y = event.xdata, event.ydata
-        if x is None or y is None: return
+        if x is None or y is None:
+            return
 
-        self.annotation_dot = ax.plot(x, y, 'o', color='red', markersize=5, zorder=10)
-        annotation_text = f"2θ: {x:.2f}\nInt: {y:.2f}"
+        # Calcular distância interplanar (d) usando Lei de Bragg: λ = 2d·sin(θ)
+        # d = λ / (2·sin(θ))
+        try:
+            # Obter comprimento de onda atual
+            wl_text = self.wavelength_combo.currentText()
+            if wl_text == "Outro":
+                wavelength = float(self.wavelength_custom_input.text())
+            else:
+                # Extrair wavelength do texto (formato: "Cu Kα (1.54056 Å)")
+                wavelength = float(wl_text.split('(')[1].split(' ')[0])
+
+            # Converter 2θ para θ (radianos)
+            theta_rad = np.radians(x / 2.0)
+
+            # Calcular d usando Lei de Bragg
+            d_spacing = wavelength / (2.0 * np.sin(theta_rad))
+
+            # Formatar texto da anotação
+            annotation_text = f"2θ = {x:.2f}°\nInt = {y:.2f}\nd = {d_spacing:.4f} Å"
+        except:
+            # Se falhar, mostrar apenas 2θ e Intensidade
+            annotation_text = f"2θ = {x:.2f}°\nInt = {y:.2f}"
+            logging.debug("Não foi possível calcular distância interplanar")
+
+        # Marcador no ponto (círculo vermelho minimalista)
+        self.annotation_dot = ax.plot(x, y, 'o', color='#E74C3C', markersize=4, zorder=10)
+
+        # Anotação moderna e minimalista
         self.point_annotation = ax.annotate(
-            annotation_text, xy=(x, y), xytext=(15, 15), textcoords='offset points',
-            bbox=dict(boxstyle="round,pad=0.5", fc="yellow", ec="black", lw=1, alpha=0.8),
-            arrowprops=dict(arrowstyle="->", connectionstyle="arc3,rad=0.1", facecolor='black')
+            annotation_text,
+            xy=(x, y),
+            xytext=(12, 12),
+            textcoords='offset points',
+            fontsize=9,
+            bbox=dict(
+                boxstyle="round,pad=0.4",
+                facecolor='white',
+                edgecolor='#95A5A6',
+                linewidth=0.8,
+                alpha=0.95
+            ),
+            arrowprops=dict(
+                arrowstyle='-',
+                connectionstyle="arc3,rad=0",
+                color='#95A5A6',
+                linewidth=0.8
+            ),
+            ha='left',
+            va='bottom'
         )
         self.plot_canvas.draw_idle()
 
@@ -1713,6 +2066,10 @@ class PhaseDRXTool(QMainWindow):
 
             self._redraw_all_plots()
             self.set_dirty()
+
+            # IMPORTANTE: NÃO renderizar automaticamente a estrutura 3D após calcular
+            # O usuário deve clicar explicitamente em "Visualizar Estrutura"
+            logging.debug(f"CIF calculado: {plot_item['label']} - estrutura 3D NÃO renderizada automaticamente")
         except Exception as e:
             QMessageBox.critical(self, "Erro na Simulação",
                                  f"Ocorreu um erro ao calcular para {plot_item['label']}:\n{e}")
@@ -1915,7 +2272,14 @@ class PhaseDRXTool(QMainWindow):
 
         # Calcular um y_ticks adequado baseado na ordem de magnitude
         # Objetivo: ter aproximadamente 5-10 ticks no eixo Y
+        # CRÍTICO: Prevenir geração de milhares de ticks que trava o matplotlib
         if y_range > 0:
+            # Proteção contra range muito pequeno
+            if y_range < 1e-6:
+                self.plot_settings["y_ticks"] = 0.1
+                logging.warning(f"Y-range muito pequeno ({y_range:.2e}), usando y_ticks padrão: 0.1")
+                return
+
             # Calcular ordem de magnitude
             magnitude = 10 ** np.floor(np.log10(y_range))
 
@@ -1945,6 +2309,17 @@ class PhaseDRXTool(QMainWindow):
                 best_step = round(best_step, 1)
             else:
                 best_step = round(best_step, 2)
+
+            # VALIDAÇÃO FINAL CRÍTICA: Garantir que não gerará mais de 1000 ticks
+            # (limite MAXTICKS do matplotlib é 1000)
+            estimated_ticks = y_range / best_step
+            if estimated_ticks > 500:  # Usar margem de segurança (50% do limite)
+                # Recalcular para ter no máximo 10 ticks
+                best_step = y_range / 10
+                logging.warning(
+                    f"Y-ticks ajustado para prevenir excesso: {best_step:.2f} "
+                    f"(teria gerado {estimated_ticks:.0f} ticks)"
+                )
 
             self.plot_settings["y_ticks"] = best_step
 
@@ -2176,7 +2551,21 @@ class PhaseDRXTool(QMainWindow):
         if any(line.get_label() for line in ax.get_lines()):
             self._update_legend()
 
-        self.plot_canvas.figure.tight_layout()
+        # IMPORTANTE: NÃO usar tight_layout quando há legenda com posição customizada
+        # pois isso causa o redimensionamento indesejado do gráfico.
+        # Se a legenda tiver bbox_to_anchor (posição customizada), não aplicar tight_layout
+        has_custom_legend_position = (
+            self._legend_ref and
+            self.legend_settings.get("bbox_to_anchor") is not None
+        )
+
+        if not has_custom_legend_position:
+            # Só aplicar tight_layout se não houver legenda com posição customizada
+            try:
+                self.plot_canvas.figure.tight_layout(rect=[0, 0, 1, 1])
+            except Exception as e:
+                logging.warning(f"Erro ao aplicar tight_layout: {e}")
+
         self.plot_canvas.draw()
 
         if not self._is_zoomed:
@@ -2213,9 +2602,13 @@ class PhaseDRXTool(QMainWindow):
         # Criar nova legenda com todas as configurações
         if bbox_to_anchor:
             # Se há bbox customizado, usar ele
+            # Usar bbox_transform=ax.transAxes para que a legenda seja posicionada
+            # em relação ao axes, não à figura, evitando que o tight_layout empurre o gráfico
+            # clip_on=False permite que a legenda fique fora dos limites do axes
             self._legend_ref = ax.legend(
                 handles, labels,
                 bbox_to_anchor=bbox_to_anchor,
+                bbox_transform=ax.transAxes,  # IMPORTANTE: usar transformação do axes
                 loc='upper left',  # Usar upper left como referência para bbox
                 fontsize=settings.get("fontsize", 10),
                 frameon=settings.get("frameon", True),
@@ -2224,18 +2617,37 @@ class PhaseDRXTool(QMainWindow):
                 framealpha=settings.get("framealpha", 0.9),
                 ncol=settings.get("ncol", 1),
             )
+            # Permitir que a legenda seja desenhada fora dos limites do axes
+            self._legend_ref.set_clip_on(False)
         else:
             # Usar localização padrão
-            self._legend_ref = ax.legend(
-                handles, labels,
-                loc=loc_setting,
-                fontsize=settings.get("fontsize", 10),
-                frameon=settings.get("frameon", True),
-                fancybox=settings.get("fancybox", True),
-                shadow=settings.get("shadow", False),
-                framealpha=settings.get("framealpha", 0.9),
-                ncol=settings.get("ncol", 1),
-            )
+            # Se loc='best', o matplotlib pode colocar a legenda fora do gráfico
+            # Para evitar isso, usamos bbox_to_anchor=(1, 1) com loc padrão
+            # quando a localização é 'best' e não há bbox customizado
+            if loc_setting == "best":
+                # Para 'best', usar localização automática dentro do gráfico
+                self._legend_ref = ax.legend(
+                    handles, labels,
+                    loc='best',
+                    fontsize=settings.get("fontsize", 10),
+                    frameon=settings.get("frameon", True),
+                    fancybox=settings.get("fancybox", True),
+                    shadow=settings.get("shadow", False),
+                    framealpha=settings.get("framealpha", 0.9),
+                    ncol=settings.get("ncol", 1),
+                )
+            else:
+                # Para outras localizações, usar normalmente
+                self._legend_ref = ax.legend(
+                    handles, labels,
+                    loc=loc_setting,
+                    fontsize=settings.get("fontsize", 10),
+                    frameon=settings.get("frameon", True),
+                    fancybox=settings.get("fancybox", True),
+                    shadow=settings.get("shadow", False),
+                    framealpha=settings.get("framealpha", 0.9),
+                    ncol=settings.get("ncol", 1),
+                )
 
         # Aplicar estilo de fonte (negrito/itálico)
         for text in self._legend_ref.get_texts():
@@ -2272,6 +2684,10 @@ class PhaseDRXTool(QMainWindow):
             if current_bbox is None or abs(new_bbox[0] - current_bbox[0]) > 0.01 or abs(new_bbox[1] - current_bbox[1]) > 0.01:
                 self.legend_settings["bbox_to_anchor"] = new_bbox
                 self.legend_settings["loc"] = "upper left"  # Usar upper left como referência
+
+                # Permitir que a legenda fique fora dos limites sem recorte
+                self._legend_ref.set_clip_on(False)
+
                 self.set_dirty()  # Marca como alterado
                 logging.debug(f"Posição da legenda salva: {new_bbox}")
         except Exception as e:
@@ -2487,9 +2903,9 @@ class PhaseDRXTool(QMainWindow):
                 self._render_3d_button.setEnabled(True)
                 self._render_3d_button.setStyleSheet("background-color: #4CAF50; color: white; font-weight: bold;")
 
-            # Se já estiver na aba do visualizador, carregar automaticamente
-            if self.plot_tab_widget.currentWidget() == self.structure_viewer:
-                self._render_3d_structure()
+            # IMPORTANTE: NÃO renderizar automaticamente ao selecionar
+            # O usuário deve clicar explicitamente em "Visualizar Estrutura"
+            logging.debug(f"CIF selecionado: {plot_item['label']} - aguardando clique em 'Visualizar Estrutura'")
 
     def _load_cif_to_3d_viewer(self, item_id):
         """Carrega um CIF no visualizador 3D (método interno)."""
@@ -2533,52 +2949,50 @@ class PhaseDRXTool(QMainWindow):
     def _on_plot_tab_changed(self, index):
         """
         Callback quando o usuário troca de aba (Difratograma <-> Visualizador 3D).
-        OTIMIZAÇÃO: Desativa widget inativo para melhorar performance.
+        OTIMIZAÇÃO CRÍTICA: Suspende completamente o widget inativo para evitar travamentos.
         """
         if not hasattr(self, 'structure_viewer') or self.structure_viewer is None:
             return
 
         # Detectar qual aba está ativa
-        is_3d_tab_active = (index == 1)  # Assume: 0=Difratograma, 1=Estrutura 3D
+        is_3d_tab_active = (index == 1)  # 0=Difratograma, 1=Estrutura 3D
 
-        # OTIMIZAÇÃO 1: Controlar renderização do visualizador 3D
         if is_3d_tab_active:
-            # Ativar visualizador 3D
+            # ========== ATIVAR VISUALIZADOR 3D ==========
             self.structure_viewer.setEnabled(True)
             if hasattr(self.structure_viewer, 'view_widget'):
                 self.structure_viewer.view_widget.setEnabled(True)
+                # Desbloquear eventos de mouse/teclado
+                self.structure_viewer.view_widget.blockSignals(False)
 
-            # OTIMIZAÇÃO EXTRA: Reativar timer do gizmo se estava ativo
+            # Reativar timer do gizmo se estava ativo
             if hasattr(self.structure_viewer, '_gizmo_sync_timer'):
                 if hasattr(self.structure_viewer, '_gizmo_timer_was_active') and self.structure_viewer._gizmo_timer_was_active:
                     if self.structure_viewer._gizmo_sync_timer and not self.structure_viewer._gizmo_sync_timer.isActive():
                         self.structure_viewer._gizmo_sync_timer.start(50)
                     self.structure_viewer._gizmo_timer_was_active = False
 
-            # Pausar atualizações do matplotlib (aba do difratograma)
-            if hasattr(self, 'canvas'):
-                self.canvas.setUpdatesEnabled(False)
+            # ========== SUSPENDER MATPLOTLIB (DIFRATOGRAMA) ==========
+            if hasattr(self, 'plot_canvas'):
+                # Bloquear completamente atualizações do matplotlib
+                self.plot_canvas.setUpdatesEnabled(False)
+                # Bloquear eventos de mouse/teclado no canvas
+                self.plot_canvas.setEnabled(False)
 
-            # Se há um CIF pendente, renderizar automaticamente
-            if self._pending_3d_cif_id is not None:
-                self._render_3d_structure()
-
-            logging.debug("✅ Visualizador 3D ATIVADO | Matplotlib PAUSADO")
+            logging.debug("✅ [TAB CHANGE] Visualizador 3D ATIVO | Matplotlib SUSPENSO")
 
         else:
-            # Ativar matplotlib (difratograma)
-            if hasattr(self, 'canvas'):
-                self.canvas.setUpdatesEnabled(True)
-                # Forçar redesenho se necessário
+            # ========== ATIVAR MATPLOTLIB (DIFRATOGRAMA) ==========
+            if hasattr(self, 'plot_canvas'):
+                self.plot_canvas.setEnabled(True)
+                self.plot_canvas.setUpdatesEnabled(True)
+                # Forçar redesenho apenas se houver mudanças pendentes
                 if hasattr(self, '_has_pending_plot_updates') and self._has_pending_plot_updates:
-                    self.canvas.draw_idle()
+                    self.plot_canvas.draw_idle()
                     self._has_pending_plot_updates = False
 
-            # Desativar renderização do visualizador 3D
-            if hasattr(self.structure_viewer, 'view_widget'):
-                self.structure_viewer.view_widget.setEnabled(False)
-
-            # OTIMIZAÇÃO EXTRA: Parar animações em execução no visualizador 3D
+            # ========== SUSPENDER VISUALIZADOR 3D ==========
+            # Parar todas as animações em execução
             if hasattr(self.structure_viewer, 'stop_animation'):
                 self.structure_viewer.stop_animation()
 
@@ -2588,7 +3002,13 @@ class PhaseDRXTool(QMainWindow):
                     self.structure_viewer._gizmo_sync_timer.stop()
                     self.structure_viewer._gizmo_timer_was_active = True
 
-            logging.debug("✅ Matplotlib ATIVADO | Visualizador 3D PAUSADO")
+            # Desabilitar renderização OpenGL
+            if hasattr(self.structure_viewer, 'view_widget'):
+                self.structure_viewer.view_widget.setEnabled(False)
+                # Bloquear eventos de mouse/teclado no visualizador
+                self.structure_viewer.view_widget.blockSignals(True)
+
+            logging.debug("✅ [TAB CHANGE] Matplotlib ATIVO | Visualizador 3D SUSPENSO")
 
     def _render_3d_structure(self):
         """Renderiza/atualiza a estrutura 3D do CIF selecionado."""
@@ -2687,18 +3107,39 @@ class PhaseDRXTool(QMainWindow):
         plot_item = self._find_plot_item_by_id(item_id_to_remove)
         is_cif_being_removed = plot_item and plot_item.get("type") in ["cif", "multiphase"]
 
-        # Se for CIF E houver visualizador 3D com estrutura carregada, SEMPRE limpar
+        # Se for CIF E houver visualizador 3D, limpar estrutura
         if is_cif_being_removed:
             if hasattr(self, 'structure_viewer') and self.structure_viewer is not None:
-                # Verificar se há estrutura carregada no visualizador
-                if hasattr(self.structure_viewer, 'structure') and self.structure_viewer.structure is not None:
-                    logging.info(f" CIF removido - limpando estrutura 3D existente")
+                try:
+                    logging.info("✓ CIF removido - limpando estrutura 3D existente")
+
+                    # Limpar estrutura 3D
                     if hasattr(self.structure_viewer, '_clear_structure'):
                         self.structure_viewer._clear_structure()
 
-            # Resetar estado
-            if hasattr(self, '_pending_3d_cif_id'):
+                    # Resetar estado da estrutura
+                    self.structure_viewer.structure = None
+
+                    # Atualizar label de informações
+                    if hasattr(self.structure_viewer, 'info_label'):
+                        self.structure_viewer.info_label.setText("Nenhuma estrutura carregada")
+                        self.structure_viewer.info_label.setStyleSheet("color: gray; font-style: italic;")
+
+                    # Limpar legenda de elementos
+                    if hasattr(self.structure_viewer, '_element_legend_items'):
+                        for label_widget in self.structure_viewer._element_legend_items:
+                            label_widget.setVisible(False)
+                        self.structure_viewer._element_legend_items.clear()
+
+                    logging.debug("✓ Estrutura 3D completamente limpa")
+
+                except Exception as e:
+                    logging.error(f"Erro ao limpar estrutura 3D: {e}")
+
+            # Resetar estado de pendências
+            if hasattr(self, '_pending_3d_cif_id') and self._pending_3d_cif_id == item_id_to_remove:
                 self._pending_3d_cif_id = None
+                self._has_pending_3d_changes = False
 
             # Desativar botão de renderização
             if hasattr(self, '_render_3d_button'):
@@ -2802,8 +3243,26 @@ class PhaseDRXTool(QMainWindow):
         if dialog.exec():
             settings = dialog.get_settings()
             try:
-                self.plot_canvas.figure.savefig(settings["path"], dpi=settings["dpi"], format=settings["format"],
-                                                bbox_inches='tight')
+                # NÃO usar bbox_inches='tight' quando há legenda customizada
+                # pois isso causaria redimensionamento indesejado
+                has_custom_legend = self.legend_settings.get("bbox_to_anchor") is not None
+
+                if has_custom_legend:
+                    # Salvar sem bbox_inches para manter layout exato
+                    self.plot_canvas.figure.savefig(
+                        settings["path"],
+                        dpi=settings["dpi"],
+                        format=settings["format"]
+                    )
+                else:
+                    # Usar bbox_inches='tight' apenas se não houver legenda customizada
+                    self.plot_canvas.figure.savefig(
+                        settings["path"],
+                        dpi=settings["dpi"],
+                        format=settings["format"],
+                        bbox_inches='tight'
+                    )
+
                 QMessageBox.information(self, "Sucesso", f"Gráfico salvo em:\n{settings['path']}")
             except Exception as e:
                 QMessageBox.critical(self, "Erro ao Salvar", f"Não foi possível salvar o gráfico:\n{e}")

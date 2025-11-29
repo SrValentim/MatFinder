@@ -91,9 +91,21 @@ def detect_peaks(y_data, x_data=None, prominence=0.01, width=1):
         print("Scipy não está disponível. Não é possível detectar picos.")
         return np.array([]), np.array([])
 
+    # Validação: verificar se há dados suficientes
+    if len(y_data) == 0:
+        print("AVISO: Array de dados vazio. Não é possível detectar picos.")
+        return np.array([]), np.array([])
+
     max_intensity = np.max(y_data)
     min_intensity = np.min(y_data)
-    prominence_value = prominence * (max_intensity - min_intensity)
+    intensity_range = max_intensity - min_intensity
+
+    # Proteção contra dados constantes (todos com mesmo valor)
+    if intensity_range < 1e-10:
+        print("AVISO: Dados têm intensidade constante. Não é possível detectar picos.")
+        return np.array([]), np.array([])
+
+    prominence_value = prominence * intensity_range
 
     indices, properties = find_peaks(y_data, prominence=prominence_value, width=width)
 
@@ -127,7 +139,21 @@ def denoise_with_wavelets(y_data, wavelet='sym8', level_percentage=0.1):
 
     # 2. Cálculo do Limiar (Threshold)
     # Usa um limiar universal (VisuShrink) que é bom para sinais com ruído gaussiano.
-    sigma = np.median(np.abs(coeffs[-1] - np.median(coeffs[-1]))) / 0.6745
+    # Validação: verificar se há coeficientes de detalhe suficientes
+    if len(coeffs) < 2 or len(coeffs[-1]) == 0:
+        print("AVISO: Coeficientes wavelet insuficientes. Retornando dados originais.")
+        return y_data
+
+    detail_coeffs = coeffs[-1]
+    median_detail = np.median(detail_coeffs)
+    mad = np.median(np.abs(detail_coeffs - median_detail))
+
+    # Proteção contra divisão por zero ou MAD muito pequeno
+    if mad < 1e-10:
+        print("AVISO: MAD muito pequeno, dados podem ser constantes. Retornando dados originais.")
+        return y_data
+
+    sigma = mad / 0.6745
     threshold = sigma * np.sqrt(2 * np.log(len(y_data)))
 
     # Ajusta o limiar com base no input do usuário para dar mais controle

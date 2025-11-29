@@ -230,7 +230,19 @@ class CifEditorDialog(QDialog):
         if not self.cif_handler: return
 
         system = self.cif_handler.get_crystal_system()
-        self.setWindowTitle(f"Editor - Sistema {system.capitalize()}")
+
+        # Obter informações do grupo espacial
+        sg_info = self.cif_handler.get_space_group_info()
+        sg_number = sg_info.get('number')
+        sg_symbol = sg_info.get('symbol', '')
+
+        # Criar título com número do grupo espacial
+        if sg_number:
+            title = f"Editor - Sistema {system.capitalize()} - {sg_symbol} ({sg_number})"
+        else:
+            title = f"Editor - Sistema {system.capitalize()}"
+
+        self.setWindowTitle(title)
 
         # Habilita todos por padrão
         for spinbox in [self.a_spin, self.b_spin, self.c_spin, self.alpha_spin, self.beta_spin, self.gamma_spin]:
@@ -257,11 +269,35 @@ class CifEditorDialog(QDialog):
             self.beta_spin.setEnabled(False)
             self.gamma_spin.setEnabled(False)
         elif system in ['trigonal', 'rhombohedral']:
-            # Trigonal/Romboédrico: a = b = c, α = β = γ ≠ 90° (apenas 'a' e 'alpha' editáveis)
-            self.b_spin.setEnabled(False)
-            self.c_spin.setEnabled(False)
-            self.beta_spin.setEnabled(False)
-            self.gamma_spin.setEnabled(False)
+            # Trigonal pode ter duas configurações:
+            # 1. Hexagonal: a = b ≠ c, α = β = 90°, γ = 120° → editar a, c
+            # 2. Romboédrica: a = b = c, α = β = γ ≠ 90° → editar a, α
+            # Detectar qual configuração pelos parâmetros
+            params = self.cif_handler.get_lattice_params()
+            is_rhombohedral = (abs(params['a'] - params['c']) < 0.01 and
+                              abs(params['alpha'] - params['gamma']) < 0.1 and
+                              abs(params['alpha'] - 90.0) > 0.1)
+
+            if is_rhombohedral or system == 'rhombohedral':
+                # Romboédrico: a = b = c, α = β = γ ≠ 90° (apenas 'a' e 'alpha' editáveis)
+                if sg_number:
+                    self.setWindowTitle(f"Editor - Sistema Trigonal (Romboédrico) - {sg_symbol} ({sg_number})")
+                else:
+                    self.setWindowTitle(f"Editor - Sistema Trigonal (Romboédrico)")
+                self.b_spin.setEnabled(False)
+                self.c_spin.setEnabled(False)
+                self.beta_spin.setEnabled(False)
+                self.gamma_spin.setEnabled(False)
+            else:
+                # Hexagonal: a = b ≠ c, α = β = 90°, γ = 120° (apenas 'a' e 'c' editáveis)
+                if sg_number:
+                    self.setWindowTitle(f"Editor - Sistema Trigonal (Hexagonal) - {sg_symbol} ({sg_number})")
+                else:
+                    self.setWindowTitle(f"Editor - Sistema Trigonal (Hexagonal)")
+                self.b_spin.setEnabled(False)
+                self.alpha_spin.setEnabled(False)
+                self.beta_spin.setEnabled(False)
+                self.gamma_spin.setEnabled(False)
         elif system == 'orthorhombic':
             # Ortorrômbico: a ≠ b ≠ c, α = β = γ = 90° (apenas a, b, c editáveis)
             self.alpha_spin.setEnabled(False)
@@ -293,24 +329,37 @@ class CifEditorDialog(QDialog):
                 elif changed_param == 'b':
                     self.a_spin.setValue(self.b_spin.value())
             elif system in ['trigonal', 'rhombohedral']:
-                # a = b = c e α = β = γ
-                if changed_param == 'a':
-                    self.b_spin.setValue(self.a_spin.value())
-                    self.c_spin.setValue(self.a_spin.value())
-                elif changed_param in ['b', 'c']:
-                    val = self.b_spin.value() if changed_param == 'b' else self.c_spin.value()
-                    self.a_spin.setValue(val)
-                    self.b_spin.setValue(val)
-                    self.c_spin.setValue(val)
+                # Detectar configuração (hexagonal vs romboédrica)
+                params = self.cif_handler.get_lattice_params()
+                is_rhombohedral = (abs(params['a'] - params['c']) < 0.01 and
+                                  abs(params['alpha'] - params['gamma']) < 0.1 and
+                                  abs(params['alpha'] - 90.0) > 0.1)
 
-                if changed_param == 'alpha':
-                    self.beta_spin.setValue(self.alpha_spin.value())
-                    self.gamma_spin.setValue(self.alpha_spin.value())
-                elif changed_param in ['beta', 'gamma']:
-                    val = self.beta_spin.value() if changed_param == 'beta' else self.gamma_spin.value()
-                    self.alpha_spin.setValue(val)
-                    self.beta_spin.setValue(val)
-                    self.gamma_spin.setValue(val)
+                if is_rhombohedral or system == 'rhombohedral':
+                    # Romboédrico: a = b = c e α = β = γ
+                    if changed_param == 'a':
+                        self.b_spin.setValue(self.a_spin.value())
+                        self.c_spin.setValue(self.a_spin.value())
+                    elif changed_param in ['b', 'c']:
+                        val = self.b_spin.value() if changed_param == 'b' else self.c_spin.value()
+                        self.a_spin.setValue(val)
+                        self.b_spin.setValue(val)
+                        self.c_spin.setValue(val)
+
+                    if changed_param == 'alpha':
+                        self.beta_spin.setValue(self.alpha_spin.value())
+                        self.gamma_spin.setValue(self.alpha_spin.value())
+                    elif changed_param in ['beta', 'gamma']:
+                        val = self.beta_spin.value() if changed_param == 'beta' else self.gamma_spin.value()
+                        self.alpha_spin.setValue(val)
+                        self.beta_spin.setValue(val)
+                        self.gamma_spin.setValue(val)
+                else:
+                    # Hexagonal: a = b (γ = 120° é fixo)
+                    if changed_param == 'a':
+                        self.b_spin.setValue(self.a_spin.value())
+                    elif changed_param == 'b':
+                        self.a_spin.setValue(self.b_spin.value())
 
             self.cif_handler.update_lattice_params(
                 a=self.a_spin.value(), b=self.b_spin.value(), c=self.c_spin.value(),

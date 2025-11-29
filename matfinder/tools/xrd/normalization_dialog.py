@@ -136,19 +136,21 @@ def normalize_data(y_data, method="normalize_01"):
         # Normalizar para [0, 1]
         min_val = y_data.min()
         max_val = y_data.max()
+        range_val = max_val - min_val
 
-        if max_val - min_val <= 0:
-            raise ValueError("Os dados não podem ser normalizados [0,1]: máximo igual ao mínimo.")
+        # Usar tolerância numérica ao invés de comparação exata
+        if range_val < 1e-10:
+            raise ValueError("Os dados não podem ser normalizados [0,1]: máximo igual ao mínimo (dados constantes).")
 
-        normalized = (y_data - min_val) / (max_val - min_val)
+        normalized = (y_data - min_val) / range_val
         return normalized
 
     elif method == "divide_by_max":
         # Dividir pelo máximo
         max_val = y_data.max()
 
-        if max_val <= 0:
-            raise ValueError("Os dados não podem ser normalizados: máximo é zero ou negativo.")
+        if abs(max_val) < 1e-10:
+            raise ValueError("Os dados não podem ser normalizados: máximo é essencialmente zero.")
 
         normalized = y_data / max_val
         return normalized
@@ -157,8 +159,8 @@ def normalize_data(y_data, method="normalize_01"):
         # Dividir pelo mínimo
         min_val = y_data.min()
 
-        if min_val == 0:
-            raise ValueError("Os dados não podem ser normalizados: mínimo é zero.")
+        if abs(min_val) < 1e-10:
+            raise ValueError("Os dados não podem ser normalizados: mínimo é essencialmente zero.")
 
         normalized = y_data / min_val
         return normalized
@@ -167,8 +169,8 @@ def normalize_data(y_data, method="normalize_01"):
         # Dividir pela mediana
         median_val = np.median(y_data)
 
-        if median_val == 0:
-            raise ValueError("Os dados não podem ser normalizados: mediana é zero.")
+        if abs(median_val) < 1e-10:
+            raise ValueError("Os dados não podem ser normalizados: mediana é essencialmente zero.")
 
         normalized = y_data / median_val
         return normalized
