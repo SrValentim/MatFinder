@@ -46,7 +46,7 @@ from PySide6.QtWidgets import (
 from PySide6.QtGui import (
     QAction, QIcon, QPixmap, QDesktopServices, QColor, QBrush,
     QCursor, QPainter, QGuiApplication, QStandardItemModel,
-    QStandardItem, QActionGroup
+    QStandardItem
 )
 from PySide6.QtCore import (
     Qt, QUrl, QTimer, QSize, QPoint, Signal, Slot, QObject, QStandardPaths
@@ -61,8 +61,6 @@ try:
     from matfinder.core.historico_dialog_pyside import HISTORICO_FILE, DATETIME_FORMAT
     from matfinder.data import COD_api_logic
     from matfinder.core.favorites_manager import favorites_manager
-    from matfinder.core.settings_manager import settings_manager
-    from matfinder.core import i18n
 except ImportError as e:
     # Log crítico se os módulos centrais falharem
     logging.critical(f"Falha ao importar módulos locais essenciais: {e}", exc_info=True)
@@ -252,12 +250,6 @@ class MaterialsApp(QMainWindow):
 
     def __init__(self):
         super().__init__()
-        
-        # Inicializar o idioma da aplicação
-        current_language = settings_manager.get_language()
-        i18n.set_language(current_language)
-        logging.info(f"Idioma da aplicação definido para: {current_language}")
-        
         self.setWindowTitle("MatFinder Ver. 4.4")
         self.setMinimumSize(790, 520)
 
@@ -493,51 +485,6 @@ class MaterialsApp(QMainWindow):
                     "Uso de proxy desabilitado para novas conexões.",
                 )
 
-    def change_language(self, language_code):
-        """
-        Altera o idioma da aplicação.
-        Salva a preferência e solicita reinicialização.
-        """
-        current_lang = settings_manager.get_language()
-        
-        # Se já for o idioma atual, não faz nada
-        if current_lang == language_code:
-            return
-        
-        # Salva a nova escolha de idioma
-        if settings_manager.set_language(language_code):
-            language_name = i18n.get_language_name(language_code)
-            
-            # Mostra diálogo perguntando se deseja reiniciar
-            reply = QMessageBox.question(
-                self,
-                i18n.tr("restart_title"),
-                i18n.tr("restart_message").format(language_name),
-                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-                QMessageBox.StandardButton.Yes
-            )
-            
-            if reply == QMessageBox.StandardButton.Yes:
-                # Reiniciar a aplicação
-                logging.info(f"Reiniciando aplicação para aplicar idioma: {language_code}")
-                QApplication.quit()
-                # Nota: O processo pai (run_matfinder.py) precisaria reiniciar
-                # Para simplificar, apenas fechamos e o usuário reabre manualmente
-            else:
-                # Usuário escolheu não reiniciar agora
-                QMessageBox.information(
-                    self,
-                    i18n.tr("restart_info_title"),
-                    i18n.tr("restart_info_message").format(language_name)
-                )
-        else:
-            QMessageBox.warning(
-                self,
-                "Erro",
-                "Não foi possível salvar a configuração de idioma."
-            )
-            logging.error(f"Falha ao salvar idioma: {language_code}")
-
     def _get_proxies_dict(self):
         # (O conteúdo desta função permanece o mesmo)
         if self.proxy_settings.get("enabled"):
@@ -617,42 +564,6 @@ class MaterialsApp(QMainWindow):
         )
         config_proxy_action.triggered.connect(self.open_proxy_config_dialog)
         menu_config.addAction(config_proxy_action)
-        
-        # Menu de idioma
-        menu_language = menu_config.addMenu(i18n.tr("menu_language"))
-        menu_language.setStatusTip(i18n.tr("menu_language_tip"))
-        
-        # Criar grupo de ações para idiomas (radio buttons)
-        language_group = QActionGroup(self)
-        language_group.setExclusive(True)
-        
-        # Ação para Português
-        action_pt = QAction(i18n.tr("language_portuguese"), self, checkable=True)
-        action_pt.triggered.connect(lambda: self.change_language("pt"))
-        language_group.addAction(action_pt)
-        menu_language.addAction(action_pt)
-        
-        # Ação para Inglês
-        action_en = QAction(i18n.tr("language_english"), self, checkable=True)
-        action_en.triggered.connect(lambda: self.change_language("en"))
-        language_group.addAction(action_en)
-        menu_language.addAction(action_en)
-        
-        # Ação para Alemão
-        action_de = QAction(i18n.tr("language_german"), self, checkable=True)
-        action_de.triggered.connect(lambda: self.change_language("de"))
-        language_group.addAction(action_de)
-        menu_language.addAction(action_de)
-        
-        # Marcar o idioma atual
-        current_lang = settings_manager.get_language()
-        if current_lang == "pt":
-            action_pt.setChecked(True)
-        elif current_lang == "en":
-            action_en.setChecked(True)
-        elif current_lang == "de":
-            action_de.setChecked(True)
-        
         menu_ferramentas = menubar.addMenu("F&erramentas")
 
         phasedrx_action = QAction("PhaseDRX - Análise de DRX", self)
