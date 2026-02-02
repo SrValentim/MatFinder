@@ -32,6 +32,7 @@ ENV/
 historico_buscas.json
 favorites.json
 matfinder.log
+settings.json
 
 # Ficheiros Temporários
 temp_cifs/*.cif
