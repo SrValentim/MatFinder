@@ -3,220 +3,219 @@
 <div align="center">
   <img src="matfinder/assets/logos/splash.png" alt="MatFinder Logo" width="200"/>
   
-  **Busca e Análise de Materiais Cristalinos**
+  **Crystalline Materials Search and Analysis**
   
   [![License](https://img.shields.io/badge/license-GPL%20v3-blue.svg)](licenses/LICENSE)
   [![Python](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/)
   [![Platform](https://img.shields.io/badge/platform-Windows-lightgrey.svg)](https://www.microsoft.com/windows)
   
-  🌐 **Disponível em:** Português | English | Deutsch
+  🌐 **Available in:** Português | English | Deutsch
 </div>
 
 ---
 
-## 📋 Sobre
+## 📋 About
 
-MatFinder é uma aplicação desktop completa para pesquisa, visualização e análise de estruturas cristalinas de materiais. Desenvolvido na Universidade Federal do Amazonas (UFAM), integra múltiplas bases de dados cristalográficas e ferramentas de análise de difração de raios-X.
+MatFinder is a complete desktop application for searching, visualizing, and analyzing crystalline material structures. Developed at the Federal University of Amazonas (UFAM), Brazil, it integrates multiple crystallographic databases and X-ray diffraction analysis tools.
 
-### 🌍 Suporte Multilíngue
+### 🌍 Multilingual Support
 
-O MatFinder está disponível em **três idiomas**:
-- 🇧🇷 **Português** (padrão)
-- 🇺🇸 **Inglês** (English)
-- 🇩🇪 **Alemão** (Deutsch)
+MatFinder is available in:
+- 🇧🇷 **Portuguese** (default)
+- 🇺🇸 **English**
+- 🇩🇪 **German** (Deutsch)
 
-O idioma pode ser alterado em **Configurações → Idioma**. A mudança requer reinicialização do programa.
 
-### Funcionalidades Principais
+### Main Features
 
-- **Busca Integrada**: Materials Project, COD (Crystallography Open Database), OQMD, ROD (Raman Open Database)
-- **Análise XRD**: Simulação e comparação de padrões de difração
-- **Ferramentas de Análise**:
-  - Editor de arquivos CIF
-  - Calculadora estequiométrica
-  - Tabela periódica interativa
-  - Remoção de background (SNIP, Rolling Ball, Polynomial)
-  - Normalização de dados (múltiplos métodos)
-- **Visualização**: Gráficos interativos com customização
-- **Gerenciamento**: Sistema de favoritos e histórico de buscas
+- **Integrated Search**: Materials Project, COD (Crystallography Open Database), OQMD, ROD (Raman Open Database)
+- **XRD Analysis**: Diffraction pattern simulation and comparison
+- **Analysis Tools**:
+  - CIF file editor
+  - Stoichiometric calculator
+  - Interactive periodic table
+  - Background removal (SNIP, Polynomial)
+  - Data normalization (multiple methods)
+- **Visualization**: Interactive graphs with customization
+- **Management**: Favorites and search history system
 
 ---
 
-## Instalação
+## Installation
 
-### Requisitos
+### Requirements
 
-- **Sistema Operacional**: Windows 10/11 (64-bit)
-- **Python**: 3.11 ou superior
-- **Memória RAM**: 4GB mínimo (8GB recomendado)
-- **Espaço em Disco**: 500MB
+- **Operating System**: Windows 10/11 (64-bit)
+- **Python**: 3.11 or higher
+- **RAM**: 4GB minimum (8GB recommended)
+- **Disk Space**: 500MB
 
-### Instalação via Python
+### Installation via Python
 
-1. **Clone o repositório**:
+1. **Clone the repository**:
    ```bash
    git clone https://github.com/SrValentim/MatFinder.git
    cd MatFinder
    ```
 
-2. **Crie um ambiente virtual**:
+2. **Create a virtual environment**:
    ```bash
    python -m venv .venv
    .venv\Scripts\activate
    ```
 
-3. **Instale as dependências**:
+3. **Install dependencies**:
    ```bash
    pip install -r requirements.txt
    ```
 
-4. **Execute o programa**:
+4. **Run the program**:
    ```bash
    python run_matfinder.py
    ```
 
-### Executável Pré-compilado
+### Pre-compiled Executable
 
-Baixe a versão mais recente em [Releases](https://github.com/SrValentim/MatFinder/releases) e execute `MatFinder.exe`.
-
----
-
-## 📖 Documentação
-
-- **Manual do Usuário**: [`docs/Manual do Usuário.pdf`](docs/Manual%20do%20Usuário.pdf)
-- **Guia de Compilação**: [`docs/compilation/`](docs/compilation/)
-- **Licença GPL v3**: [`licenses/LICENSE_FULL.txt`](licenses/LICENSE_FULL.txt)
+Download the latest version from [Releases](https://github.com/SrValentim/MatFinder/releases) and run `MatFinder.exe`.
 
 ---
 
-## 🛠️ Desenvolvimento
+## Documentation
 
-### Estrutura do Projeto
+- **User Manual**: [`docs/Manual do Usuário.pdf`](docs/Manual%20do%20Usuário.pdf)
+- **Compilation Guide**: [`docs/compilation/`](docs/compilation/)
+- **GPL v3 License**: [`licenses/LICENSE_FULL.txt`](licenses/LICENSE_FULL.txt)
+
+---
+
+## 🛠️ Development
+
+### Project Structure
 
 ```
 MatFinder/
-├── matfinder/              # Código-fonte principal
-│   ├── core/              # Módulos principais
-│   ├── data/              # Manipulação de dados (CIF, APIs)
-│   ├── tools/             # Ferramentas (calculadora, XRD, etc.)
-│   └── assets/            # Recursos (ícones, logos, configs)
-├── build_tools/           # Scripts de compilação
-│   ├── MatFinder.spec     # Configuração PyInstaller
-│   ├── build_optimized.py # Script de build otimizado
-│   └── COMPILE.bat        # Compilação automatizada
-├── scripts/               # Scripts auxiliares
-│   ├── hooks/            # Hooks personalizados PyInstaller
-│   └── build_msi.py      # Gerador de instalador MSI
-├── docs/                  # Documentação
-├── licenses/              # Arquivos de licença
-├── tests/                 # Testes
-├── run_matfinder.py       # Ponto de entrada da aplicação
-├── setup.py               # Configuração de instalação
-└── requirements.txt       # Dependências Python
+├── matfinder/              # Main source code
+│   ├── core/              # Core modules
+│   ├── data/              # Data handling (CIF, APIs)
+│   ├── tools/             # Tools (calculator, XRD, etc.)
+│   └── assets/            # Resources (icons, logos, configs)
+├── build_tools/           # Compilation scripts
+│   ├── MatFinder.spec     # PyInstaller configuration
+│   ├── build_optimized.py # Optimized build script
+│   └── COMPILE.bat        # Automated compilation
+├── scripts/               # Auxiliary scripts
+│   ├── hooks/            # Custom PyInstaller hooks
+│   └── build_msi.py      # MSI installer generator
+├── docs/                  # Documentation
+├── licenses/              # License files
+├── tests/                 # Tests
+├── run_matfinder.py       # Application entry point
+├── setup.py               # Installation configuration
+└── requirements.txt       # Python dependencies
 ```
 
-### Compilação
+### Compilation
 
-Para compilar o MatFinder em um executável:
+To compile MatFinder into an executable:
 
-1. **Navegue para a pasta de ferramentas de build**:
+1. **Navigate to the build tools folder**:
    ```bash
    cd build_tools
    ```
 
-2. **Execute o script de compilação**:
+2. **Run the compilation script**:
    ```bash
    COMPILE.bat
    ```
 
-3. **O executável será gerado em**: `dist/MatFinder/MatFinder.exe`
+3. **The executable will be generated at**: `dist/MatFinder/MatFinder.exe`
 
-Para mais detalhes, consulte [`docs/compilation/BUILD_GUIDE.md`](docs/compilation/).
+For more details, see [`docs/compilation/BUILD_GUIDE.md`](docs/compilation/).
 
-### Tecnologias Utilizadas
+### Technologies Used
 
-| Componente | Tecnologia |
-|------------|------------|
+| Component | Technology |
+|-----------|------------|
 | **Interface** | PySide6 (Qt for Python) |
-| **Gráficos** | Matplotlib |
-| **Computação Científica** | NumPy, SciPy, Pandas |
-| **Cristalografia** | Pymatgen |
-| **APIs** | mp-api (Materials Project), OQMD, COD (Crystallography Open Database) e ROD (Raman Open Database) |
-| **Compilação** | PyInstaller |
+| **Graphics** | Matplotlib |
+| **Scientific Computing** | NumPy, SciPy, Pandas |
+| **Crystallography** | Pymatgen |
+| **APIs** | mp-api (Materials Project), OQMD, COD (Crystallography Open Database) and ROD (Raman Open Database) |
+| **Compilation** | PyInstaller |
 
 ---
 
-## 🤝 Contribuindo
+## 🤝 Contributing
 
-Contribuições são bem-vindas! Para contribuir:
+Contributions are welcome! To contribute:
 
-1. Fork o repositório
-2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
-3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
-4. Push para a branch (`git push origin feature/AmazingFeature`)
-5. Abra um Pull Request
-
----
-
-## 📜 Licença
-
-Este projeto está licenciado sob a **GNU General Public License v3.0** - veja o arquivo [`licenses/LICENSE`](licenses/LICENSE) para detalhes.
-
-### Resumo da Licença
-
--  Modificação permitida
--  Distribuição permitida
--  Uso privado permitido
--  Mudanças devem ser documentadas
--  Código-fonte deve ser disponibilizado
--  Mesma licença deve ser usada em trabalhos derivados
+1. Fork the repository
+2. Create a branch for your feature (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
 ---
 
-## 👨‍💻 Autor
+## 📜 License
+
+This project is licensed under the **GNU General Public License v3.0** - see the [`licenses/LICENSE`](licenses/LICENSE) file for details.
+
+### License Summary
+
+- ✅ Modification allowed
+- ✅ Distribution allowed
+- ✅ Private use allowed
+- ⚠️ Changes must be documented
+- ⚠️ Source code must be made available
+- ⚠️ Same license must be used in derivative works
+
+---
+
+## 👨‍💻 Author
 
 **Raynner Valentim**
-- 🎓 Universidade Federal do Amazonas (UFAM) | Departamento de Física | Departamento de Física de Materiais
+- 🎓 Federal University of Amazonas (UFAM) | Department of Physics | Materials Physics Department
 - 📧 Email: [Raynnervalentim@hotmail.com](mailto:Raynnervalentim@hotmail.com)
 - 🐙 GitHub: [@SrValentim](https://github.com/SrValentim)
 
 ---
 
-##  Agradecimentos
+## Acknowledgments
 
-- **Materials Project** - Base de dados de materiais
-- **Crystallography Open Database (COD)** - Estruturas cristalinas
+- **Materials Project** - Materials database
+- **Crystallography Open Database (COD)** - Crystal structures
 - **Open Quantum Materials Database (OQMD)**
 - **Raman Open Database (ROD)**
-- **Pymatgen** - Framework de análise de materiais
-- **Comunidade Python** - Ferramentas e bibliotecas de código aberto
+- **Pymatgen** - Materials analysis framework
+- **Python Community** - Open source tools and libraries
 
 ---
 
-## 📊 Status do Projeto
+## 📊 Project Status
 
-🟢 **Ativo** - Em desenvolvimento e manutenção
+🟢 **Active** - Under development and maintenance
 
-### Versão Atual: 3.24.0
+### Current Version: 3.24.0
 
-**Últimas Atualizações**:
-- 🌍 Suporte multilíngue completo (Português, Inglês, Alemão)
-- Normalização por pico específico
-- Diálogo de legenda interativa
-- Remoção de background (SNIP, Rolling Ball, Polynomial)
-- Correção de bugs no editor de CIF
-- Melhorias de performance na plotagem
-- Integração da licença GPL v3
+**Latest Updates**:
+- 🌍 Full multilingual support (Portuguese, English, German)
+- Peak-specific normalization
+- Interactive legend dialog
+- Background removal (SNIP, Polynomial)
+- Bug fixes in CIF editor
+- Plotting performance improvements
+- GPL v3 license integration
 
 ---
 
-## 🐛 Reportar Problemas
+## 🐛 Report Issues
 
-Encontrou um bug? Tem uma sugestão? Abra uma [issue](https://github.com/SrValentim/MatFinder/issues).
+Found a bug? Have a suggestion? Open an [issue](https://github.com/SrValentim/MatFinder/issues).
 
 ---
 
 <div align="center">
-  <sub>A excelência é um hábito</sub>
+  <sub>Excellence is a habit</sub>
 </div>
 
