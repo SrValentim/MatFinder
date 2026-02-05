@@ -39,7 +39,7 @@ from PySide6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
     QLineEdit, QComboBox, QTreeWidget, QTreeWidgetItem, QFileDialog,
     QMessageBox, QDialog, QFormLayout, QGroupBox, QSizePolicy,
-    QHeaderView, QMenu, QInputDialog,
+    QHeaderView, QMenu, QInputDialog, QApplication,
     QStatusBar, QTableWidget,
     QTableWidgetItem, QAbstractItemView
 )
@@ -56,11 +56,13 @@ from PySide6.QtSvg import QSvgRenderer
 # --- ALTERAÇÃO DE REATORAÇÃO: Importações de Módulos Locais ---
 # Os caminhos de importação foram atualizados para refletir a nova estrutura de pacotes
 try:
+    from matfinder import __version__, get_full_title
     from matfinder.tools.periodic_table.tabela_periodica_pyside import ELEMENTOS as TABELA_PERIODICA_ELEMENTOS
     from matfinder.core.grupo_espacial import obter_info_grupo_espacial
     from matfinder.core.historico_dialog_pyside import HISTORICO_FILE, DATETIME_FORMAT
     from matfinder.data import COD_api_logic
     from matfinder.core.favorites_manager import favorites_manager
+    from matfinder.core.translator import tr, get_translator, set_language, get_current_language, SUPPORTED_LANGUAGES
 except ImportError as e:
     # Log crítico se os módulos centrais falharem
     logging.critical(f"Falha ao importar módulos locais essenciais: {e}", exc_info=True)
@@ -79,6 +81,12 @@ except ImportError as e:
         def search_cod_by_elements(self, *args, **kwargs): return []
         def get_cod_cif_data(self, *args, **kwargs): return None
     COD_api_logic = MockCodApiLogic()
+    # Fallback para tradução
+    def tr(key, **kwargs): return key
+    def get_translator(): return None
+    def set_language(lang): return False
+    def get_current_language(): return 'pt_BR'
+    SUPPORTED_LANGUAGES = {'pt_BR': 'Português (Brasil)', 'en_US': 'English (US)', 'de_DE': 'Deutsch'}
 # --- FIM DA ALTERAÇÃO ---
 
 
@@ -91,6 +99,12 @@ SISTEMAS_CRISTALINOS_PT = {
 }
 ROD_SEARCH_BASE_URL = "https://solsa.crystallography.net/rod/result"
 ROD_ENTRY_BASE_URL = "https://solsa.crystallography.net/rod/"
+
+
+# --- Função para traduzir sistemas cristalinos ---
+def get_crystal_system_translated(system_key: str) -> str:
+    """Retorna o nome do sistema cristalino traduzido."""
+    return tr(f'crystal_systems.{system_key.lower()}')
 
 
 class Worker(QObject):
@@ -250,7 +264,7 @@ class MaterialsApp(QMainWindow):
 
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("MatFinder Ver. 4.4")
+        self.setWindowTitle(get_full_title())
         self.setMinimumSize(790, 520)
 
         self.search_cache = {}
@@ -438,9 +452,8 @@ class MaterialsApp(QMainWindow):
         current_key = self.get_api_key_on_demand() or ""
         text, ok = QInputDialog.getText(
             self,
-            "Chave API Materials Project",
-            "Insira sua chave da API do Materials Project (32 caracteres):\n"
-            "Obtenha uma em: materialsproject.org/api",
+            tr('dialogs.api_key.title'),
+            tr('dialogs.api_key.prompt'),
             QLineEdit.EchoMode.Normal,
             current_key,
         )
@@ -451,13 +464,13 @@ class MaterialsApp(QMainWindow):
                     self.api_key_mp = new_key
                     QMessageBox.information(
                         self,
-                        "Chave Salva",
-                        "Chave da API do Materials Project salva com sucesso!",
+                        tr('dialogs.api_key.saved'),
+                        tr('dialogs.api_key.saved_msg'),
                     )
                     logging.info("Nova chave API do Materials Project salva.")
             else:
                 QMessageBox.warning(
-                    self, "Chave Inválida", "A chave da API deve ter 32 caracteres."
+                    self, tr('dialogs.api_key.invalid'), tr('dialogs.api_key.invalid_msg')
                 )
                 logging.warning("Tentativa de salvar chave API MP com tamanho inválido.")
 
@@ -473,16 +486,16 @@ class MaterialsApp(QMainWindow):
             if self.proxy_settings["enabled"]:
                 QMessageBox.information(
                     self,
-                    "Proxy Configurado",
-                    f"Proxy HTTP: {self.proxy_settings['http']}\n"
-                    f"Proxy HTTPS: {self.proxy_settings['https']}\n"
-                    "Estas configurações serão usadas para novas conexões nesta sessão.",
+                    tr('dialogs.proxy.configured'),
+                    tr('dialogs.proxy.configured_msg',
+                       http=self.proxy_settings['http'],
+                       https=self.proxy_settings['https']),
                 )
             else:
                 QMessageBox.information(
                     self,
-                    "Proxy Desabilitado",
-                    "Uso de proxy desabilitado para novas conexões.",
+                    tr('dialogs.proxy.disabled'),
+                    tr('dialogs.proxy.disabled_msg'),
                 )
 
     def _get_proxies_dict(self):
@@ -537,88 +550,220 @@ class MaterialsApp(QMainWindow):
             logging.warning(f"Ícone da aplicação não encontrado em: {icon_path_str}")
 
     def create_menu(self):
-        # (O conteúdo desta função permanece o mesmo)
+        """Cria o menu principal com suporte a tradução."""
         menubar = self.menuBar()
-        menu_arquivo = menubar.addMenu("&Arquivo")
+
+        # Menu Arquivo
+        menu_arquivo = menubar.addMenu(tr('menu.file.title'))
         historico_action = QAction(
-            QIcon.fromTheme("document-open-recent"), "Histórico de &Busca", self
+            QIcon.fromTheme("document-open-recent"), tr('menu.file.history'), self
         )
-        historico_action.setStatusTip("Visualizar e gerenciar o histórico de buscas")
+        historico_action.setStatusTip(tr('menu.file.history_tip'))
         historico_action.triggered.connect(self.open_search_history_dialog)
         menu_arquivo.addAction(historico_action)
-        sair_action = QAction(QIcon.fromTheme("application-exit"), "&Sair", self)
+        sair_action = QAction(QIcon.fromTheme("application-exit"), tr('menu.file.exit'), self)
         sair_action.setShortcut("Alt+F4")
-        sair_action.setStatusTip("Sair da aplicação")
+        sair_action.setStatusTip(tr('menu.file.exit_tip'))
         sair_action.triggered.connect(self.close)
         menu_arquivo.addAction(sair_action)
-        menu_config = menubar.addMenu("&Configuração")
-        config_api_action = QAction("Chave API &Materials Project...", self)
-        config_api_action.setStatusTip(
-            "Configurar a chave da API para o Materials Project"
-        )
+
+        # Menu Configuração
+        menu_config = menubar.addMenu(tr('menu.config.title'))
+        config_api_action = QAction(tr('menu.config.api_key'), self)
+        config_api_action.setStatusTip(tr('menu.config.api_key_tip'))
         config_api_action.triggered.connect(self.open_api_key_dialog)
         menu_config.addAction(config_api_action)
-        config_proxy_action = QAction("Configurar &Proxy...", self)
-        config_proxy_action.setStatusTip(
-            "Configurar servidor proxy para conexões de rede"
-        )
+
+        config_proxy_action = QAction(tr('menu.config.proxy'), self)
+        config_proxy_action.setStatusTip(tr('menu.config.proxy_tip'))
         config_proxy_action.triggered.connect(self.open_proxy_config_dialog)
         menu_config.addAction(config_proxy_action)
-        menu_ferramentas = menubar.addMenu("F&erramentas")
 
-        phasedrx_action = QAction("PhaseDRX - Análise de DRX", self)
-        phasedrx_action.setStatusTip("Abrir a ferramenta de análise de difração de raios X")
+        menu_config.addSeparator()
+
+        # Submenu de Idioma
+        language_menu = menu_config.addMenu(tr('menu.config.language'))
+        language_menu.setStatusTip(tr('menu.config.language_tip'))
+
+        # Adicionar opções de idioma
+        current_lang = get_current_language()
+        for lang_code, lang_name in SUPPORTED_LANGUAGES.items():
+            lang_action = QAction(lang_name, self)
+            lang_action.setCheckable(True)
+            lang_action.setChecked(lang_code == current_lang)
+            lang_action.setData(lang_code)
+            lang_action.triggered.connect(lambda checked, code=lang_code: self.change_language(code))
+            language_menu.addAction(lang_action)
+
+        # Menu Ferramentas
+        menu_ferramentas = menubar.addMenu(tr('menu.tools.title'))
+
+        phasedrx_action = QAction(tr('menu.tools.phasedrx'), self)
+        phasedrx_action.setStatusTip(tr('menu.tools.phasedrx_tip'))
         phasedrx_action.triggered.connect(self.open_phasedrx_tool)
         menu_ferramentas.addAction(phasedrx_action)
         menu_ferramentas.addSeparator()
 
-        calc_esteq_action = QAction("Calculadora &Estequiométrica", self)
-        calc_esteq_action.setStatusTip("Abrir a calculadora estequiométrica")
+        calc_esteq_action = QAction(tr('menu.tools.stoich_calc'), self)
+        calc_esteq_action.setStatusTip(tr('menu.tools.stoich_calc_tip'))
         calc_esteq_action.triggered.connect(self.open_calculadora_estequiometrica)
         menu_ferramentas.addAction(calc_esteq_action)
 
-        calc_prop_massa_action = QAction("Calculadora de &Proporção de Massa", self)
-        calc_prop_massa_action.setStatusTip(
-            "Abrir a calculadora de proporção de massa"
-        )
+        calc_prop_massa_action = QAction(tr('menu.tools.mass_calc'), self)
+        calc_prop_massa_action.setStatusTip(tr('menu.tools.mass_calc_tip'))
         calc_prop_massa_action.triggered.connect(
             self.open_calculadora_proporcao_massa
         )
         menu_ferramentas.addAction(calc_prop_massa_action)
 
-        menu_sobre = menubar.addMenu("S&obre")
-        instrucoes_action = QAction("&Instruções de uso", self)
-        instrucoes_action.setStatusTip(
-            "Abrir o arquivo de instruções (Leiame.txt)"
-        )
+        # Menu Sobre
+        menu_sobre = menubar.addMenu(tr('menu.about.title'))
+        instrucoes_action = QAction(tr('menu.about.instructions'), self)
+        instrucoes_action.setStatusTip(tr('menu.about.instructions_tip'))
         instrucoes_action.triggered.connect(self.open_readme)
         menu_sobre.addAction(instrucoes_action)
 
-        licenca_action = QAction("&Licença", self)
-        licenca_action.setStatusTip(
-            "Visualizar a licença completa do software"
-        )
+        licenca_action = QAction(tr('menu.about.license'), self)
+        licenca_action.setStatusTip(tr('menu.about.license_tip'))
         licenca_action.triggered.connect(self.open_license)
         menu_sobre.addAction(licenca_action)
 
+    def change_language(self, lang_code: str):
+        """Altera o idioma da interface - requer reinício para aplicar completamente."""
+        current_lang = get_current_language()
+        if lang_code == current_lang:
+            return
+
+        if set_language(lang_code):
+            lang_name = SUPPORTED_LANGUAGES.get(lang_code, lang_code)
+            # Mostrar mensagem pedindo para reiniciar
+            msg = QMessageBox(self)
+            msg.setIcon(QMessageBox.Icon.Information)
+            msg.setWindowTitle(tr('dialogs.language.restart_required'))
+            msg.setText(tr('dialogs.language.restart_msg'))
+            msg.setInformativeText(tr('dialogs.language.selected', language=lang_name))
+
+            restart_btn = msg.addButton(tr('dialogs.language.restart_button'), QMessageBox.ButtonRole.AcceptRole)
+            cancel_btn = msg.addButton(tr('dialogs.confirm.cancel'), QMessageBox.ButtonRole.RejectRole)
+
+            msg.exec()
+
+            if msg.clickedButton() == restart_btn:
+                # Reiniciar o programa
+                self._restart_application()
+            else:
+                # Reverter para o idioma anterior
+                set_language(current_lang)
+
+    def _restart_application(self):
+        """Reinicia a aplicação para aplicar mudanças de idioma."""
+        import subprocess
+        import sys
+
+        # Fechar a aplicação atual
+        self.close()
+
+        # Reiniciar o programa
+        python = sys.executable
+        script = sys.argv[0]
+        subprocess.Popen([python, script])
+
+        # Sair do processo atual
+        QApplication.quit()
+
+    def update_ui_translations(self):
+        """Atualiza todos os textos da interface após mudança de idioma."""
+        # Atualizar título da janela
+        self.setWindowTitle(tr('app.title'))
+
+        # Recriar menu
+        self.menuBar().clear()
+        self.create_menu()
+
+        # Atualizar labels
+        if hasattr(self, 'label_buscar_em') and self.label_buscar_em:
+            self.label_buscar_em.setText(tr('search.database_label'))
+
+        if hasattr(self, 'label_elementos_ref') and self.label_elementos_ref:
+            self.label_elementos_ref.setText(tr('search.elements_label'))
+
+        if hasattr(self, 'entry_elementos') and self.entry_elementos:
+            self.entry_elementos.setPlaceholderText(tr('search.elements_placeholder'))
+
+        if hasattr(self, 'btn_consultar_ref') and self.btn_consultar_ref:
+            if self.is_searching:
+                self.btn_consultar_ref.setText(tr('search.cancel_button'))
+            else:
+                self.btn_consultar_ref.setText(tr('search.search_button'))
+
+        # Atualizar cabeçalhos das tabelas
+        if hasattr(self, 'tree_oqmd_mp'):
+            self.tree_oqmd_mp.setHeaderLabels([
+                tr('results.columns.favorite'),
+                tr('results.columns.name'),
+                tr('results.columns.id'),
+                tr('results.columns.spacegroup'),
+                tr('results.columns.bandgap'),
+                tr('results.columns.formation_energy'),
+                tr('results.columns.stability'),
+            ])
+
+        if hasattr(self, 'table_cod_rod'):
+            columns_cod = [
+                tr('results.columns.favorite'),
+                tr('results.columns.id'),
+                tr('results.columns.file'),
+                tr('results.columns.formula'),
+                tr('results.columns.system'),
+                tr('results.columns.parameters'),
+                tr('results.columns.volume'),
+                tr('results.columns.reference'),
+                tr('results.columns.year'),
+            ]
+            self.table_cod_rod.setHorizontalHeaderLabels(columns_cod)
+
+        # Atualizar painel inferior
+        if hasattr(self, 'db_logos_group') and self.db_logos_group:
+            self.db_logos_group.setTitle(tr('bottom_panel.external_databases'))
+
+        if hasattr(self, 'scihub_group') and self.scihub_group:
+            self.scihub_group.setTitle(tr('bottom_panel.scihub_downloader'))
+
+        if hasattr(self, 'article_search_group') and self.article_search_group:
+            self.article_search_group.setTitle(tr('bottom_panel.article_search'))
+
+        if hasattr(self, 'doi_entry_ref') and self.doi_entry_ref:
+            self.doi_entry_ref.setPlaceholderText(tr('bottom_panel.doi_placeholder'))
+            self.doi_entry_ref.setToolTip(tr('bottom_panel.doi_tooltip'))
+
+        if hasattr(self, 'btn_scihub_ref') and self.btn_scihub_ref:
+            self.btn_scihub_ref.setText(tr('bottom_panel.scihub_button'))
+            self.btn_scihub_ref.setToolTip(tr('bottom_panel.scihub_tooltip'))
+
+        # Atualizar botão da tabela periódica
+        if hasattr(self, 'btn_tabela_periodica') and self.btn_tabela_periodica:
+            self.btn_tabela_periodica.setText(tr('search.periodic_table_button'))
+
+        logging.info(f"Interface atualizada para idioma: {get_current_language()}")
+
     def create_database_selection_frame(self, parent_layout):
-        # (O conteúdo desta função permanece o mesmo)
+        """Cria o frame de seleção de base de dados."""
         db_frame_widget = QWidget()
         db_layout = QHBoxLayout(db_frame_widget)
         db_layout.setContentsMargins(5, 0, 5, 0)
 
-        label_buscar_em = QLabel("Buscar em:")
-        db_layout.addWidget(label_buscar_em)
+        self.label_buscar_em = QLabel(tr('search.database_label'))
+        db_layout.addWidget(self.label_buscar_em)
 
         self.db_combobox = QComboBox()
 
         model = QStandardItemModel(self.db_combobox)
 
         db_options = [
-            ("OQMD", "Open Quantum Materials Database"),
-            ("Materials Project", "Materials Project (API Key Requerida)"),
-            ("COD", "Crystallography Open Database"),
-            ("ROD", "Raman Open Database")
+            ("OQMD", tr('databases.oqmd')),
+            ("Materials Project", tr('databases.mp')),
+            ("COD", tr('databases.cod')),
+            ("ROD", tr('databases.rod'))
         ]
 
         for text, tooltip in db_options:
@@ -668,17 +813,17 @@ class MaterialsApp(QMainWindow):
                 self.statusBar().clearMessage()
 
     def create_main_search_frame(self, parent_layout):
-        # (O conteúdo desta função permanece o mesmo)
+        """Cria o frame de busca principal."""
         search_frame_widget = QWidget()
         search_layout = QHBoxLayout(search_frame_widget)
         search_layout.setContentsMargins(5, 2, 5, 2)
         search_layout.addStretch(1)
 
-        self.label_elementos_ref = QLabel("Elementos (ex: Sm, Fe, O):")
+        self.label_elementos_ref = QLabel(tr('search.elements_label'))
         search_layout.addWidget(self.label_elementos_ref)
 
         self.entry_elementos = QLineEdit()
-        self.entry_elementos.setPlaceholderText("Elementos (ex: Sm, Fe, O)")
+        self.entry_elementos.setPlaceholderText(tr('search.elements_placeholder'))
         self.entry_elementos.setMinimumWidth(150)
         self.entry_elementos.setSizePolicy(
             QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed
@@ -686,7 +831,7 @@ class MaterialsApp(QMainWindow):
         self.entry_elementos.returnPressed.connect(self.toggle_search_cancellation)
         search_layout.addWidget(self.entry_elementos)
 
-        self.btn_consultar_ref = QPushButton("Consultar")
+        self.btn_consultar_ref = QPushButton(tr('search.search_button'))
         self.btn_consultar_ref.clicked.connect(self.toggle_search_cancellation)
         search_layout.addWidget(self.btn_consultar_ref)
 
@@ -698,24 +843,24 @@ class MaterialsApp(QMainWindow):
         self.logo_label.setFixedSize(50, 50)
         search_layout.addWidget(self.logo_label)
 
-        btn_tabela_periodica = QPushButton("Tabela Periódica")
-        btn_tabela_periodica.clicked.connect(self.open_periodic_table)
-        search_layout.addWidget(btn_tabela_periodica)
+        self.btn_tabela_periodica = QPushButton(tr('search.periodic_table_button'))
+        self.btn_tabela_periodica.clicked.connect(self.open_periodic_table)
+        search_layout.addWidget(self.btn_tabela_periodica)
 
         search_layout.addStretch(1)
         parent_layout.addWidget(search_frame_widget)
 
     def create_results_treeview_oqmd_mp(self):
-        # (O conteúdo desta função permanece o mesmo)
+        """Cria o TreeView de resultados para OQMD/MP."""
         self.tree_oqmd_mp = QTreeWidget()
         self.initial_columns_oqmd_mp = (
-            "★",
-            "Nome",
-            "ID",
-            "Grupo Espacial",
-            "Gap de Banda (eV)",
-            "E. Formação (eV/átomo)",
-            "Estabilidade",
+            tr('results.columns.favorite'),
+            tr('results.columns.name'),
+            tr('results.columns.id'),
+            tr('results.columns.spacegroup'),
+            tr('results.columns.bandgap'),
+            tr('results.columns.formation_energy'),
+            tr('results.columns.stability'),
         )
         self.tree_oqmd_mp.setColumnCount(len(self.initial_columns_oqmd_mp))
         self.tree_oqmd_mp.setHeaderLabels(self.initial_columns_oqmd_mp)
@@ -757,28 +902,28 @@ class MaterialsApp(QMainWindow):
         """Cria tabela de resultados COD/ROD com design moderno e elegante."""
         self.table_cod_rod = QTableWidget()
 
-        # Colunas organizadas e com nomes mais descritivos
+        # Colunas organizadas e com nomes traduzidos
         self.columns_cod = [
-            "★",
-            "ID",
-            "Arquivo",
-            "Fórmula",
-            "Sistema",
-            "Parâmetros (Å, °)",
-            "Vol. (Å³)",
-            "Referência",
-            "Ano",
+            tr('results.columns.favorite'),
+            tr('results.columns.id'),
+            tr('results.columns.file'),
+            tr('results.columns.formula'),
+            tr('results.columns.system'),
+            tr('results.columns.parameters'),
+            tr('results.columns.volume'),
+            tr('results.columns.reference'),
+            tr('results.columns.year'),
         ]
         self.columns_rod = [
-            "★",
-            "ID",
-            "Arquivo",
-            "Fórmula",
-            "Sistema",
-            "Parâmetros (Å, °)",
-            "Vol. (Å³)",
-            "Referência",
-            "Ano",
+            tr('results.columns.favorite'),
+            tr('results.columns.id'),
+            tr('results.columns.file'),
+            tr('results.columns.formula'),
+            tr('results.columns.system'),
+            tr('results.columns.parameters'),
+            tr('results.columns.volume'),
+            tr('results.columns.reference'),
+            tr('results.columns.year'),
         ]
 
         self.table_cod_rod.setColumnCount(len(self.columns_cod))
@@ -945,6 +1090,7 @@ class MaterialsApp(QMainWindow):
         self.table_cod_rod.verticalHeader().setVisible(False)
 
     def create_bottom_frame(self, parent_layout):
+        """Cria o painel inferior com links externos e busca."""
         bottom_container_widget = QWidget()
         bottom_container_widget.setSizePolicy(
             QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Maximum
@@ -952,9 +1098,10 @@ class MaterialsApp(QMainWindow):
         bottom_main_layout = QHBoxLayout(bottom_container_widget)
         bottom_main_layout.setContentsMargins(5, 5, 5, 5)
 
-        db_logos_group = QGroupBox("Bases de Dados Externas")
-        db_logos_layout = QHBoxLayout(db_logos_group)
-        
+        # GroupBox de bases de dados externas
+        self.db_logos_group = QGroupBox(tr('bottom_panel.external_databases'))
+        db_logos_layout = QHBoxLayout(self.db_logos_group)
+
         # --- ALTERAÇÃO DE REATORAÇÃO: Caminhos dos Assets ---
         # Todos os caminhos de logo são atualizados para 'matfinder/assets/logos/'
         logos_info = {
@@ -1021,46 +1168,48 @@ class MaterialsApp(QMainWindow):
             else:
                 btn.setText(name.upper())
 
-            btn.setToolTip(f"Abrir {name.upper()} ({url})")
+            btn.setToolTip(tr('bottom_panel.open_database', name=name.upper(), url=url))
             btn.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
             btn.clicked.connect(
                 lambda checked=False, u=url: QDesktopServices.openUrl(QUrl(u))
             )
             db_logos_layout.addWidget(btn)
         db_logos_layout.addStretch(1)
-        bottom_main_layout.addWidget(db_logos_group)
+        bottom_main_layout.addWidget(self.db_logos_group)
 
-        scihub_group = QGroupBox("Sci-Hub DOI Downloader")
-        scihub_layout = QVBoxLayout(scihub_group)
+        # GroupBox do Sci-Hub
+        self.scihub_group = QGroupBox(tr('bottom_panel.scihub_downloader'))
+        scihub_layout = QVBoxLayout(self.scihub_group)
         self.doi_entry_ref = QLineEdit()
-        self.doi_entry_ref.setPlaceholderText("Digite o DOI do artigo...")
+        self.doi_entry_ref.setPlaceholderText(tr('bottom_panel.doi_placeholder'))
         self.doi_entry_ref.returnPressed.connect(self.trigger_scihub_download)
         scihub_layout.addWidget(self.doi_entry_ref)
-        self.btn_scihub_ref = QPushButton("Buscar e Salvar PDF")
+        self.btn_scihub_ref = QPushButton(tr('bottom_panel.scihub_button'))
         self.btn_scihub_ref.clicked.connect(self.trigger_scihub_download)
         scihub_layout.addWidget(self.btn_scihub_ref)
         scihub_layout.addStretch(1)
-        bottom_main_layout.addWidget(scihub_group)
+        bottom_main_layout.addWidget(self.scihub_group)
 
-        article_search_group = QGroupBox("Busca Rápida de Artigos")
-        article_search_layout = QVBoxLayout(article_search_group)
+        # GroupBox de busca de artigos
+        self.article_search_group = QGroupBox(tr('bottom_panel.article_search'))
+        article_search_layout = QVBoxLayout(self.article_search_group)
         google_scholar_widget = self._create_search_box_widget(
-            "Google Scholar:", "https://scholar.google.com.br/scholar?q="
+            tr('bottom_panel.google_scholar'), "https://scholar.google.com.br/scholar?q="
         )
         sciencedirect_widget = self._create_search_box_widget(
-            "ScienceDirect:", "https://www.sciencedirect.com/search?qs="
+            tr('bottom_panel.sciencedirect'), "https://www.sciencedirect.com/search?qs="
         )
         article_search_layout.addWidget(google_scholar_widget)
         article_search_layout.addWidget(sciencedirect_widget)
         article_search_layout.addStretch(1)
-        bottom_main_layout.addWidget(article_search_group)
+        bottom_main_layout.addWidget(self.article_search_group)
 
         parent_layout.addWidget(bottom_container_widget)
 
     def _create_search_box_widget(
             self, label_text: str, base_url: str
     ) -> QWidget:
-        # (O conteúdo desta função permanece o mesmo)
+        """Cria widget de busca com label e campo de texto."""
         search_box_widget = QWidget()
         layout = QVBoxLayout(search_box_widget)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -1068,7 +1217,7 @@ class MaterialsApp(QMainWindow):
         label = QLabel(label_text)
         layout.addWidget(label)
         entry = QLineEdit()
-        entry.setPlaceholderText("Digite sua busca aqui...")
+        entry.setPlaceholderText(tr('bottom_panel.search_placeholder'))
         entry.returnPressed.connect(
             lambda: self._search_article_site_triggered(base_url, entry)
         )
@@ -1085,19 +1234,19 @@ class MaterialsApp(QMainWindow):
             logging.info(f"Busca rápida de artigo acionada para: {base_url}{query}")
         else:
             QMessageBox.information(
-                self, "Busca Vazia", "Por favor, digite um termo para buscar."
+                self, tr('search.empty_title'), tr('search.empty_message')
             )
 
     def trigger_scihub_download(self):
         # (O conteúdo desta função permanece o mesmo)
         doi = self.doi_entry_ref.text().strip()
         if not doi:
-            QMessageBox.warning(self, "DOI em Falta", "Por favor, insira um DOI.")
+            QMessageBox.warning(self, tr('scihub.doi_missing_title'), tr('scihub.doi_missing_message'))
             return
 
         if self.scihub_thread and self.scihub_thread.is_alive():
             QMessageBox.information(
-                self, "Em Progresso", "Um download do Sci-Hub já está em andamento."
+                self, tr('scihub.in_progress_title'), tr('scihub.in_progress_message')
             )
             return
 
@@ -1266,18 +1415,16 @@ class MaterialsApp(QMainWindow):
             try:
                 with open(filePath, "wb") as f:
                     f.write(pdf_content_bytes)
-                self.statusBar().showMessage(f"Artigo salvo em: {filePath}", 7000)
+                self.statusBar().showMessage(tr('status.file_saved', path=filePath), 7000)
                 QMessageBox.information(
-                    self, "Download Concluído", f"Artigo salvo com sucesso em:\n{filePath}"
+                    self, tr('scihub.download_complete'), tr('scihub.file_saved', path=filePath)
                 )
                 logging.info(f"Artigo Sci-Hub salvo em: {filePath}")
                 if not QDesktopServices.openUrl(QUrl.fromLocalFile(filePath)):
                     QMessageBox.warning(
                         self,
-                        "Abrir Arquivo",
-                        "Não foi possível abrir o arquivo PDF automaticamente.\n"
-                        "O sistema pode não ter um programa associado para arquivos .pdf.\n"
-                        f"Você pode encontrá-lo em: {filePath}",
+                        tr('dialogs.error.warning'),
+                        tr('scihub.cannot_open_file', path=filePath),
                     )
                     logging.warning(
                         f"Não foi possível abrir automaticamente o arquivo PDF: {filePath}"
@@ -1286,24 +1433,24 @@ class MaterialsApp(QMainWindow):
             except IOError as ioe:
                 QMessageBox.critical(
                     self,
-                    "Erro ao Salvar PDF",
-                    f"Não foi possível salvar o arquivo PDF (erro de E/S):\n{ioe}",
+                    tr('scihub.save_error'),
+                    tr('scihub.save_io_error', error=str(ioe)),
                 )
                 logging.exception(
                     f"Erro de E/S ao salvar PDF do Sci-Hub em {filePath}:"
                 )
             except Exception as e:
                 QMessageBox.critical(
-                    self, "Erro ao Salvar PDF", f"Não foi possível salvar o arquivo PDF:\n{e}"
+                    self, tr('scihub.save_error'), tr('scihub.save_generic_error', error=str(e))
                 )
                 logging.exception(
                     f"Erro inesperado ao salvar PDF do Sci-Hub em {filePath}:"
                 )
         else:
             QMessageBox.information(
-                self, "Download Cancelado", "O download do PDF foi cancelado."
+                self, tr('scihub.download_cancelled_title'), tr('scihub.download_cancelled_msg')
             )
-            self.statusBar().showMessage("Download do PDF cancelado.", 3000)
+            self.statusBar().showMessage(tr('scihub.download_cancelled_status'), 3000)
             logging.info("Download do PDF (Sci-Hub) cancelado pelo usuário.")
 
     @Slot(str, str)
@@ -1341,14 +1488,14 @@ class MaterialsApp(QMainWindow):
                 pass
 
         self.reset_search_ui_state()
-        self.statusBar().showMessage("Busca cancelada pelo usuário.", 3000)
+        self.statusBar().showMessage(tr('search.search_cancelled'), 3000)
 
     def reset_search_ui_state(self):
         # (O conteúdo desta função permanece o mesmo)
         self.is_searching = False
         self.current_worker = None
         self.toggle_logo_blink_qt(False)
-        self.btn_consultar_ref.setText("Consultar")
+        self.btn_consultar_ref.setText(tr('search.search_button'))
         self.entry_elementos.setEnabled(True)
         self.db_combobox.setEnabled(True)
 
@@ -1357,7 +1504,7 @@ class MaterialsApp(QMainWindow):
         elements_input_str = self.entry_elementos.text().strip()
         if not elements_input_str:
             QMessageBox.warning(
-                self, "Entrada Vazia", "Por favor, insira os elementos para busca."
+                self, tr('search.empty_title'), tr('search.enter_elements')
             )
             return
 
@@ -1375,8 +1522,8 @@ class MaterialsApp(QMainWindow):
         if not all(e.isalpha() and 1 <= len(e) <= 2 for e in elements_list):
             QMessageBox.warning(
                 self,
-                "Formato Inválido",
-                "Use símbolos de elementos válidos separados por vírgula (ex: Fe, O, Sm).",
+                tr('search.invalid_format_title'),
+                tr('search.invalid_format_message'),
             )
             self.set_ui_for_searching(False)
             logging.warning(
@@ -1415,11 +1562,11 @@ class MaterialsApp(QMainWindow):
         self.entry_elementos.setEnabled(not searching)
         self.db_combobox.setEnabled(not searching)
         if searching:
-            self.btn_consultar_ref.setText("Cancelar")
-            self.statusBar().showMessage(f"Buscando em {self._current_selected_database}...", 0)
+            self.btn_consultar_ref.setText(tr('search.cancel_button'))
+            self.statusBar().showMessage(tr('search.searching', db=self._current_selected_database), 0)
         else:
-            self.btn_consultar_ref.setText("Consultar")
-            if not self.statusBar().currentMessage().startswith("Busca cancelada"):
+            self.btn_consultar_ref.setText(tr('search.search_button'))
+            if not self.statusBar().currentMessage().startswith(tr('search.search_cancelled')):
                 self.statusBar().clearMessage()
 
     def load_results_from_selected_db(
@@ -1745,8 +1892,8 @@ class MaterialsApp(QMainWindow):
                         "stability_metric_value": float(stability_val),
                         "is_stable": float(stability_val) <= 0,
                         "stability_tooltip_text": (
-                            "Dist. ao casco convexo (OQMD):\n"
-                            f"{float(stability_val):.4f} eV/átomo"
+                            f"{tr('results.stability_tooltip.convex_hull_oqmd')}:\n"
+                            f"{float(stability_val):.4f} eV/{tr('results.stability_tooltip.atom')}"
                         ),
                         "icsd_codes_list": icsd_codes, # Salva a lista de códigos
                     }
@@ -1802,8 +1949,8 @@ class MaterialsApp(QMainWindow):
                         "stability_metric_value": stability_metric,
                         "is_stable": stability_metric <= 0.025,
                         "stability_tooltip_text": (
-                            "Energia acima do casco (MP):\n"
-                            f"{stability_metric:.4f} eV/átomo"
+                            f"{tr('results.stability_tooltip.energy_above_hull_mp')}:\n"
+                            f"{stability_metric:.4f} eV/{tr('results.stability_tooltip.atom')}"
                         ),
                         "icsd_codes_list": icsd_numeric_str_list,
                     }
@@ -1930,11 +2077,11 @@ class MaterialsApp(QMainWindow):
         if not standardized_results:
             QMessageBox.information(
                 self,
-                "Sem Resultados",
-                f"Nenhum resultado encontrado para a sua busca em '{db_choice}'.",
+                tr('search.no_results_title'),
+                tr('search.no_results_msg', db=db_choice),
             )
             self.statusBar().showMessage(
-                f"Nenhum resultado para '{self.entry_elementos.text()}' em {db_choice}.",
+                tr('search.no_results_status', query=self.entry_elementos.text(), db=db_choice),
                 5000,
             )
             logging.info(
@@ -2099,7 +2246,7 @@ class MaterialsApp(QMainWindow):
                     compound_data.get("spacegroup_display", "N/A"),
                     compound_data.get("band_gap_display", "N/A"),
                     compound_data.get("formation_energy_display", "N/A"),
-                    "Estável" if compound_data.get("is_stable") else "Instável",
+                    tr('results.stability_values.stable') if compound_data.get("is_stable") else tr('results.stability_values.unstable'),
                 ]
                 tree_item = QTreeWidgetItem(self.tree_oqmd_mp, values)
                 tree_item.setData(0, Qt.ItemDataRole.UserRole, compound_data)
@@ -2118,7 +2265,7 @@ class MaterialsApp(QMainWindow):
                 tree_item.setToolTip(6, compound_data.get("stability_tooltip_text", ""))
                 sg_symbol = compound_data.get("spacegroup_display", "N/A")
                 crystal_system_pt_api = compound_data.get("crystal_system_pt", "")
-                tooltip_sg_parts = [f"Símbolo: {sg_symbol}"]
+                tooltip_sg_parts = [f"{tr('results.tooltip.symbol')}: {sg_symbol}"]
                 info_grupo_custom = obter_info_grupo_espacial(sg_symbol)
                 if info_grupo_custom:
                     cs_custom = info_grupo_custom.get("sistema_cristalino")
@@ -2127,15 +2274,15 @@ class MaterialsApp(QMainWindow):
                         crystal_system_pt_api = cs_custom
                     desc_add = info_grupo_custom.get("descricao_adicional")
                     if desc_add:
-                        tooltip_sg_parts.append(f"Detalhe: {desc_add}")
+                        tooltip_sg_parts.append(f"{tr('results.tooltip.detail')}: {desc_add}")
                     elif info_grupo_custom.get("ponto_grupo"):
-                        tooltip_sg_parts.append(f"Ponto Grupo: {info_grupo_custom['ponto_grupo']}")
+                        tooltip_sg_parts.append(f"{tr('results.tooltip.point_group')}: {info_grupo_custom['ponto_grupo']}")
                 if crystal_system_pt_api and crystal_system_pt_api != SISTEMAS_CRISTALINOS_PT.get("unknown"):
-                    tooltip_sg_parts.append(f"Sistema: {crystal_system_pt_api}")
+                    tooltip_sg_parts.append(f"{tr('results.tooltip.system')}: {crystal_system_pt_api}")
                 tree_item.setToolTip(3, "\n".join(tooltip_sg_parts))
 
         self.statusBar().showMessage(
-            f"{len(standardized_results)} resultados encontrados em {db_choice}.", 5000
+            tr('search.results_found', count=len(standardized_results)) + f" {tr('search.in_db', db=db_choice)}", 5000
         )
         logging.info(
             f"{len(standardized_results)} resultados padronizados e exibidos para {db_choice}."
@@ -2185,15 +2332,13 @@ class MaterialsApp(QMainWindow):
 
         if source_db == "ROD" and id_original != "N/A":
             action_abrir_rod_site = menu.addAction(
-                f"Abrir '{name_display}' ({id_original}) no site (ROD)"
+                tr('context_menu.open_on_site', name=name_display, id=id_original, db="ROD")
             )
             action_abrir_rod_site.triggered.connect(
                 lambda checked=False, id_val=id_original: self.open_material_page(id_val, "ROD")
             )
         elif source_db != "ROD" and id_original != "N/A":
-            action_text = (
-                f"Abrir '{name_display}' ({id_original}) no site ({source_db})"
-            )
+            action_text = tr('context_menu.open_on_site', name=name_display, id=id_original, db=source_db)
             action_abrir_db = menu.addAction(action_text)
             action_abrir_db.triggered.connect(
                 lambda checked=False, id_val=id_original, src=source_db: self.open_material_page(
@@ -2205,17 +2350,17 @@ class MaterialsApp(QMainWindow):
         phasedrx_is_open = self.phasedrx_window_ref and self.phasedrx_window_ref.isVisible()
 
         if can_export_cif:
-            action_export_phasedrx = menu.addAction("Exportar CIF para PhaseDRX")
+            action_export_phasedrx = menu.addAction(tr('context_menu.export_cif_phasedrx'))
             if not phasedrx_is_open:
                 action_export_phasedrx.setEnabled(False)
-                action_export_phasedrx.setToolTip("Abra a ferramenta PhaseDRX primeiro (em Ferramentas).")
+                action_export_phasedrx.setToolTip(tr('context_menu.open_phasedrx_first'))
             else:
                 action_export_phasedrx.triggered.connect(
                     lambda: self.handle_export_cif_to_phasedrx(compound_data)
                 )
 
         if source_db == "Materials Project":
-            action_baixar_cif_mp = menu.addAction("Baixar CIF (MP)")
+            action_baixar_cif_mp = menu.addAction(tr('context_menu.download_cif_mp'))
             action_baixar_cif_mp.triggered.connect(
                 lambda checked=False, name=name_display, id_val=id_original: self.trigger_baixar_cif_mp(
                     name, id_val
@@ -2223,24 +2368,24 @@ class MaterialsApp(QMainWindow):
             )
             icsd_numeric_codes = compound_data.get("icsd_codes_list", [])
             if icsd_numeric_codes:
-                menu_icsd_principal = menu.addMenu("ICSD (via MP)")
+                menu_icsd_principal = menu.addMenu(tr('context_menu.icsd_via_mp'))
                 for code_num_str in icsd_numeric_codes:
                     submenu_code_specific = menu_icsd_principal.addMenu(
                         f"ICSD-{code_num_str}"
                     )
-                    action_abrir_ccdc = submenu_code_specific.addAction("Abrir no CCDC")
+                    action_abrir_ccdc = submenu_code_specific.addAction(tr('context_menu.open_ccdc'))
                     url_ccdc = f"https://www.ccdc.cam.ac.uk/structures/Search?Ccdcid={code_num_str}&DatabaseToSearch=ICSD"
                     action_abrir_ccdc.triggered.connect(
                         lambda checked=False, url=url_ccdc: QDesktopServices.openUrl(QUrl(url))
                     )
-                    action_abrir_fiz = submenu_code_specific.addAction("Abrir ICSD Fiz Karlsruhe")
+                    action_abrir_fiz = submenu_code_specific.addAction(tr('context_menu.open_fiz'))
                     url_fiz = f"https://icsd.fiz-karlsruhe.de/linkicsd.xhtml?coll_code={code_num_str}"
                     action_abrir_fiz.triggered.connect(
                         lambda checked=False, url=url_fiz: QDesktopServices.openUrl(QUrl(url))
                     )
-                    action_refs = submenu_code_specific.addAction("Referências")
+                    action_refs = submenu_code_specific.addAction(tr('context_menu.references'))
                     action_refs.setEnabled(False)
-                    action_copiar_codigo = submenu_code_specific.addAction("Copiar código")
+                    action_copiar_codigo = submenu_code_specific.addAction(tr('context_menu.copy_code'))
                     code_to_copy = f"ICSD-{code_num_str}"
                     action_copiar_codigo.triggered.connect(
                         lambda checked=False, code=code_to_copy: self.copy_to_clipboard(code)
@@ -2249,24 +2394,24 @@ class MaterialsApp(QMainWindow):
         elif source_db == "OQMD":
             icsd_numeric_codes = compound_data.get("icsd_codes_list", [])
             if icsd_numeric_codes:
-                menu_icsd_principal = menu.addMenu("ICSD (via OQMD)")
+                menu_icsd_principal = menu.addMenu(tr('context_menu.icsd_via_oqmd'))
                 for code_num_str in icsd_numeric_codes:
                     submenu_code_specific = menu_icsd_principal.addMenu(
                         f"ICSD-{code_num_str}"
                     )
-                    action_abrir_ccdc = submenu_code_specific.addAction("Abrir no CCDC")
+                    action_abrir_ccdc = submenu_code_specific.addAction(tr('context_menu.open_ccdc'))
                     url_ccdc = f"https://www.ccdc.cam.ac.uk/structures/Search?Ccdcid={code_num_str}&DatabaseToSearch=ICSD"
                     action_abrir_ccdc.triggered.connect(
                         lambda checked=False, url=url_ccdc: QDesktopServices.openUrl(QUrl(url))
                     )
-                    action_abrir_fiz = submenu_code_specific.addAction("Abrir ICSD Fiz Karlsruhe")
+                    action_abrir_fiz = submenu_code_specific.addAction(tr('context_menu.open_fiz'))
                     url_fiz = f"https://icsd.fiz-karlsruhe.de/linkicsd.xhtml?coll_code={code_num_str}"
                     action_abrir_fiz.triggered.connect(
                         lambda checked=False, url=url_fiz: QDesktopServices.openUrl(QUrl(url))
                     )
-                    action_refs = submenu_code_specific.addAction("Referências")
+                    action_refs = submenu_code_specific.addAction(tr('context_menu.references'))
                     action_refs.setEnabled(False)
-                    action_copiar_codigo = submenu_code_specific.addAction("Copiar código")
+                    action_copiar_codigo = submenu_code_specific.addAction(tr('context_menu.copy_code'))
                     code_to_copy = f"ICSD-{code_num_str}"
                     action_copiar_codigo.triggered.connect(
                         lambda checked=False, code=code_to_copy: self.copy_to_clipboard(code)
@@ -2274,7 +2419,7 @@ class MaterialsApp(QMainWindow):
         elif source_db == "COD" and id_original != "N/A":
             formula_cod = compound_data.get("formula_display", id_original)
             action_baixar_cif_cod = menu.addAction(
-                f"Baixar CIF ({id_original}) do COD"
+                tr('context_menu.download_cif_cod', id=id_original)
             )
             action_baixar_cif_cod.triggered.connect(
                 lambda checked=False, cod_id=id_original, fname=formula_cod: self.trigger_baixar_cif_cod(
@@ -2284,7 +2429,7 @@ class MaterialsApp(QMainWindow):
         elif source_db == "ROD" and id_original != "N/A":
             formula_rod = compound_data.get("formula_display", id_original)
             action_baixar_rod_file = menu.addAction(
-                f"Baixar .rod ({id_original}) como .txt"
+                tr('context_menu.download_rod', id=id_original)
             )
             action_baixar_rod_file.triggered.connect(
                 lambda checked=False, rod_id=id_original, fname=formula_rod: self.trigger_baixar_rod_file(
@@ -2295,7 +2440,7 @@ class MaterialsApp(QMainWindow):
         if unique_id:
             menu.addSeparator()
             is_fav = favorites_manager.is_favorite(unique_id)
-            fav_text = "Remover dos Favoritos" if is_fav else "Favoritar"
+            fav_text = tr('context_menu.remove_favorite') if is_fav else tr('context_menu.add_favorite')
             action_favoritar = menu.addAction(fav_text)
             action_favoritar.triggered.connect(
                 lambda: self.toggle_favorite_status(unique_id)
@@ -2322,12 +2467,12 @@ class MaterialsApp(QMainWindow):
         name_display = compound_data.get("name_display", "N/A")
 
         if not self.phasedrx_window_ref or not self.phasedrx_window_ref.isVisible():
-            QMessageBox.warning(self, "Ferramenta Fechada", "A janela do PhaseDRX não está aberta.")
+            QMessageBox.warning(self, tr('cif.phasedrx_closed_title'), tr('cif.phasedrx_closed_msg'))
             return
 
         logging.info(
             f"Iniciando exportação de CIF para PhaseDRX. Material: {name_display} ({id_original}) de {source_db}")
-        self.statusBar().showMessage(f"Exportando CIF de {name_display} para PhaseDRX...", 5000)
+        self.statusBar().showMessage(tr('cif.exporting', name=name_display), 5000)
 
         self.cif_export_target = 'phasedrx'
         if source_db == "Materials Project":
@@ -2340,22 +2485,21 @@ class MaterialsApp(QMainWindow):
         if self.get_api_key_on_demand() is None:
             QMessageBox.warning(
                 self,
-                "Chave API Necessária",
-                "A chave da API do Materials Project é necessária para baixar arquivos CIF.\n"
-                "Configure-a em 'Configuração > Chave Materials Project...'.",
+                tr('dialogs.api_key.required_title'),
+                tr('dialogs.api_key.required_cif_msg'),
             )
             self.cif_export_target = None
             return
         if self.cif_fetch_thread and self.cif_fetch_thread.is_alive():
             QMessageBox.information(
-                self, "Em Progresso", "Uma busca de arquivo CIF (MP) já está em andamento."
+                self, tr('status.in_progress'), tr('cif.mp_in_progress')
             )
             return
         logging.info(
             f"Iniciando download de CIF (MP) para {formula_pretty} (ID: {material_id})."
         )
         self.statusBar().showMessage(
-            f"Buscando CIF (MP) para {formula_pretty} (ID: {material_id})...", 5000
+            tr('cif.fetching_mp', formula=formula_pretty, id=material_id), 5000
         )
         cif_worker = Worker(
             self._fetch_cif_data_logic_mp,
@@ -2436,9 +2580,9 @@ class MaterialsApp(QMainWindow):
         if self.cif_export_target == 'phasedrx':
             if self.phasedrx_window_ref and self.phasedrx_window_ref.isVisible():
                 self.phasedrx_window_ref.load_cif_from_data(cif_string, suggested_filename)
-                self.statusBar().showMessage(f"CIF '{suggested_filename}' enviado para PhaseDRX.", 4000)
+                self.statusBar().showMessage(tr('cif.sent_to_phasedrx', filename=suggested_filename), 4000)
             else:
-                QMessageBox.warning(self, "Janela Fechada", "A janela PhaseDRX foi fechada. Salvando CIF em arquivo.")
+                QMessageBox.warning(self, tr('cif.window_closed_title'), tr('cif.window_closed_saving'))
                 self._save_cif_file_dialog(cif_string, suggested_filename, "MP")
             self.cif_export_target = None
         else:
@@ -2450,11 +2594,11 @@ class MaterialsApp(QMainWindow):
         # (O conteúdo desta função permanece o mesmo)
         if self.cod_cif_fetch_thread and self.cod_cif_fetch_thread.is_alive():
             QMessageBox.information(
-                self, "Em Progresso", "Um download de CIF do COD já está em andamento."
+                self, tr('status.in_progress'), tr('cif.cod_in_progress')
             )
             return
         logging.info(f"Iniciando download de CIF (COD) para ID: {cod_id}.")
-        self.statusBar().showMessage(f"Buscando CIF (COD) para ID: {cod_id}...", 5000)
+        self.statusBar().showMessage(tr('cif.fetching_cod', id=cod_id), 5000)
         cod_cif_worker = Worker(
             COD_api_logic.get_cod_cif_data,
             "fetch_cif_cod",
@@ -2481,9 +2625,9 @@ class MaterialsApp(QMainWindow):
         if self.cif_export_target == 'phasedrx':
             if self.phasedrx_window_ref and self.phasedrx_window_ref.isVisible():
                 self.phasedrx_window_ref.load_cif_from_data(cif_string, suggested_filename)
-                self.statusBar().showMessage(f"CIF '{suggested_filename}' enviado para PhaseDRX.", 4000)
+                self.statusBar().showMessage(tr('cif.sent_to_phasedrx', filename=suggested_filename), 4000)
             else:
-                QMessageBox.warning(self, "Janela Fechada", "A janela PhaseDRX foi fechada. Salvando CIF em arquivo.")
+                QMessageBox.warning(self, tr('cif.window_closed_title'), tr('cif.window_closed_saving'))
                 self._save_cif_file_dialog(cif_string, suggested_filename, f"COD ({cod_id})")
             self.cif_export_target = None
         else:
@@ -2495,11 +2639,11 @@ class MaterialsApp(QMainWindow):
         # (O conteúdo desta função permanece o mesmo)
         if self.rod_file_fetch_thread and self.rod_file_fetch_thread.is_alive():
             QMessageBox.information(
-                self, "Em Progresso", "Um download de arquivo .rod da ROD já está em andamento."
+                self, tr('status.in_progress'), tr('cif.rod_in_progress')
             )
             return
         logging.info(f"Iniciando download de arquivo .rod (ROD) para ID: {rod_id}.")
-        self.statusBar().showMessage(f"Buscando arquivo .rod (ROD) para ID: {rod_id}...", 5000)
+        self.statusBar().showMessage(tr('cif.fetching_rod', id=rod_id), 5000)
 
         rod_file_worker = Worker(
             self._fetch_rod_file_content_logic,
@@ -2737,11 +2881,11 @@ class MaterialsApp(QMainWindow):
     def trigger_fetch_doi_from_ccdc(self, url: str):
         # (O conteúdo desta função permanece o mesmo)
         if self.doi_fetch_thread and self.doi_fetch_thread.is_alive():
-            QMessageBox.information(self, "Em Progresso", "Uma busca de DOI já está em andamento.")
+            QMessageBox.information(self, tr('status.in_progress'), tr('search.doi_in_progress'))
             return
 
         logging.info(f"Iniciando busca de DOI na página do CCDC: {url}")
-        self.statusBar().showMessage("Buscando DOI na página do CCDC...", 5000)
+        self.statusBar().showMessage(tr('search.fetching_doi_ccdc'), 5000)
 
         doi_worker = Worker(self._fetch_doi_from_ccdc_logic, "fetch_doi_from_ccdc", url)
         doi_worker.doi_from_ccdc_ready.connect(self.handle_doi_from_ccdc_ready)
@@ -2785,17 +2929,17 @@ class MaterialsApp(QMainWindow):
         self.statusBar().clearMessage()
         if doi:
             self.copy_to_clipboard(doi)
-            QMessageBox.information(self, "DOI Encontrado",
-                                    f"O seguinte DOI foi encontrado e copiado para a área de transferência:\n\n{doi}")
+            QMessageBox.information(self, tr('search.doi_found_title'),
+                                    tr('search.doi_found_msg', doi=doi))
         else:
-            QMessageBox.warning(self, "DOI Não Encontrado",
-                                "Não foi possível encontrar um DOI na página da publicação associada.")
+            QMessageBox.warning(self, tr('search.doi_not_found_title'),
+                                tr('search.doi_not_found_msg'))
 
     def open_cod_material_page(self, cod_id: str):
         # (O conteúdo desta função permanece o mesmo)
         if not cod_id or cod_id == "N/A":
             QMessageBox.warning(
-                self, "ID Inválido", "Não há um COD ID válido para abrir."
+                self, tr('dialogs.error.invalid_id'), tr('results.context_menu.no_cod_id')
             )
             return
         url = f"https://www.crystallography.net/cod/{cod_id}.html"
@@ -2803,8 +2947,8 @@ class MaterialsApp(QMainWindow):
         if not QDesktopServices.openUrl(QUrl(url)):
             QMessageBox.warning(
                 self,
-                "Erro ao Abrir URL do COD",
-                f"Não foi possível abrir o link para COD ID {cod_id} no navegador.\nURL: {url}",
+                tr('dialogs.error.open_url_cod'),
+                tr('dialogs.error.open_url_cod_msg', id=cod_id, url=url),
             )
             logging.error(f"Falha ao abrir URL do COD: {url}")
 
@@ -2813,8 +2957,8 @@ class MaterialsApp(QMainWindow):
         if not str(icsd_code_number).strip():
             QMessageBox.warning(
                 self,
-                "Código ICSD Inválido",
-                f"O código ICSD fornecido ('{icsd_code_number}') parece ser inválido.",
+                tr('dialogs.error.invalid_icsd'),
+                tr('dialogs.error.invalid_icsd_msg', code=icsd_code_number),
             )
             return
         url = f"https://www.ccdc.cam.ac.uk/structures/Search?Ccdcid={icsd_code_number}&DatabaseToSearch=ICSD"
@@ -2822,8 +2966,8 @@ class MaterialsApp(QMainWindow):
         if not QDesktopServices.openUrl(QUrl(url)):
             QMessageBox.warning(
                 self,
-                "Erro ao Abrir URL do CCDC/ICSD",
-                f"Não foi possível abrir o link para o código ICSD {icsd_code_number} no navegador.\nURL: {url}",
+                tr('dialogs.error.open_url_icsd'),
+                tr('dialogs.error.open_url_icsd_msg', code=icsd_code_number, url=url),
             )
             logging.error(f"Falha ao abrir URL do CCDC/ICSD: {url}")
 
@@ -2831,7 +2975,7 @@ class MaterialsApp(QMainWindow):
         # (O conteúdo desta função permanece o mesmo)
         clipboard = QGuiApplication.clipboard()
         clipboard.setText(str(value_to_copy))
-        self.statusBar().showMessage(f"'{value_to_copy}' copiado!", 2000)
+        self.statusBar().showMessage(tr('status.copied', value=value_to_copy), 2000)
         logging.info(
             f"Valor '{value_to_copy[:50]}...' copiado para a área de transferência."
         )
@@ -2982,16 +3126,15 @@ class MaterialsApp(QMainWindow):
             project_file = os.path.join(project_dir, f"{project_name}.mfpx")
 
             if os.path.exists(project_dir):
-                reply = QMessageBox.question(self, "Pasta Existente",
-                                             f"A pasta '{project_dir}' já existe.\n"
-                                             "Deseja abri-la como um projeto existente?",
+                reply = QMessageBox.question(self, tr('project.folder_exists_title'),
+                                             tr('project.folder_exists_msg', folder=project_dir),
                                              QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
                                              QMessageBox.StandardButton.Yes)
                 if reply == QMessageBox.StandardButton.No:
                     return
                 if not os.path.exists(project_file):
-                     QMessageBox.warning(self, "Arquivo de Projeto Não Encontrado",
-                                         f"A pasta existe, mas o arquivo de projeto '{project_file}' não foi encontrado.")
+                     QMessageBox.warning(self, tr('project.file_not_found_title'),
+                                         tr('project.file_not_found_msg', file=project_file))
                      return
                 project_path_to_open = project_file
             else:
@@ -3003,8 +3146,8 @@ class MaterialsApp(QMainWindow):
                     project_path_to_open = project_file
                     logging.info(f"Nova estrutura de projeto criada em: {project_dir}")
                 except OSError as e:
-                    QMessageBox.critical(self, "Erro ao Criar Projeto",
-                                         f"Não foi possível criar a estrutura de pastas do projeto:\n{e}")
+                    QMessageBox.critical(self, tr('project.create_error_title'),
+                                         tr('project.create_error_msg', error=str(e)))
                     return
 
         elif choice == dialog.OPEN_PROJECT:
@@ -3084,18 +3227,18 @@ class MaterialsApp(QMainWindow):
             with open(filepath, "w", encoding="utf-8") as f:
                 json.dump(historico_existente, f, indent=4, ensure_ascii=False)
             self.statusBar().showMessage(
-                f"Busca por '{termos_str_normalizados}' em '{base_dados}' adicionada ao histórico.",
+                tr('history.added_to_history', query=termos_str_normalizados, db=base_dados),
                 3000,
             )
             logging.info(
                 f"Busca por '{termos_str_normalizados}' em '{base_dados}' adicionada ao histórico."
             )
         except IOError as e:
-            self.statusBar().showMessage(f"Erro ao salvar histórico: {e}", 5000)
+            self.statusBar().showMessage(tr('history.save_error', error=str(e)), 5000)
             logging.error(f"Erro de E/S ao salvar histórico: {e}")
         except Exception as e:
             self.statusBar().showMessage(
-                f"Erro inesperado ao salvar histórico: {e}", 5000
+                tr('history.save_error', error=str(e)), 5000
             )
             logging.error(f"Erro inesperado ao salvar histórico: {e}")
 

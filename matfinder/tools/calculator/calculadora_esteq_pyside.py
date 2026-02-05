@@ -13,6 +13,12 @@ from PySide6.QtWidgets import (
 from PySide6.QtGui import QFont, QColor, QGuiApplication
 from PySide6.QtCore import Qt, Signal
 
+# Importar sistema de tradução
+try:
+    from matfinder.core.translator import tr
+except ImportError:
+    def tr(key, **kwargs): return key
+
 # --- ALTERAÇÃO DE REATORAÇÃO: Importação Relativa ---
 # Como 'quimica_calc.py' está na mesma pasta 'calculator/',
 # usamos um '.' para importá-lo.
@@ -61,7 +67,7 @@ class CalculadoraEstequiometricaDialog(QDialog):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("Calculadora Estequiométrica e de Soluções")
+        self.setWindowTitle(tr('calculators.stoichiometric.title'))
 
         self.setFixedWidth(620)
         self.setMinimumHeight(620)
@@ -92,7 +98,7 @@ class CalculadoraEstequiometricaDialog(QDialog):
         main_layout.addWidget(scroll_area)
 
         # --- 1. Seção da Equação Química ---
-        self.eq_group = QGroupBox("1. Equação Química")
+        self.eq_group = QGroupBox(tr('calculators.stoichiometric.section_equation'))
         self.eq_group.setCheckable(True)
         self.eq_group.setChecked(True)
         eq_layout_outer = QVBoxLayout(self.eq_group)
@@ -100,30 +106,30 @@ class CalculadoraEstequiometricaDialog(QDialog):
         self.eq_content_widget = QWidget()
         eq_layout_inner = QVBoxLayout(self.eq_content_widget)
 
-        eq_layout_inner.addWidget(QLabel("Insira a equação (ex: CH4 + O2 -> CO2 + H2O):"))
+        eq_layout_inner.addWidget(QLabel(tr('calculators.stoichiometric.equation_label')))
         self.equation_entry = QLineEdit()
-        self.equation_entry.setPlaceholderText("H2 + O2 -> H2O")
+        self.equation_entry.setPlaceholderText(tr('calculators.stoichiometric.equation_placeholder'))
         self.equation_entry.returnPressed.connect(self.balancear_equacao)
         eq_layout_inner.addWidget(self.equation_entry)
 
         eq_buttons_layout = QHBoxLayout()
-        self.balance_button = QPushButton("Balancear Equação")
+        self.balance_button = QPushButton(tr('calculators.stoichiometric.balance_button'))
         self.balance_button.clicked.connect(self.balancear_equacao)
         eq_buttons_layout.addWidget(self.balance_button)
 
-        self.reset_button = QPushButton("Resetar Tudo")
+        self.reset_button = QPushButton(tr('calculators.stoichiometric.reset_button'))
         self.reset_button.clicked.connect(self.resetar_calculadora)
         eq_buttons_layout.addWidget(self.reset_button)
 
         info_button = QPushButton("!")
         info_button.setFixedSize(30, 30)
-        info_button.setToolTip("Informações sobre o formato da equação")
+        info_button.setToolTip(tr('calculators.stoichiometric.info_tooltip'))
         info_button.clicked.connect(self.mostrar_info_formatacao_equacao)
         eq_buttons_layout.addWidget(info_button)
         eq_buttons_layout.addStretch()
         eq_layout_inner.addLayout(eq_buttons_layout)
 
-        self.balanced_equation_label = QLabel("Equação balanceada aparecerá aqui.")
+        self.balanced_equation_label = QLabel(tr('calculators.stoichiometric.balanced_placeholder'))
         self.balanced_equation_label.setFont(QFont("Arial", 10, QFont.Weight.Bold))
         self.balanced_equation_label.setWordWrap(True)
         eq_layout_inner.addWidget(self.balanced_equation_label)
@@ -133,7 +139,7 @@ class CalculadoraEstequiometricaDialog(QDialog):
         sections_layout.addWidget(self.eq_group)
 
         # --- 2. Seção de Quantidades Iniciais dos Reagentes ---
-        self.quant_group = QGroupBox("2. Quantidades Iniciais dos Reagentes")
+        self.quant_group = QGroupBox(tr('calculators.stoichiometric.section_quantities'))
         self.quant_group.setCheckable(True)
         self.quant_group.setChecked(False)
         quant_layout_outer = QVBoxLayout(self.quant_group)
@@ -141,14 +147,14 @@ class CalculadoraEstequiometricaDialog(QDialog):
         self.quant_content_widget = QWidget()
         quant_layout_inner = QVBoxLayout(self.quant_content_widget)
 
-        self.quant_placeholder_label = QLabel("Balanceie uma equação para inserir as quantidades.")
+        self.quant_placeholder_label = QLabel(tr('calculators.stoichiometric.quantities_placeholder'))
         quant_layout_inner.addWidget(self.quant_placeholder_label)
 
         self.quant_reagents_container_widget = QWidget()
         self.quant_reagents_layout = QVBoxLayout(self.quant_reagents_container_widget)
         quant_layout_inner.addWidget(self.quant_reagents_container_widget)
 
-        self.limitante_button = QPushButton("Identificar Reagente Limitante")
+        self.limitante_button = QPushButton(tr('calculators.stoichiometric.identify_limiting'))
         self.limitante_button.clicked.connect(self.identificar_reagente_limitante_action)
         quant_layout_inner.addWidget(self.limitante_button, alignment=Qt.AlignmentFlag.AlignLeft)
 
@@ -157,7 +163,7 @@ class CalculadoraEstequiometricaDialog(QDialog):
         sections_layout.addWidget(self.quant_group)
 
         # --- 3. Seção de Cálculo de Rendimento ---
-        self.rend_group = QGroupBox("3. Cálculo de Rendimento")
+        self.rend_group = QGroupBox(tr('calculators.stoichiometric.section_yield'))
         self.rend_group.setCheckable(True)
         self.rend_group.setChecked(False)
         rend_layout_outer = QVBoxLayout(self.rend_group)
@@ -165,23 +171,23 @@ class CalculadoraEstequiometricaDialog(QDialog):
         self.rend_main_content_widget = QWidget()
         rend_layout_inner = QVBoxLayout(self.rend_main_content_widget)
 
-        self.rend_placeholder_label = QLabel("Defina as quantidades e identifique o reagente limitante.")
+        self.rend_placeholder_label = QLabel(tr('calculators.stoichiometric.yield_placeholder'))
         rend_layout_inner.addWidget(self.rend_placeholder_label)
 
         self.rend_actual_content_widget = QWidget()
         rend_content_layout = QGridLayout(self.rend_actual_content_widget)
 
-        rend_content_layout.addWidget(QLabel("Produto para Rendimento Teórico:"), 0, 0)
+        rend_content_layout.addWidget(QLabel(tr('calculators.stoichiometric.product_for_yield')), 0, 0)
         self.produto_rt_combo = QComboBox()
         rend_content_layout.addWidget(self.produto_rt_combo, 0, 1)
 
-        self.calc_rt_button = QPushButton("Calcular Rendimento Teórico")
+        self.calc_rt_button = QPushButton(tr('calculators.stoichiometric.calc_theoretical_yield'))
         self.calc_rt_button.clicked.connect(self.calcular_rendimento_teorico_action)
         rend_content_layout.addWidget(self.calc_rt_button, 0, 2)
 
-        rend_content_layout.addWidget(QLabel("Rendimento Real Obtido:"), 1, 0)
+        rend_content_layout.addWidget(QLabel(tr('calculators.stoichiometric.actual_yield')), 1, 0)
         self.rend_real_entry = QLineEdit()
-        self.rend_real_entry.setPlaceholderText("ex: 10.5")
+        self.rend_real_entry.setPlaceholderText(tr('calculators.stoichiometric.example_value'))
         rend_real_unit_layout = QHBoxLayout()
         rend_real_unit_layout.addWidget(self.rend_real_entry)
         self.rend_real_unit_combo = QComboBox()
@@ -189,7 +195,7 @@ class CalculadoraEstequiometricaDialog(QDialog):
         rend_real_unit_layout.addWidget(self.rend_real_unit_combo)
         rend_content_layout.addLayout(rend_real_unit_layout, 1, 1)
 
-        self.calc_perc_rend_button = QPushButton("Calcular % Rendimento")
+        self.calc_perc_rend_button = QPushButton(tr('calculators.stoichiometric.calc_percent_yield'))
         self.calc_perc_rend_button.clicked.connect(self.calcular_percentagem_rendimento_action)
         rend_content_layout.addWidget(self.calc_perc_rend_button, 1, 2)
 
@@ -201,7 +207,7 @@ class CalculadoraEstequiometricaDialog(QDialog):
         sections_layout.addWidget(self.rend_group)
 
         # --- 4. Seção de Cálculo de Molaridade ---
-        self.molaridade_group = QGroupBox("4. Cálculo de Molaridade de Solução")
+        self.molaridade_group = QGroupBox(tr('calculators.stoichiometric.section_molarity'))
         self.molaridade_group.setCheckable(True)
         self.molaridade_group.setChecked(True)
         molaridade_layout_outer = QVBoxLayout(self.molaridade_group)
@@ -209,25 +215,25 @@ class CalculadoraEstequiometricaDialog(QDialog):
         self.molaridade_content_widget = QWidget()
         molaridade_layout_inner = QGridLayout(self.molaridade_content_widget)
 
-        molaridade_layout_inner.addWidget(QLabel("Fórmula do Soluto:"), 0, 0)
+        molaridade_layout_inner.addWidget(QLabel(tr('calculators.stoichiometric.solute_formula')), 0, 0)
         self.molaridade_formula_entry = QLineEdit()
-        self.molaridade_formula_entry.setPlaceholderText("ex: NaCl")
+        self.molaridade_formula_entry.setPlaceholderText(tr('calculators.stoichiometric.solute_formula_placeholder'))
         molaridade_layout_inner.addWidget(self.molaridade_formula_entry, 0, 1)
 
-        molaridade_layout_inner.addWidget(QLabel("Massa Molar do Soluto (g/mol):"), 1, 0)
+        molaridade_layout_inner.addWidget(QLabel(tr('calculators.stoichiometric.solute_molar_mass')), 1, 0)
         self.molaridade_mm_entry = QLineEdit()
-        self.molaridade_mm_entry.setPlaceholderText("ex: 58.44 (para NaCl)")
+        self.molaridade_mm_entry.setPlaceholderText(tr('calculators.stoichiometric.solute_mm_placeholder'))
         molaridade_layout_inner.addWidget(self.molaridade_mm_entry, 1, 1)
         self.molaridade_formula_entry.editingFinished.connect(self.preencher_massa_molar_soluto)
 
-        molaridade_layout_inner.addWidget(QLabel("Massa do Soluto (g):"), 2, 0)
+        molaridade_layout_inner.addWidget(QLabel(tr('calculators.stoichiometric.solute_mass')), 2, 0)
         self.molaridade_massa_soluto_entry = QLineEdit()
-        self.molaridade_massa_soluto_entry.setPlaceholderText("ex: 5.844")
+        self.molaridade_massa_soluto_entry.setPlaceholderText(tr('calculators.stoichiometric.solute_mass_placeholder'))
         molaridade_layout_inner.addWidget(self.molaridade_massa_soluto_entry, 2, 1)
 
-        molaridade_layout_inner.addWidget(QLabel("Volume da Solução:"), 3, 0)
+        molaridade_layout_inner.addWidget(QLabel(tr('calculators.stoichiometric.solution_volume')), 3, 0)
         self.molaridade_volume_solucao_entry = QLineEdit()
-        self.molaridade_volume_solucao_entry.setPlaceholderText("ex: 0.5 ou 500")
+        self.molaridade_volume_solucao_entry.setPlaceholderText(tr('calculators.stoichiometric.volume_placeholder'))
         self.molaridade_volume_unit_combo = QComboBox()
         self.molaridade_volume_unit_combo.addItems(["L", "mL"])
         molaridade_volume_layout = QHBoxLayout()
@@ -235,15 +241,15 @@ class CalculadoraEstequiometricaDialog(QDialog):
         molaridade_volume_layout.addWidget(self.molaridade_volume_unit_combo)
         molaridade_layout_inner.addLayout(molaridade_volume_layout, 3, 1)
 
-        self.molaridade_calc_button = QPushButton("Calcular Molaridade")
+        self.molaridade_calc_button = QPushButton(tr('calculators.stoichiometric.calc_molarity'))
         self.molaridade_calc_button.clicked.connect(self.calcular_molaridade_action)
         molaridade_layout_inner.addWidget(self.molaridade_calc_button, 4, 0, 1, 2)
 
-        self.molaridade_reset_button = QPushButton("Resetar Molaridade")
+        self.molaridade_reset_button = QPushButton(tr('calculators.stoichiometric.reset_molarity'))
         self.molaridade_reset_button.clicked.connect(self.resetar_campos_molaridade)
         molaridade_layout_inner.addWidget(self.molaridade_reset_button, 4, 2)
 
-        self.molaridade_resultado_label = QLabel("Molaridade (M): N/A")
+        self.molaridade_resultado_label = QLabel(tr('calculators.stoichiometric.molarity_result'))
         self.molaridade_resultado_label.setFont(QFont("Arial", 10, QFont.Weight.Bold))
         molaridade_layout_inner.addWidget(self.molaridade_resultado_label, 5, 0, 1, 3)
 
@@ -252,7 +258,7 @@ class CalculadoraEstequiometricaDialog(QDialog):
         sections_layout.addWidget(self.molaridade_group)
 
         # --- 5. Seção de Resultados Detalhados (Estequiometria) ---
-        res_group = QGroupBox("5. Resultados Detalhados (Estequiometria)")
+        res_group = QGroupBox(tr('calculators.stoichiometric.section_results'))
         res_layout = QVBoxLayout()
         self.results_text_edit = QTextEdit()
         self.results_text_edit.setReadOnly(True)
@@ -269,12 +275,11 @@ class CalculadoraEstequiometricaDialog(QDialog):
         action_buttons_layout = QHBoxLayout()
         action_buttons_layout.addStretch()
 
-        self.copy_results_button = QPushButton("Copiar Resultados")  # <--- ALTERADO
-        self.copy_results_button.setToolTip(
-            "Copiar o conteúdo da caixa de resultados para a área de transferência.")  # <--- ALTERADO
+        self.copy_results_button = QPushButton(tr('calculators.stoichiometric.copy_results'))
+        self.copy_results_button.setToolTip(tr('calculators.stoichiometric.copy_results_tooltip'))
         self.copy_results_button.setEnabled(False)
-        self.copy_results_button.clicked.connect(self.copiar_resultados_clipboard)  # <--- ALTERADO
-        action_buttons_layout.addWidget(self.copy_results_button)  # <--- ALTERADO
+        self.copy_results_button.clicked.connect(self.copiar_resultados_clipboard)
+        action_buttons_layout.addWidget(self.copy_results_button)
 
         self.dialog_button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Close)
         self.dialog_button_box.rejected.connect(self.reject)
@@ -318,16 +323,8 @@ class CalculadoraEstequiometricaDialog(QDialog):
         self.copy_results_button.setEnabled(bool(self.results_text_edit.toPlainText().strip()))
 
     def mostrar_info_formatacao_equacao(self):
-        info_text = (
-            "Formato da Equação:\n"
-            "- Use símbolos válidos (ex: H, O, Fe, CH4).\n"
-            "- Índices após o elemento (ex: H2O, O2).\n"
-            "- Separe reagentes de produtos com '->', '=' ou '=>'.\n"
-            "- Separe espécies com '+'.\n"
-            "- Não insira coeficientes para balanceamento.\n"
-            "- Parênteses são suportados (ex: Ca(OH)2)."
-        )
-        QMessageBox.information(self, "Formato da Equação", info_text)
+        info_text = tr('calculators.stoichiometric.equation_format_info')
+        QMessageBox.information(self, tr('calculators.stoichiometric.equation_format_title'), info_text)
 
     def balancear_equacao(self):
         # Resetar estados relevantes antes de um novo balanceamento
@@ -347,20 +344,19 @@ class CalculadoraEstequiometricaDialog(QDialog):
 
         equation_str = self.equation_entry.text().strip()
         if not equation_str:
-            self.balanced_equation_label.setText("<font color='red'>Por favor, insira uma equação.</font>")
+            self.balanced_equation_label.setText(f"<font color='red'>{tr('calculators.stoichiometric.error_no_equation')}</font>")
             self._update_sections_state()
             return
 
         if not CHEMPY_AVAILABLE:
             self.balanced_equation_label.setText(
-                "<font color='red'>Balanceamento indisponível (Chempy não instalado).</font>")
-            # QMessageBox.warning(self, "Chempy Ausente", ...) # Já é mostrado no __main__
+                f"<font color='red'>{tr('calculators.stoichiometric.error_chempy_missing')}</font>")
             self._update_sections_state()
             return
 
         parsed_data = parse_equation_string(equation_str)
         if not parsed_data or not parsed_data[0] or not parsed_data[1]:
-            self.balanced_equation_label.setText("<font color='red'>Erro ao ler a equação. Verifique o formato.</font>")
+            self.balanced_equation_label.setText(f"<font color='red'>{tr('calculators.stoichiometric.error_parse')}</font>")
             self._update_sections_state()
             return
 
@@ -371,7 +367,7 @@ class CalculadoraEstequiometricaDialog(QDialog):
             prod_set = {str(f) for f in self.parsed_products_formulas}
             coeffs = balance_chemical_equation(reac_set, prod_set)
         except Exception as e:
-            self.balanced_equation_label.setText(f"<font color='red'>Erro no balanceamento: {e}</font>")
+            self.balanced_equation_label.setText(f"<font color='red'>{tr('calculators.stoichiometric.error_balance')}: {e}</font>")
             self._update_sections_state()
             return
 
@@ -384,7 +380,7 @@ class CalculadoraEstequiometricaDialog(QDialog):
                 self.balanced_prod_coeffs
             )
             self.balanced_equation_label.setText(f"<b>{formatted_eq}</b>")
-            self.log_resultado(f"Equação Balanceada: {formatted_eq}")
+            self.log_resultado(f"{tr('calculators.stoichiometric.balanced_equation')}: {formatted_eq}")
             self._create_reagent_fields()
             self._populate_product_combo()
             self._update_sections_state(equation_balanced=True)
@@ -393,7 +389,7 @@ class CalculadoraEstequiometricaDialog(QDialog):
             self.molaridade_group.setChecked(False)  # Recolhe molaridade também
         else:
             self.balanced_equation_label.setText(
-                "<font color='red'>Não foi possível balancear. Verifique as fórmulas.</font>")
+                f"<font color='red'>{tr('calculators.stoichiometric.error_balance_failed')}</font>")
             self._update_sections_state()
 
     def _clear_reagent_fields(self):
@@ -415,7 +411,7 @@ class CalculadoraEstequiometricaDialog(QDialog):
         self._clear_reagent_fields()
 
         if not self.parsed_reactants_formulas:
-            no_reagents_label = QLabel("Nenhum reagente explícito na equação para inserir quantidades.")
+            no_reagents_label = QLabel(tr('calculators.stoichiometric.no_reagents'))
             self.quant_reagents_layout.addWidget(no_reagents_label)
             return
 
@@ -424,7 +420,7 @@ class CalculadoraEstequiometricaDialog(QDialog):
             label = QLabel(f"{formula}:")
             label.setFixedWidth(100)
             entry = QLineEdit()
-            entry.setPlaceholderText("Quantidade")
+            entry.setPlaceholderText(tr('calculators.stoichiometric.quantity'))
             unit_combo = QComboBox()
             unit_combo.addItems(["g", "mol"])
 
@@ -443,7 +439,7 @@ class CalculadoraEstequiometricaDialog(QDialog):
 
     def identificar_reagente_limitante_action(self):
         if not self.balanced_reac_coeffs:
-            QMessageBox.warning(self, "Atenção", "Balanceie a equação primeiro.")
+            QMessageBox.warning(self, tr('dialogs.error.warning'), tr('calculators.stoichiometric.balance_first'))
             return
 
         quantidades_moles_reagentes = {}
@@ -455,12 +451,14 @@ class CalculadoraEstequiometricaDialog(QDialog):
             try:
                 valor_str = widgets["entry"].text().strip()
                 if not valor_str:
-                    QMessageBox.warning(self, "Entrada Inválida", f"Por favor, insira uma quantidade para {formula}.")
+                    QMessageBox.warning(self, tr('dialogs.error.invalid_input'),
+                                       tr('calculators.stoichiometric.enter_quantity', formula=formula))
                     pode_calcular = False
                     break
                 valor = float(valor_str)
                 if valor < 0:
-                    QMessageBox.warning(self, "Valor Inválido", f"A quantidade de {formula} não pode ser negativa.")
+                    QMessageBox.warning(self, tr('dialogs.error.invalid_value'),
+                                       tr('calculators.stoichiometric.negative_quantity', formula=formula))
                     pode_calcular = False
                     break
 
@@ -469,27 +467,29 @@ class CalculadoraEstequiometricaDialog(QDialog):
                 if unidade == "g":
                     massa_molar_reagente = calcular_massa_molar(formula)
                     if massa_molar_reagente is None or massa_molar_reagente <= 0:
-                        self.log_resultado(f"ERRO: Massa molar inválida ou não calculada para {formula}.")
-                        QMessageBox.critical(self, "Erro de Cálculo",
-                                             f"Não foi possível calcular a massa molar para {formula}.")
+                        self.log_resultado(f"ERRO: {tr('calculators.stoichiometric.invalid_molar_mass', formula=formula)}")
+                        QMessageBox.critical(self, tr('dialogs.error.calc_error'),
+                                            tr('calculators.stoichiometric.calc_mm_error', formula=formula))
                         pode_calcular = False
                         break
                     moles = massa_para_moles(valor, massa_molar_reagente)
                     if moles is None:
-                        self.log_resultado(f"ERRO: Falha ao converter massa para moles para {formula}.")
-                        QMessageBox.critical(self, "Erro de Cálculo",
-                                             f"Não foi possível converter a massa de {formula} para moles.")
+                        self.log_resultado(f"ERRO: {tr('calculators.stoichiometric.mass_to_moles_error', formula=formula)}")
+                        QMessageBox.critical(self, tr('dialogs.error.calc_error'),
+                                            tr('calculators.stoichiometric.convert_error', formula=formula))
                         pode_calcular = False
                         break
                     quantidades_moles_reagentes[formula] = moles
                 else:
                     quantidades_moles_reagentes[formula] = valor
             except ValueError:
-                QMessageBox.warning(self, "Erro de Entrada", f"Valor numérico inválido inserido para {formula}.")
+                QMessageBox.warning(self, tr('dialogs.error.input_error'),
+                                   tr('calculators.stoichiometric.invalid_number', formula=formula))
                 pode_calcular = False
                 break
             except Exception as e:
-                QMessageBox.critical(self, "Erro Inesperado", f"Ocorreu um erro ao processar {formula}: {e}")
+                QMessageBox.critical(self, tr('dialogs.error.unexpected'),
+                                    tr('calculators.stoichiometric.processing_error', formula=formula, error=str(e)))
                 pode_calcular = False
                 break
 
@@ -497,9 +497,9 @@ class CalculadoraEstequiometricaDialog(QDialog):
             self._update_sections_state(equation_balanced=True, limitante_identificado=False)
             return
 
-        if not self.reactant_widgets or not quantidades_moles_reagentes:  # Verifica se há reagentes ou se as quantidades foram preenchidas
-            QMessageBox.warning(self, "Sem Dados",
-                                "Nenhuma quantidade de reagente válida foi inserida ou não há reagentes.")
+        if not self.reactant_widgets or not quantidades_moles_reagentes:
+            QMessageBox.warning(self, tr('dialogs.error.no_data'),
+                               tr('calculators.stoichiometric.no_valid_quantities'))
             self._update_sections_state(equation_balanced=True, limitante_identificado=False)
             return
 
@@ -511,23 +511,23 @@ class CalculadoraEstequiometricaDialog(QDialog):
         if self.reagente_limitante_formula:
             self.reagente_limitante_moles = quantidades_moles_reagentes[self.reagente_limitante_formula]
             self.log_resultado(
-                f"Reagente Limitante: {self.reagente_limitante_formula} ({self.reagente_limitante_moles:.4f} mol)")
+                f"{tr('calculators.stoichiometric.limiting_reagent')}: {self.reagente_limitante_formula} ({self.reagente_limitante_moles:.4f} mol)")
             self._update_sections_state(equation_balanced=True, limitante_identificado=True)
             self.rend_group.setChecked(True)
         else:
-            self.log_resultado("Não foi possível determinar o reagente limitante com os dados fornecidos.")
+            self.log_resultado(tr('calculators.stoichiometric.limiting_not_found'))
             self.reagente_limitante_moles = None
             self._update_sections_state(equation_balanced=True, limitante_identificado=False)
 
     def calcular_rendimento_teorico_action(self):
         if not self.reagente_limitante_formula or self.reagente_limitante_moles is None:
-            QMessageBox.warning(self, "Atenção", "Identifique o reagente limitante primeiro.")
+            QMessageBox.warning(self, tr('dialogs.error.warning'), tr('calculators.stoichiometric.identify_limiting_first'))
             return
 
         produto_selecionado = self.produto_rt_combo.currentText()
         if not produto_selecionado:
-            QMessageBox.warning(self, "Seleção Necessária",
-                                "Por favor, selecione um produto para calcular o rendimento.")
+            QMessageBox.warning(self, tr('dialogs.error.selection_required'),
+                               tr('calculators.stoichiometric.select_product'))
             return
 
         self.rt_moles_calculado = None  # Reseta antes de calcular
@@ -552,33 +552,33 @@ class CalculadoraEstequiometricaDialog(QDialog):
                     rt_gramas_str = f"{rt_gramas:.4f} g"
             else:
                 self.log_resultado(
-                    f"AVISO: Não foi possível calcular a massa molar para o produto {produto_selecionado}.")
+                    f"{tr('dialogs.error.warning')}: {tr('calculators.stoichiometric.calc_mm_warning', product=produto_selecionado)}")
 
-            self.log_resultado(f"\nRendimento Teórico para {produto_selecionado}:")
-            self.log_resultado(f"  - Em moles: {rt_moles:.4f} mol")
-            self.log_resultado(f"  - Em gramas: {rt_gramas_str} (MM: {mm_produto_str})")
+            self.log_resultado(f"\n{tr('calculators.stoichiometric.theoretical_yield_for', product=produto_selecionado)}:")
+            self.log_resultado(f"  - {tr('calculators.stoichiometric.in_moles')}: {rt_moles:.4f} mol")
+            self.log_resultado(f"  - {tr('calculators.stoichiometric.in_grams')}: {rt_gramas_str} (MM: {mm_produto_str})")
             self._update_sections_state(equation_balanced=True, limitante_identificado=True, rt_calculado=True)
         else:
-            self.log_resultado(f"\nNão foi possível calcular o rendimento teórico para {produto_selecionado}.")
+            self.log_resultado(f"\n{tr('calculators.stoichiometric.rt_calc_failed', product=produto_selecionado)}")
             self._update_sections_state(equation_balanced=True, limitante_identificado=True, rt_calculado=False)
 
     def calcular_percentagem_rendimento_action(self):
         if self.rt_moles_calculado is None:
-            QMessageBox.warning(self, "Atenção", "Calcule o Rendimento Teórico primeiro.")
+            QMessageBox.warning(self, tr('dialogs.error.warning'), tr('calculators.stoichiometric.calc_rt_first'))
             return
 
         rend_real_str = self.rend_real_entry.text().strip()
         if not rend_real_str:
-            QMessageBox.warning(self, "Entrada Inválida", "Por favor, insira o Rendimento Real Obtido.")
+            QMessageBox.warning(self, tr('dialogs.error.invalid_input'), tr('calculators.stoichiometric.enter_actual_yield'))
             return
 
         try:
             rend_real_valor = float(rend_real_str)
             if rend_real_valor < 0:
-                QMessageBox.warning(self, "Valor Inválido", "O Rendimento Real não pode ser negativo.")
+                QMessageBox.warning(self, tr('dialogs.error.invalid_value'), tr('calculators.stoichiometric.negative_yield'))
                 return
         except ValueError:
-            QMessageBox.warning(self, "Erro de Entrada", "Valor numérico inválido para Rendimento Real.")
+            QMessageBox.warning(self, tr('dialogs.error.input_error'), tr('calculators.stoichiometric.invalid_yield_number'))
             return
 
         rend_real_unidade = self.rend_real_unit_combo.currentText()
@@ -586,41 +586,40 @@ class CalculadoraEstequiometricaDialog(QDialog):
         produto_selecionado_para_mm = self.produto_rt_combo.currentText()  # Produto para o qual RT foi calculado
 
         if not produto_selecionado_para_mm:
-            QMessageBox.critical(self, "Erro Interno", "Produto não definido para cálculo de % de rendimento (MM).")
+            QMessageBox.critical(self, tr('dialogs.error.internal'), tr('calculators.stoichiometric.product_undefined'))
             return
 
         if rend_real_unidade == "g":
             massa_molar_produto = calcular_massa_molar(produto_selecionado_para_mm)
             if massa_molar_produto is None or massa_molar_produto <= 0:
                 self.log_resultado(
-                    f"ERRO: Falha ao obter MM para {produto_selecionado_para_mm} para converter rendimento real.")
-                QMessageBox.critical(self, "Erro de Cálculo",
-                                     f"Não foi possível obter massa molar para {produto_selecionado_para_mm} para converter rendimento real.")
+                    f"ERRO: {tr('calculators.stoichiometric.mm_get_error', product=produto_selecionado_para_mm)}")
+                QMessageBox.critical(self, tr('dialogs.error.calc_error'),
+                                    tr('calculators.stoichiometric.mm_convert_error', product=produto_selecionado_para_mm))
                 return
 
             moles_convertidos = massa_para_moles(rend_real_valor, massa_molar_produto)
             if moles_convertidos is None:
                 self.log_resultado(
-                    f"ERRO: Falha ao converter massa de {produto_selecionado_para_mm} (rend. real) para moles.")
-                QMessageBox.critical(self, "Erro de Conversão",
-                                     f"Não foi possível converter a massa de {produto_selecionado_para_mm} (rendimento real) para moles.")
+                    f"ERRO: {tr('calculators.stoichiometric.mass_convert_error', product=produto_selecionado_para_mm)}")
+                QMessageBox.critical(self, tr('dialogs.error.conversion'),
+                                    tr('calculators.stoichiometric.mass_to_moles_failed', product=produto_selecionado_para_mm))
                 return
             rend_real_moles = moles_convertidos
         else:
             rend_real_moles = rend_real_valor
 
         # Chama a função do backend
-        # Certifique-se que quimica_calc.calcular_percentagem_rendimento está correta
         percent_rend = calcular_percentagem_rendimento(rend_real_moles, self.rt_moles_calculado)
 
         if percent_rend is not None:
             self.log_resultado(
-                f"\nPercentagem de Rendimento para {self.produto_rt_combo.currentText()}: {percent_rend:.2f}%")
+                f"\n{tr('calculators.stoichiometric.percent_yield_for', product=self.produto_rt_combo.currentText())}: {percent_rend:.2f}%")
             self.log_resultado(
-                f"  (Rendimento Real: {rend_real_moles:.4f} mol / Rendimento Teórico: {self.rt_moles_calculado:.4f} mol)")
+                f"  ({tr('calculators.stoichiometric.actual_yield_label')}: {rend_real_moles:.4f} mol / {tr('calculators.stoichiometric.theoretical_yield_label')}: {self.rt_moles_calculado:.4f} mol)")
         else:
             self.log_resultado(
-                f"\nNão foi possível calcular a percentagem de rendimento para {self.produto_rt_combo.currentText()}. Verifique os valores (RT pode ser zero).")
+                f"\n{tr('calculators.stoichiometric.percent_calc_failed', product=self.produto_rt_combo.currentText())}")
         # Mantém o estado, pois o cálculo foi tentado/realizado
         self._update_sections_state(equation_balanced=True, limitante_identificado=True, rt_calculado=True)
 
@@ -646,7 +645,7 @@ class CalculadoraEstequiometricaDialog(QDialog):
             formula_soluto_str = self.molaridade_formula_entry.text().strip()  # Pega a fórmula para log
 
             if not all([massa_soluto_str, mm_soluto_str, volume_solucao_str]):
-                QMessageBox.warning(self, "Campos Vazios", "Preencha todos os campos para calcular a molaridade.")
+                QMessageBox.warning(self, tr('dialogs.error.empty_fields'), tr('calculators.stoichiometric.fill_all_fields'))
                 return
 
             massa_soluto = float(massa_soluto_str)
@@ -655,13 +654,13 @@ class CalculadoraEstequiometricaDialog(QDialog):
             unidade_volume = self.molaridade_volume_unit_combo.currentText()
 
             if mm_soluto <= 0:
-                QMessageBox.warning(self, "Valor Inválido", "A massa molar do soluto deve ser positiva.")
+                QMessageBox.warning(self, tr('dialogs.error.invalid_value'), tr('calculators.stoichiometric.mm_positive'))
                 return
             if massa_soluto < 0:
-                QMessageBox.warning(self, "Valor Inválido", "A massa do soluto não pode ser negativa.")
+                QMessageBox.warning(self, tr('dialogs.error.invalid_value'), tr('calculators.stoichiometric.mass_not_negative'))
                 return
             if volume_solucao <= 0:
-                QMessageBox.warning(self, "Valor Inválido", "O volume da solução deve ser positivo.")
+                QMessageBox.warning(self, tr('dialogs.error.invalid_value'), tr('calculators.stoichiometric.volume_positive'))
                 return
 
             if unidade_volume == "mL":
@@ -670,30 +669,30 @@ class CalculadoraEstequiometricaDialog(QDialog):
                 volume_solucao_L = volume_solucao
 
             if volume_solucao_L == 0:
-                QMessageBox.warning(self, "Volume Zero",
-                                    "O volume da solução não pode ser zero após conversão para litros.")
+                QMessageBox.warning(self, tr('dialogs.error.zero_volume'),
+                                   tr('calculators.stoichiometric.volume_zero_after_conversion'))
                 return
 
             moles_soluto = massa_soluto / mm_soluto
             molaridade = moles_soluto / volume_solucao_L
 
-            self.molaridade_resultado_label.setText(f"Molaridade (M): {molaridade:.4f} mol/L")
-            self.log_resultado(f"\n--- Cálculo de Molaridade ---")
+            self.molaridade_resultado_label.setText(f"{tr('calculators.stoichiometric.molarity_label')}: {molaridade:.4f} mol/L")
+            self.log_resultado(f"\n--- {tr('calculators.stoichiometric.molarity_calc')} ---")
             if formula_soluto_str:
-                self.log_resultado(f"  Soluto: {formula_soluto_str}")
-            self.log_resultado(f"  Massa Molar: {mm_soluto:.4f} g/mol")
-            self.log_resultado(f"  Massa do Soluto: {massa_soluto:.4f} g ({moles_soluto:.4f} mol)")
-            self.log_resultado(f"  Volume da Solução: {volume_solucao} {unidade_volume} ({volume_solucao_L:.4f} L)")
-            self.log_resultado(f"  Molaridade Calculada: {molaridade:.4f} M")
+                self.log_resultado(f"  {tr('calculators.stoichiometric.solute')}: {formula_soluto_str}")
+            self.log_resultado(f"  {tr('calculators.stoichiometric.molar_mass')}: {mm_soluto:.4f} g/mol")
+            self.log_resultado(f"  {tr('calculators.stoichiometric.solute_mass_label')}: {massa_soluto:.4f} g ({moles_soluto:.4f} mol)")
+            self.log_resultado(f"  {tr('calculators.stoichiometric.solution_volume_label')}: {volume_solucao} {unidade_volume} ({volume_solucao_L:.4f} L)")
+            self.log_resultado(f"  {tr('calculators.stoichiometric.calc_molarity_result')}: {molaridade:.4f} M")
             self.log_resultado(f"----------------------------")
 
 
         except ValueError:
-            QMessageBox.warning(self, "Erro de Entrada", "Verifique se todos os valores numéricos são válidos.")
-            self.molaridade_resultado_label.setText("Molaridade (M): Erro")
+            QMessageBox.warning(self, tr('dialogs.error.input_error'), tr('calculators.stoichiometric.check_numeric_values'))
+            self.molaridade_resultado_label.setText(f"{tr('calculators.stoichiometric.molarity_label')}: {tr('dialogs.error.error')}")
         except Exception as e:
-            QMessageBox.critical(self, "Erro Inesperado", f"Ocorreu um erro no cálculo da molaridade: {e}")
-            self.molaridade_resultado_label.setText("Molaridade (M): Erro")
+            QMessageBox.critical(self, tr('dialogs.error.unexpected'), tr('calculators.stoichiometric.molarity_error', error=str(e)))
+            self.molaridade_resultado_label.setText(f"{tr('calculators.stoichiometric.molarity_label')}: {tr('dialogs.error.error')}")
 
     def resetar_campos_molaridade(self):
         self.molaridade_formula_entry.clear()
@@ -701,27 +700,26 @@ class CalculadoraEstequiometricaDialog(QDialog):
         self.molaridade_massa_soluto_entry.clear()
         self.molaridade_volume_solucao_entry.clear()
         self.molaridade_volume_unit_combo.setCurrentIndex(0)
-        self.molaridade_resultado_label.setText("Molaridade (M): N/A")
-        # self.log_resultado("\nCampos de molaridade resetados.") # Log opcional ao resetar apenas esta seção
+        self.molaridade_resultado_label.setText(tr('calculators.stoichiometric.molarity_result'))
 
-    def copiar_resultados_clipboard(self):  # <--- NOVO MÉTODO
+    def copiar_resultados_clipboard(self):
         texto_resultados = self.results_text_edit.toPlainText()
         if texto_resultados.strip():
             clipboard = QGuiApplication.clipboard()
             clipboard.setText(texto_resultados)
-            self.log_resultado("\n[Resultados copiados para a área de transferência]")
-            QMessageBox.information(self, "Copiado",
-                                    "Os resultados detalhados foram copiados para a área de transferência.")
+            self.log_resultado(f"\n[{tr('calculators.stoichiometric.results_copied')}]")
+            QMessageBox.information(self, tr('calculators.stoichiometric.copied'),
+                                   tr('calculators.stoichiometric.copied_msg'))
         else:
-            QMessageBox.information(self, "Nada para Copiar", "A caixa de resultados está vazia.")
+            QMessageBox.information(self, tr('calculators.stoichiometric.nothing_to_copy'), tr('calculators.stoichiometric.results_empty'))
 
     def exportar_resultados(self):  # Mantido, mas o botão agora é de copiar
         QMessageBox.information(self, "TODO",
-                                "Funcionalidade de exportar para Excel a ser implementada. Use o botão 'Copiar Resultados'.")
+                                tr('calculators.stoichiometric.export_todo'))
 
     def resetar_calculadora(self):
         self.equation_entry.clear()
-        self.balanced_equation_label.setText("Equação balanceada aparecerá aqui.")
+        self.balanced_equation_label.setText(tr('calculators.stoichiometric.balanced_placeholder'))
 
         self.parsed_reactants_formulas = []
         self.parsed_products_formulas = []
@@ -744,7 +742,7 @@ class CalculadoraEstequiometricaDialog(QDialog):
         self._update_sections_state()  # Reseta o estado dos botões e placeholders
         self.resetar_campos_molaridade()
         self.results_text_edit.clear()  # Limpa resultados por último
-        self.log_resultado("Calculadora resetada.")
+        self.log_resultado(tr('calculators.stoichiometric.calculator_reset'))
 
     def log_resultado(self, mensagem):
         self.results_text_edit.append(mensagem)
@@ -756,12 +754,9 @@ if __name__ == '__main__':
     if not CHEMPY_AVAILABLE:  # Verifica e informa se Chempy não estiver disponível
         msg_box = QMessageBox()
         msg_box.setIcon(QMessageBox.Icon.Warning)
-        msg_box.setWindowTitle("Componente Ausente")
-        msg_box.setText("A biblioteca 'chempy' não foi encontrada.")
-        msg_box.setInformativeText(
-            "O balanceamento de equações químicas não funcionará.\n"
-            "Para instalar, execute no seu terminal: pip install chempy sympy"
-        )
+        msg_box.setWindowTitle(tr('calculators.stoichiometric.missing_component'))
+        msg_box.setText(tr('calculators.stoichiometric.chempy_not_found'))
+        msg_box.setInformativeText(tr('calculators.stoichiometric.chempy_install_hint'))
         msg_box.setStandardButtons(QMessageBox.StandardButton.Ok)
         msg_box.exec()
 

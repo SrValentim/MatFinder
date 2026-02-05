@@ -18,6 +18,12 @@ from PySide6.QtGui import QDoubleValidator
 from PySide6.QtCore import Qt, QStandardPaths, Signal, Slot
 from matplotlib.backend_bases import MouseEvent
 
+# Importar sistema de tradução
+try:
+    from matfinder.core.translator import tr
+except ImportError:
+    def tr(key, **kwargs): return key
+
 # --- Integração com Matplotlib para Gráficos ---
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
@@ -80,31 +86,24 @@ MASSAS_ATOMICAS = {el["simbolo"]: el["massa"] for el in TABELA_PERIODICA_ELEMENT
 
 
 class ProxyConfigDialog(QDialog):
-    # ... (O conteúdo desta classe permanece o mesmo)
+    """Diálogo de configuração de proxy."""
     def __init__(self, current_settings, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("Configurar Proxy")
+        self.setWindowTitle(tr('dialogs.proxy.title'))
         self.setMinimumWidth(400)
         self.settings = current_settings.copy()
         layout = QVBoxLayout(self)
         form_layout = QFormLayout()
-        self.enable_proxy_checkbox = QCheckBox("Habilitar Proxy")
+        self.enable_proxy_checkbox = QCheckBox(tr('dialogs.proxy.enabled'))
         self.enable_proxy_checkbox.setChecked(self.settings.get("enabled", False))
         form_layout.addRow(self.enable_proxy_checkbox)
         self.http_proxy_edit = QLineEdit(self.settings.get("http", ""))
-        self.http_proxy_edit.setPlaceholderText(
-            "ex: http://utilizador:senha@host:porta"
-        )
-        form_layout.addRow("Proxy HTTP:", self.http_proxy_edit)
+        self.http_proxy_edit.setPlaceholderText(tr('dialogs.proxy.http_placeholder'))
+        form_layout.addRow(tr('dialogs.proxy.http_label'), self.http_proxy_edit)
         self.https_proxy_edit = QLineEdit(self.settings.get("https", ""))
-        self.https_proxy_edit.setPlaceholderText(
-            "ex: https://utilizador:senha@host:porta"
-        )
-        form_layout.addRow("Proxy HTTPS:", self.https_proxy_edit)
-        info_label = QLabel(
-            "Nota: As configurações são para a sessão atual.\n"
-            "O proxy SOCKS não está implementado nesta versão."
-        )
+        self.https_proxy_edit.setPlaceholderText(tr('dialogs.proxy.https_placeholder'))
+        form_layout.addRow(tr('dialogs.proxy.https_label'), self.https_proxy_edit)
+        info_label = QLabel(tr('dialogs.proxy.note'))
         info_label.setWordWrap(True)
         form_layout.addRow(info_label)
         layout.addLayout(form_layout)
@@ -112,6 +111,8 @@ class ProxyConfigDialog(QDialog):
         button_box.setStandardButtons(
             QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel
         )
+        button_box.button(QDialogButtonBox.StandardButton.Ok).setText(tr('dialogs.confirm.ok'))
+        button_box.button(QDialogButtonBox.StandardButton.Cancel).setText(tr('dialogs.confirm.cancel'))
         button_box.accepted.connect(self.accept)
         button_box.rejected.connect(self.reject)
         layout.addWidget(button_box)
@@ -131,11 +132,10 @@ class ProxyConfigDialog(QDialog):
 
 
 class CalculadoraProporcaoMassaDialog(QDialog):
-    # ... (O conteúdo desta classe permanece o mesmo,
-    # pois TabelaPeriodicaDialog já foi importada corretamente no topo)
+    """Calculadora de proporção de massa."""
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("Proporção de Massa")
+        self.setWindowTitle(tr('calculators.mass_proportion.title'))
         self.setFixedWidth(320)
         self.setMinimumHeight(380)
 
@@ -152,10 +152,10 @@ class CalculadoraProporcaoMassaDialog(QDialog):
         outer_layout.setContentsMargins(10, 10, 10, 10)
         outer_layout.setSpacing(10)
 
-        self.select_elements_button = QPushButton("1. Selecionar Elementos")
+        self.select_elements_button = QPushButton(tr('calculators.mass_proportion.select_elements'))
         outer_layout.addWidget(self.select_elements_button)
 
-        self.selected_elements_label = QLabel("Elementos Selecionados: Nenhum")
+        self.selected_elements_label = QLabel(tr('calculators.mass_proportion.selected_none'))
         self.selected_elements_label.setWordWrap(True)
         self.selected_elements_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.selected_elements_label.setStyleSheet(
@@ -164,7 +164,7 @@ class CalculadoraProporcaoMassaDialog(QDialog):
         )
         outer_layout.addWidget(self.selected_elements_label)
 
-        proporcoes_group_label = QLabel("2. Proporções Atômicas:")
+        proporcoes_group_label = QLabel(tr('calculators.mass_proportion.atomic_proportions'))
         outer_layout.addWidget(proporcoes_group_label)
 
         self.proporcoes_outer_scroll_area = QScrollArea()
@@ -193,35 +193,34 @@ class CalculadoraProporcaoMassaDialog(QDialog):
         outer_layout.addWidget(self.proporcoes_outer_scroll_area)
 
         massa_total_layout = QHBoxLayout()
-        massa_total_label = QLabel("3. Massa Total da Amostra (g):")
+        massa_total_label = QLabel(tr('calculators.mass_proportion.total_mass'))
         massa_total_layout.addWidget(massa_total_label)
         self.massa_total_entry = QLineEdit()
         self.massa_total_entry.setValidator(QDoubleValidator(0.0001, 1000000.0, 4))
-        self.massa_total_entry.setPlaceholderText("Ex: 10.0")
+        self.massa_total_entry.setPlaceholderText(tr('calculators.mass_proportion.mass_placeholder'))
         massa_total_layout.addWidget(self.massa_total_entry)
         outer_layout.addLayout(massa_total_layout)
 
         action_buttons_layout = QHBoxLayout()
-        self.calculate_button = QPushButton("Calcular")
+        self.calculate_button = QPushButton(tr('calculators.calculate'))
         action_buttons_layout.addWidget(self.calculate_button)
-        self.clear_button = QPushButton("Limpar")
+        self.clear_button = QPushButton(tr('calculators.clear'))
         action_buttons_layout.addWidget(self.clear_button)
         action_buttons_layout.addStretch()
         outer_layout.addLayout(action_buttons_layout)
 
-        results_label = QLabel("4. Resultados (Massas Individuais):")
+        results_label = QLabel(tr('calculators.mass_proportion.results'))
         outer_layout.addWidget(results_label)
         self.results_text_edit = QTextEdit()
         self.results_text_edit.setReadOnly(True)
-        self.results_text_edit.setPlaceholderText(
-            "As massas calculadas aparecerão aqui..."
-        )
+        self.results_text_edit.setPlaceholderText(tr('calculators.mass_proportion.results_placeholder'))
         self.results_text_edit.setFixedHeight(100)
         outer_layout.addWidget(self.results_text_edit)
 
         outer_layout.addStretch(1)
 
         self.button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Close)
+        self.button_box.button(QDialogButtonBox.StandardButton.Close).setText(tr('dialogs.confirm.close'))
         outer_layout.addWidget(self.button_box)
         self.adjustSize()
 
@@ -235,9 +234,8 @@ class CalculadoraProporcaoMassaDialog(QDialog):
         if not TABELA_PERIODICA_ELEMENTOS:
             QMessageBox.critical(
                 self,
-                "Erro de Dados",
-                "Os dados dos elementos para a Tabela Periódica não foram carregados.\n"
-                "A seleção de elementos não pode prosseguir.",
+                tr('dialogs.error.title'),
+                tr('calculators.error.elements_not_loaded'),
             )
             logging.error(
                 "Dados da Tabela Periódica não carregados ao tentar abrir na Calculadora de Proporção."
@@ -264,7 +262,7 @@ class CalculadoraProporcaoMassaDialog(QDialog):
     def _handle_elements_selected(self, selected_symbols_list: list):
         self.selected_elements_symbols = selected_symbols_list
         if not self.selected_elements_symbols:
-            self.selected_elements_label.setText("Elementos Selecionados: Nenhum")
+            self.selected_elements_label.setText(tr('calculators.mass_proportion.selected_none'))
         else:
             sorted_symbols = sorted(
                 self.selected_elements_symbols,
@@ -279,7 +277,7 @@ class CalculadoraProporcaoMassaDialog(QDialog):
             )
             self.selected_elements_symbols = sorted_symbols
             self.selected_elements_label.setText(
-                f"Elementos Selecionados: {', '.join(self.selected_elements_symbols)}"
+                f"{tr('calculators.mass_proportion.selected', elements=', '.join(self.selected_elements_symbols))}"
             )
             logging.info(
                 "Elementos selecionados na Calculadora de Proporção: "
@@ -295,9 +293,7 @@ class CalculadoraProporcaoMassaDialog(QDialog):
         self.proporcao_entries.clear()
 
         if not self.selected_elements_symbols:
-            placeholder_label = QLabel(
-                "Nenhum elemento selecionado.\nClique em 'Selecionar Elementos...'"
-            )
+            placeholder_label = QLabel(tr('calculators.mass_proportion.no_element_placeholder'))
             placeholder_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
             placeholder_label.setStyleSheet(
                 "font-style: italic; color: gray; padding: 10px;"
@@ -309,7 +305,7 @@ class CalculadoraProporcaoMassaDialog(QDialog):
                 label_text = f"{simbolo} (MM: {massa_atomica:.3f}):"
                 entry = QLineEdit()
                 entry.setValidator(QDoubleValidator(0.0001, 1000.0, 4))
-                entry.setPlaceholderText("Proporção (ex: 1)")
+                entry.setPlaceholderText(tr('calculators.mass_proportion.proportion_placeholder'))
                 self.proporcoes_form_layout.addRow(label_text, entry)
                 self.proporcao_entries[simbolo] = entry
         self.proporcoes_widget_container.adjustSize()
@@ -319,7 +315,7 @@ class CalculadoraProporcaoMassaDialog(QDialog):
         logging.info("Iniciando cálculo de proporção de massa.")
         if not self.selected_elements_symbols:
             QMessageBox.warning(
-                self, "Seleção Incompleta", "Por favor, selecione os elementos primeiro."
+                self, tr('dialogs.error.warning'), tr('calculators.mass_proportion.select_elements_first')
             )
             logging.warning(
                 "Tentativa de cálculo de proporção de massa sem elementos selecionados."
@@ -331,9 +327,8 @@ class CalculadoraProporcaoMassaDialog(QDialog):
             if not self.proporcao_entries and self.selected_elements_symbols:
                 QMessageBox.warning(
                     self,
-                    "Erro Interno",
-                    "Campos de proporção não foram criados. "
-                    "Tente selecionar os elementos novamente.",
+                    tr('dialogs.error.internal'),
+                    tr('calculators.mass_proportion.fields_not_created'),
                 )
                 logging.error(
                     "Campos de proporção não encontrados na Calculadora de Proporção."
@@ -344,8 +339,8 @@ class CalculadoraProporcaoMassaDialog(QDialog):
                 if not entry:
                     QMessageBox.critical(
                         self,
-                        "Erro Interno",
-                        f"Campo de proporção para {simbolo} não encontrado.",
+                        tr('dialogs.error.internal'),
+                        tr('calculators.mass_proportion.field_not_found', symbol=simbolo),
                     )
                     logging.error(
                         f"Campo de proporção para {simbolo} não encontrado internamente."
@@ -355,24 +350,24 @@ class CalculadoraProporcaoMassaDialog(QDialog):
                 if not valor_str:
                     QMessageBox.warning(
                         self,
-                        "Entrada Inválida",
-                        f"Por favor, insira a proporção para {simbolo}.",
+                        tr('dialogs.error.invalid_input'),
+                        tr('calculators.mass_proportion.enter_proportion', symbol=simbolo),
                     )
                     return
                 proporcao_val = float(valor_str.replace(",", "."))
                 if proporcao_val <= 0:
                     QMessageBox.warning(
                         self,
-                        "Valor Inválido",
-                        f"A proporção para {simbolo} deve ser positiva.",
+                        tr('dialogs.error.invalid_value'),
+                        tr('calculators.mass_proportion.positive_proportion', symbol=simbolo),
                     )
                     return
                 proporcoes_input[simbolo] = proporcao_val
         except ValueError:
             QMessageBox.critical(
                 self,
-                "Erro de Entrada",
-                "Valor numérico inválido para uma das proporções.",
+                tr('dialogs.error.input_error'),
+                tr('calculators.mass_proportion.invalid_proportion'),
             )
             logging.warning(
                 "Erro de valor (ValueError) ao ler proporções na Calculadora de Proporção."
@@ -380,7 +375,7 @@ class CalculadoraProporcaoMassaDialog(QDialog):
             return
         except Exception as e:
             QMessageBox.critical(
-                self, "Erro Inesperado", f"Erro ao processar proporções: {e}"
+                self, tr('dialogs.error.unexpected'), tr('calculators.mass_proportion.processing_error', error=str(e))
             )
             logging.exception(
                 "Erro inesperado ao processar proporções na Calculadora de Proporção."
@@ -390,15 +385,15 @@ class CalculadoraProporcaoMassaDialog(QDialog):
         if len(proporcoes_input) != len(self.selected_elements_symbols):
             QMessageBox.warning(
                 self,
-                "Entrada Incompleta",
-                "Por favor, preencha todas as proporções para os elementos selecionados.",
+                tr('dialogs.error.invalid_input'),
+                tr('calculators.mass_proportion.fill_all_proportions'),
             )
             return
 
         massa_total_str = self.massa_total_entry.text().strip()
         if not massa_total_str:
             QMessageBox.warning(
-                self, "Entrada Inválida", "Por favor, insira a massa total da amostra."
+                self, tr('dialogs.error.invalid_input'), tr('calculators.mass_proportion.enter_total_mass')
             )
             return
         try:
@@ -406,13 +401,13 @@ class CalculadoraProporcaoMassaDialog(QDialog):
             if massa_total_amostra <= 0:
                 QMessageBox.warning(
                     self,
-                    "Valor Inválido",
-                    "A massa total da amostra deve ser positiva.",
+                    tr('dialogs.error.invalid_value'),
+                    tr('calculators.mass_proportion.positive_mass'),
                 )
                 return
         except ValueError:
             QMessageBox.critical(
-                self, "Erro de Entrada", "Valor numérico inválido para a massa total."
+                self, tr('dialogs.error.input_error'), tr('calculators.mass_proportion.invalid_total_mass')
             )
             logging.warning(
                 "Valor numérico inválido (ValueError) para massa total na Calculadora de Proporção."
@@ -425,8 +420,8 @@ class CalculadoraProporcaoMassaDialog(QDialog):
             if simbolo not in MASSAS_ATOMICAS:
                 QMessageBox.critical(
                     self,
-                    "Erro de Dados",
-                    f"Massa atômica para o elemento '{simbolo}' não encontrada.",
+                    tr('dialogs.error.title'),
+                    tr('calculators.mass_proportion.atomic_mass_not_found', symbol=simbolo),
                 )
                 logging.error(
                     f"Massa atômica para {simbolo} não encontrada no dicionário global MASSAS_ATOMICAS."
@@ -440,9 +435,8 @@ class CalculadoraProporcaoMassaDialog(QDialog):
         if massa_molar_composto_total == 0:
             QMessageBox.critical(
                 self,
-                "Erro de Cálculo",
-                "Massa molar total do composto calculada como zero. "
-                "Verifique as proporções e massas atômicas.",
+                tr('dialogs.error.calc_error'),
+                tr('calculators.mass_proportion.molar_mass_zero'),
             )
             logging.error(
                 "Massa molar total do composto calculada como zero na Calculadora de Proporção, "
@@ -463,14 +457,14 @@ class CalculadoraProporcaoMassaDialog(QDialog):
             resultados_finais.append(
                 f"{simbolo}: {massa_do_elemento_na_amostra:.4f} g"
             )
-        self.results_text_edit.setText("Resultados:\n" + "\n".join(resultados_finais))
+        self.results_text_edit.setText(f"{tr('calculators.mass_proportion.results_title')}:\n" + "\n".join(resultados_finais))
         logging.info(
             f"Cálculo de proporção de massa concluído. Resultados: {resultados_finais}"
         )
 
     def _clear_all_fields(self):
         self.selected_elements_symbols = []
-        self.selected_elements_label.setText("Elementos Selecionados: Nenhum")
+        self.selected_elements_label.setText(tr('calculators.mass_proportion.selected_none'))
         self._update_proporcao_fields()
         self.massa_total_entry.clear()
         self.results_text_edit.clear()

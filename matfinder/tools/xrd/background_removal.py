@@ -59,7 +59,11 @@ def snip_background(y_data, iterations=40, smooth=False):
                 pass
 
         # Transformação logarítmica (parte do algoritmo SNIP)
+        # Referência: Ryan et al. (1988), LLS transformation
         v = np.log(np.log(np.sqrt(y + 1) + 1) + 1)
+
+        # Guardar valores originais das bordas (transformados)
+        v_original = v.copy()
 
         # Iterações SNIP
         for i in range(1, iterations + 1):
@@ -70,11 +74,12 @@ def snip_background(y_data, iterations=40, smooth=False):
             # Peak clipping
             v = np.minimum(v, (v_left + v_right) / 2)
 
-            # Corrigir bordas
-            v[:i] = y_data[:i]
-            v[-i:] = y_data[-i:]
+            # Corrigir bordas - usar valores transformados originais
+            # (evita artefatos nas bordas)
+            v[:i] = v_original[:i]
+            v[-i:] = v_original[-i:]
 
-        # Transformação inversa
+        # Transformação inversa (LLS inversa)
         background = (np.exp(np.exp(v) - 1) - 1) ** 2 - 1
         background = np.maximum(background, 0)
 
@@ -131,52 +136,76 @@ def arpls_background(y_data, lam=1e6, ratio=0.001, max_iter=100):
         y = np.array(y_data, dtype=float)
         L = len(y)
 
-        # Matriz de diferenças de segunda ordem (penalidade de curvatura)
-        D = sparse.diags([1, -2, 1], [0, 1, 2], shape=(L - 2, L))
-        D = lam * D.dot(D.transpose())
+        # Construir matriz de diferenças de segunda ordem corretamente
+        # D é uma matriz (L-2) x L que calcula a segunda derivada discreta
+        diag_0 = np.ones(L - 2)
+        diag_1 = -2 * np.ones(L - 2)
+        diag_2 = np.ones(L - 2)
+        D = sparse.diags([diag_0, diag_1, diag_0], [0, 1, 2], shape=(L - 2, L))
 
-        # Pesos iniciais
+        # H = lambda * D^T * D (matriz de penalização)
+        H = lam * D.T.dot(D)
+
+        # Pesos iniciais (todos = 1)
         w = np.ones(L)
-        W = sparse.spdiags(w, 0, L, L)
 
         # Iterações arPLS
-        z = y.copy()  # Inicializar z
-        i = 0
-        for i in range(max_iter):
-            W.setdiag(w)
-            Z = W + D
-            z = spsolve(Z, w * y)
+        z = y.copy()
+        for iteration in range(max_iter):
+            # Matriz diagonal de pesos
+            W = sparse.diags(w, 0, format='csr')
 
-            # Calcular resíduos
+            # Resolver sistema: (W + H) * z = W * y
+            # z é o background estimado
+            try:
+                z = spsolve(W + H, w * y)
+            except Exception as solve_error:
+                logging.warning(f"arPLS spsolve falhou na iteração {iteration}: {solve_error}")
+                break
+
+            # Calcular resíduos (diferença entre dados e background)
             d = y - z
 
-            # Negativos (background) têm peso 1, positivos (picos) têm peso reduzido
+            # Estatísticas dos resíduos negativos (onde o background está acima dos dados)
             dn = d[d < 0]
 
             if len(dn) == 0:
+                # Sem resíduos negativos - convergiu
+                logging.debug(f"arPLS convergiu (sem resíduos negativos) na iteração {iteration}")
                 break
 
             m = np.mean(dn)
             s = np.std(dn)
 
-            # Atualizar pesos assimetricamente
-            wt = 1.0 / (1 + np.exp(2 * (d - (2 * s - m)) / s))
+            if s < 1e-10:
+                # Desvio padrão muito pequeno - convergiu
+                break
 
-            # Verificar convergência
-            if np.linalg.norm(w - wt) / np.linalg.norm(w) < ratio:
+            # Atualizar pesos assimetricamente
+            # Resíduos positivos (picos) recebem peso menor
+            # Resíduos negativos (background) recebem peso maior
+            wt = 1.0 / (1.0 + np.exp(2.0 * (d - (2.0 * s - m)) / s))
+
+            # Verificar convergência pela mudança nos pesos
+            weight_change = np.linalg.norm(w - wt) / (np.linalg.norm(w) + 1e-10)
+            if weight_change < ratio:
+                logging.debug(f"arPLS convergiu na iteração {iteration}, mudança de peso: {weight_change:.6f}")
                 break
 
             w = wt
 
-        background = z
+        # Garantir que background seja não-negativo e não exceda dados originais
+        background = np.array(z)
         background = np.maximum(background, 0)
-        background = np.minimum(background, y_data)
+        background = np.minimum(background, np.array(y_data))
 
-        logging.debug(f"arPLS background calculado: {i+1} iterações, lambda={lam}")
+        logging.debug(f"arPLS background calculado: {iteration+1} iterações, lambda={lam:.2e}")
         return background
 
     except Exception as e:
         logging.error(f"Erro no arPLS: {e}")
+        import traceback
+        logging.error(traceback.format_exc())
         return np.zeros_like(y_data)
 
 

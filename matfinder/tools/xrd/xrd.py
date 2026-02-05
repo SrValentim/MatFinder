@@ -340,8 +340,14 @@ class PhaseDRXTool(QMainWindow):
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
         main_layout = QHBoxLayout(central_widget)
-        splitter = QSplitter(Qt.Orientation.Horizontal)
-        main_layout.addWidget(splitter)
+        
+        # Criar splitter principal e guardar referência
+        self.main_splitter = QSplitter(Qt.Orientation.Horizontal)
+        main_layout.addWidget(self.main_splitter)
+        
+        # Estado do splitter para toggle
+        self._splitter_collapsed = False
+        self._splitter_original_sizes = [450, 750]
 
         control_widget = QWidget()
         control_layout = QVBoxLayout(control_widget)
@@ -356,11 +362,22 @@ class PhaseDRXTool(QMainWindow):
         self._create_simulation_tab()
         self.tab_widget.addTab(self.sim_tab, "Simulação Teórica (de CIF)")
 
-        splitter.addWidget(control_widget)
+        self.main_splitter.addWidget(control_widget)
+
+        # Desabilitar arrastar com o mouse no splitter
+        self.main_splitter.setHandleWidth(0)
+        self.main_splitter.setChildrenCollapsible(False)
 
         plot_panel = QWidget()
         plot_layout = QVBoxLayout(plot_panel)
         action_button_layout = QHBoxLayout()
+
+        # Botão de toggle do splitter (expandir/recolher painel de controle)
+        self.toggle_splitter_button = QPushButton("◀")
+        self.toggle_splitter_button.setFixedSize(24, 24)
+        self.toggle_splitter_button.setToolTip("Expandir/Recolher painel de controle")
+        self.toggle_splitter_button.clicked.connect(self._toggle_splitter)
+        action_button_layout.addWidget(self.toggle_splitter_button)
 
         self.undo_button = QPushButton("◀ Desfazer")
         self.redo_button = QPushButton("Refazer ▶")
@@ -374,12 +391,12 @@ class PhaseDRXTool(QMainWindow):
         self.edit_item_button.setEnabled(False)
         action_button_layout.addWidget(self.edit_item_button)
 
-        self.peak_detect_button = QPushButton("Detectar Picos")
-        self.smooth_plot_button = QPushButton("Smooth")
+        # Botão de detectar picos removido da interface (funcionalidade mantida no backend)
+        # self.peak_detect_button = QPushButton("Detectar Picos")
+        # Botão Smooth movido para "Controles dos Dados Experimentais"
         self.save_plot_button = QPushButton("Salvar Gráfico...")
         self.customize_plot_button = QPushButton("Personalizar Gráfico")
-        action_button_layout.addWidget(self.peak_detect_button)
-        action_button_layout.addWidget(self.smooth_plot_button)
+        # action_button_layout.addWidget(self.peak_detect_button)
         action_button_layout.addWidget(self.save_plot_button)
         action_button_layout.addWidget(self.customize_plot_button)
         plot_layout.addLayout(action_button_layout)
@@ -456,8 +473,8 @@ class PhaseDRXTool(QMainWindow):
                 self.structure_viewer.view_widget.setEnabled(False)
             logging.debug("🚀 Inicialização: Difratograma ativo, Visualizador 3D pausado")
 
-        splitter.addWidget(plot_panel)
-        splitter.setSizes([450, 750])
+        self.main_splitter.addWidget(plot_panel)
+        self.main_splitter.setSizes([450, 750])
 
         self._setup_zoom_selector()
 
@@ -494,10 +511,12 @@ class PhaseDRXTool(QMainWindow):
         load_layout = QVBoxLayout(load_group)
         self.load_button = QPushButton("Carregar Arquivo(s) Exp...")
         self.normalize_button = QPushButton("Normalização...")
+        self.smooth_plot_button = QPushButton("Smooth")
 
         load_controls_layout = QHBoxLayout()
         load_controls_layout.addWidget(self.load_button)
         load_controls_layout.addWidget(self.normalize_button)
+        load_controls_layout.addWidget(self.smooth_plot_button)
         load_layout.addLayout(load_controls_layout)
 
         analysis_buttons_layout = QHBoxLayout()
@@ -622,7 +641,8 @@ class PhaseDRXTool(QMainWindow):
         self.customize_plot_button.clicked.connect(self.open_plot_customization_dialog)
         self.save_plot_button.clicked.connect(self.open_save_plot_dialog)
         self.smooth_plot_button.clicked.connect(self.open_smooth_dialog)
-        self.peak_detect_button.clicked.connect(self.open_peak_detect_dialog)
+        # Detectar picos removido da interface (funcionalidade mantida no backend)
+        # self.peak_detect_button.clicked.connect(self.open_peak_detect_dialog)
         self.edit_item_button.clicked.connect(self.open_item_editor)
 
         self.num_groups_spin.valueChanged.connect(self.update_group_settings)
@@ -1093,6 +1113,24 @@ class PhaseDRXTool(QMainWindow):
 
         logging.debug("✅ Zoom selector manual configurado (estilo Windows XP)")
 
+    def _toggle_splitter(self):
+        """Alterna entre expandir e recolher o painel de controle."""
+        if self._splitter_collapsed:
+            # Expandir - voltar ao tamanho original
+            self.main_splitter.setSizes(self._splitter_original_sizes)
+            self.toggle_splitter_button.setText("◀")
+            self.toggle_splitter_button.setToolTip("Recolher painel de controle")
+            self._splitter_collapsed = False
+        else:
+            # Recolher - salvar tamanho atual e colapsar
+            self._splitter_original_sizes = self.main_splitter.sizes()
+            # Colapsar painel de controle (primeiro widget) completamente
+            total_width = sum(self._splitter_original_sizes)
+            self.main_splitter.setSizes([0, total_width])
+            self.toggle_splitter_button.setText("▶")
+            self.toggle_splitter_button.setToolTip("Expandir painel de controle")
+            self._splitter_collapsed = True
+
     def _on_zoom_press(self, event):
         """Início da seleção de zoom - ao pressionar botão esquerdo."""
         # Ignorar se não for botão esquerdo ou não estiver no axes
@@ -1429,12 +1467,13 @@ class PhaseDRXTool(QMainWindow):
             try:
                 self.point_annotation.set_visible(False)
                 if self.annotation_dot and len(self.annotation_dot) > 0:
-                    self.annotation_dot[0].set_visible(False)
+                    for line in self.annotation_dot:
+                        line.remove()
+                self.plot_canvas.draw_idle()
             except Exception as e:
                 logging.debug(f"Erro ao ocultar anotação: {e}")
             self.point_annotation = None
             self.annotation_dot = None
-            self.plot_canvas.draw_idle()
             return
 
         ax = self.plot_canvas.axes

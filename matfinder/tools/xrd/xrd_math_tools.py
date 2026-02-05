@@ -116,63 +116,111 @@ def detect_peaks(y_data, x_data=None, prominence=0.01, width=1):
 
 
 # --- NOVA FUNÇÃO DE REDUÇÃO DE RUÍDO (WAVELET) ---
-def denoise_with_wavelets(y_data, wavelet='sym8', level_percentage=0.1):
+def denoise_with_wavelets(y_data, wavelet='sym8', level_percentage=0.1, method='bayesshrink'):
     """
     Reduz o ruído de um sinal 1D usando a Transformada Wavelet.
 
+    Implementa dois métodos de threshold:
+    - BayesShrink (padrão): Threshold adaptativo por nível, melhor para preservar detalhes
+    - VisuShrink: Threshold universal, mais agressivo na remoção de ruído
+
     Args:
         y_data (np.ndarray): O array de dados de intensidade.
-        wavelet (str): O nome da wavelet a ser usada (ex: 'db4', 'sym8').
-        level_percentage (float): Um fator (de 0 a 1) para ajustar o limiar.
-                                  Valores maiores removem mais ruído (e potencialmente mais sinal).
+        wavelet (str): O nome da wavelet a ser usada.
+                       Recomendados para XRD: 'sym8' (Symlet-8), 'db4' (Daubechies-4)
+        level_percentage (float): Fator de ajuste fino (0 a 1).
+                                  0.0 = threshold mínimo (preserva mais detalhes)
+                                  1.0 = threshold máximo (remove mais ruído)
+        method (str): Método de threshold - 'bayesshrink' (padrão) ou 'visushrink'
 
     Returns:
         np.ndarray: O array de dados com ruído reduzido.
+
+    References:
+        - Chang, S.G.; Yu, B.; Vetterli, M. (2000). "Adaptive wavelet thresholding
+          for image denoising and compression". IEEE Trans. Image Processing. 9(9): 1532-1546.
+        - Donoho, D.L.; Johnstone, I.M. (1994). "Ideal spatial adaptation by
+          wavelet shrinkage". Biometrika. 81(3): 425-455.
     """
     if not PYWAVELETS_AVAILABLE:
         print("PyWavelets não está disponível. Retornando dados originais.")
         return y_data
 
-    # 1. Decomposição do sinal
-    # Decompõe o sinal em coeficientes de aproximação (baixa frequência) e de detalhe (alta frequência)
-    coeffs = pywt.wavedec(y_data, wavelet, mode='per')
+    y = np.array(y_data, dtype=float)
+    n = len(y)
 
-    # 2. Cálculo do Limiar (Threshold)
-    # Usa um limiar universal (VisuShrink) que é bom para sinais com ruído gaussiano.
-    # Validação: verificar se há coeficientes de detalhe suficientes
+    # Calcular nível máximo de decomposição
+    try:
+        max_level = pywt.dwt_max_level(n, pywt.Wavelet(wavelet).dec_len)
+        level = min(max_level, 6)  # Limitar a 6 níveis para XRD
+    except:
+        level = None
+
+    # 1. Decomposição do sinal (DWT)
+    coeffs = pywt.wavedec(y, wavelet, mode='per', level=level)
+
     if len(coeffs) < 2 or len(coeffs[-1]) == 0:
         print("AVISO: Coeficientes wavelet insuficientes. Retornando dados originais.")
         return y_data
 
-    detail_coeffs = coeffs[-1]
-    median_detail = np.median(detail_coeffs)
-    mad = np.median(np.abs(detail_coeffs - median_detail))
+    # 2. Estimar nível de ruído usando MAD do nível mais fino
+    detail_finest = coeffs[-1]
+    sigma_noise = np.median(np.abs(detail_finest - np.median(detail_finest))) / 0.6745
 
-    # Proteção contra divisão por zero ou MAD muito pequeno
-    if mad < 1e-10:
-        print("AVISO: MAD muito pequeno, dados podem ser constantes. Retornando dados originais.")
+    if sigma_noise < 1e-10:
+        print("AVISO: Ruído estimado muito baixo. Retornando dados originais.")
         return y_data
 
-    sigma = mad / 0.6745
-    threshold = sigma * np.sqrt(2 * np.log(len(y_data)))
+    # 3. Aplicar threshold em cada nível de detalhe
+    new_coeffs = [coeffs[0]]  # Manter coeficientes de aproximação
 
-    # Ajusta o limiar com base no input do usuário para dar mais controle
-    adjusted_threshold = threshold * (1 + level_percentage * 5)  # Mapeia de 0-1 para um range mais efetivo
+    for i, detail_coeffs in enumerate(coeffs[1:], 1):
+        if len(detail_coeffs) == 0:
+            new_coeffs.append(detail_coeffs)
+            continue
 
-    # 3. Limiarização dos Coeficientes (Thresholding)
-    # Aplica o "soft thresholding" nos coeficientes de detalhe.
-    # Isso encolhe os coeficientes em direção a zero pelo valor do limiar.
-    new_coeffs = [coeffs[0]]  # Mantém os coeficientes de aproximação intactos
-    for c in coeffs[1:]:
-        new_coeffs.append(pywt.threshold(c, value=adjusted_threshold, mode='soft'))
+        if method.lower() == 'bayesshrink':
+            # ============================================
+            # BayesShrink: Threshold adaptativo por nível
+            # Referência: Chang et al. (2000)
+            # ============================================
 
-    # 4. Reconstrução do Sinal
-    # Reconstrói o sinal a partir dos coeficientes modificados.
+            # Variância total dos coeficientes neste nível
+            sigma_y_squared = np.var(detail_coeffs)
+
+            # Variância do sinal = variância total - variância do ruído
+            sigma_signal_squared = max(sigma_y_squared - sigma_noise**2, 0)
+
+            if sigma_signal_squared > 0:
+                # Threshold BayesShrink: λ = σ_noise² / σ_signal
+                threshold = (sigma_noise**2) / np.sqrt(sigma_signal_squared)
+            else:
+                # Se não há sinal detectável, usar VisuShrink como fallback
+                threshold = sigma_noise * np.sqrt(2 * np.log(n))
+
+        else:
+            # ============================================
+            # VisuShrink: Threshold universal
+            # Referência: Donoho & Johnstone (1994)
+            # ============================================
+            threshold = sigma_noise * np.sqrt(2 * np.log(n))
+
+        # Ajuste do usuário (fator de 0.5 a 2.0)
+        # level_percentage = 0 → fator = 0.5 (preserva mais)
+        # level_percentage = 1 → fator = 2.0 (remove mais)
+        adjustment_factor = 0.5 + level_percentage * 1.5
+        adjusted_threshold = threshold * adjustment_factor
+
+        # Soft thresholding (preserva continuidade do sinal)
+        thresholded = pywt.threshold(detail_coeffs, value=adjusted_threshold, mode='soft')
+        new_coeffs.append(thresholded)
+
+    # 4. Reconstrução do Sinal (IDWT)
     denoised_y = pywt.waverec(new_coeffs, wavelet, mode='per')
 
-    # Garante que o sinal reconstruído tenha o mesmo tamanho do original
-    if len(denoised_y) != len(y_data):
-        return denoised_y[:len(y_data)]
+    # Garantir mesmo tamanho do sinal original
+    if len(denoised_y) != n:
+        denoised_y = denoised_y[:n]
 
     return denoised_y
 

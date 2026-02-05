@@ -15,6 +15,12 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Qt, Signal, QSize, Slot
 from PySide6.QtGui import QIcon, QColor, QPixmap, QPainter
 
+# Importar sistema de tradução
+try:
+    from matfinder.core.translator import tr
+except ImportError:
+    def tr(key, **kwargs): return key
+
 # Constantes para o arquivo de histórico
 HISTORICO_FILE = "historico_buscas.json"
 DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%S.%f"
@@ -29,7 +35,7 @@ class HistoricoDialog(QDialog):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("Histórico de Busca de Materiais")
+        self.setWindowTitle(tr('history.title'))
         self.setMinimumSize(750, 500)
         self.historico_data = []
 
@@ -42,9 +48,12 @@ class HistoricoDialog(QDialog):
         self.table_widget = QTableWidget()
         # --- ALTERAÇÃO: Colunas ajustadas ---
         self.table_widget.setColumnCount(4)
-        self.table_widget.setHorizontalHeaderLabels(
-            ["★", "Termos da Busca", "Base de Dados", "Data da Consulta"]
-        )
+        self.table_widget.setHorizontalHeaderLabels([
+            tr('results.columns.favorite'),
+            tr('history.columns.elements'),
+            tr('history.columns.database'),
+            tr('history.columns.date')
+        ])
         self.table_widget.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
         self.table_widget.setSelectionMode(
             QAbstractItemView.SelectionMode.ExtendedSelection)
@@ -66,28 +75,28 @@ class HistoricoDialog(QDialog):
 
         buttons_layout = QHBoxLayout()
 
-        self.refazer_busca_button = QPushButton("Refazer Busca")
-        self.refazer_busca_button.setToolTip("Refaz a busca para o item selecionado.")
+        self.refazer_busca_button = QPushButton(tr('history.search_again'))
+        self.refazer_busca_button.setToolTip(tr('history.search_again'))
         self.refazer_busca_button.clicked.connect(self.refazer_busca_selecionada_action)
         buttons_layout.addWidget(self.refazer_busca_button)
 
-        self.apagar_selecionado_button = QPushButton("Apagar Selecionado(s)")
-        self.apagar_selecionado_button.setToolTip("Apaga os itens selecionados do histórico.")
+        self.apagar_selecionado_button = QPushButton(tr('history.delete'))
+        self.apagar_selecionado_button.setToolTip(tr('history.delete'))
         self.apagar_selecionado_button.clicked.connect(self.apagar_selecionados_action)
         buttons_layout.addWidget(self.apagar_selecionado_button)
 
         buttons_layout.addStretch()
 
-        self.apagar_historico_button = QPushButton("Apagar Todo o Histórico")
+        self.apagar_historico_button = QPushButton(tr('history.clear_all'))
         self.apagar_historico_button.setStyleSheet("color: red; font-weight: bold;")
-        self.apagar_historico_button.setToolTip("Apaga permanentemente todo o histórico de busca.")
+        self.apagar_historico_button.setToolTip(tr('history.clear_all'))
         self.apagar_historico_button.clicked.connect(self.apagar_todo_historico_action)
         buttons_layout.addWidget(self.apagar_historico_button)
 
         main_layout.addLayout(buttons_layout)
 
         self.dialog_button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Close)
-        self.dialog_button_box.button(QDialogButtonBox.StandardButton.Close).setText("Fechar")
+        self.dialog_button_box.button(QDialogButtonBox.StandardButton.Close).setText(tr('dialogs.confirm.close'))
         self.dialog_button_box.rejected.connect(self.reject)
         main_layout.addWidget(self.dialog_button_box)
 
@@ -192,8 +201,8 @@ class HistoricoDialog(QDialog):
     def refazer_busca_selecionada_action(self):
         selected_items = self.table_widget.selectedItems()
         if not selected_items:
-            QMessageBox.information(self, "Nenhuma Seleção",
-                                    "Por favor, selecione uma busca no histórico para refazer.")
+            QMessageBox.information(self, tr('dialogs.error.info'),
+                                    tr('history.select_to_search'))
             return
 
         selected_row = selected_items[0].row()
@@ -206,18 +215,18 @@ class HistoricoDialog(QDialog):
                 self.refazer_busca_signal.emit(termos, base)
                 self.accept()
             else:
-                QMessageBox.warning(self, "Dados Incompletos",
-                                    "A entrada do histórico selecionada não possui informações suficientes para refazer a busca.")
+                QMessageBox.warning(self, tr('dialogs.error.warning'),
+                                    tr('history.incomplete_data'))
 
     @Slot()
     def apagar_selecionados_action(self):
         selected_rows = sorted(list(set(index.row() for index in self.table_widget.selectedIndexes())), reverse=True)
         if not selected_rows:
-            QMessageBox.information(self, "Nenhuma Seleção", "Por favor, selecione itens do histórico para apagar.")
+            QMessageBox.information(self, tr('dialogs.error.info'), tr('history.select_to_delete'))
             return
 
-        reply = QMessageBox.question(self, "Confirmar Exclusão",
-                                     f"Tem certeza que deseja apagar os {len(selected_rows)} item(ns) selecionado(s) do histórico?",
+        reply = QMessageBox.question(self, tr('dialogs.confirm.title'),
+                                     tr('history.confirm_delete', count=len(selected_rows)),
                                      QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
                                      QMessageBox.StandardButton.No)
         if reply == QMessageBox.StandardButton.Yes:
@@ -232,15 +241,15 @@ class HistoricoDialog(QDialog):
 
     @Slot()
     def apagar_todo_historico_action(self):
-        reply = QMessageBox.question(self, "Confirmar Exclusão Total",
-                                     "Tem certeza que deseja apagar TODO o histórico de busca?\nEsta ação não pode ser desfeita.",
+        reply = QMessageBox.question(self, tr('dialogs.confirm.title'),
+                                     tr('history.clear_confirm'),
                                      QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
                                      QMessageBox.StandardButton.No)
         if reply == QMessageBox.StandardButton.Yes:
             self.historico_data = []
             self.salvar_historico()
             self.ordenar_e_popular_tabela()
-            QMessageBox.information(self, "Histórico Apagado", "Todo o histórico de busca foi apagado.")
+            QMessageBox.information(self, tr('dialogs.success.title'), tr('history.cleared'))
 
     def showEvent(self, event):
         self.carregar_historico()

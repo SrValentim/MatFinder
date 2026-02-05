@@ -1,4 +1,4 @@
-# MatFinder v3.23.0
+# MatFinder v3.24.0
 
 <div align="center">
   <img src="matfinder/assets/logos/splash.png" alt="MatFinder Logo" width="200"/>
@@ -8,6 +8,8 @@
   [![License](https://img.shields.io/badge/license-GPL%20v3-blue.svg)](licenses/LICENSE)
   [![Python](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/)
   [![Platform](https://img.shields.io/badge/platform-Windows-lightgrey.svg)](https://www.microsoft.com/windows)
+  
+  🌐 **Disponível em:** Português | English | Deutsch
 </div>
 
 ---
@@ -16,22 +18,31 @@
 
 MatFinder é uma aplicação desktop completa para pesquisa, visualização e análise de estruturas cristalinas de materiais. Desenvolvido na Universidade Federal do Amazonas (UFAM), integra múltiplas bases de dados cristalográficas e ferramentas de análise de difração de raios-X.
 
-###  Funcionalidades Principais
+### 🌍 Suporte Multilíngue
 
--  **Busca Integrada**: Materials Project, COD (Crystallography Open Database), OQMD, ROD (Raman Open Database)
--  **Análise XRD**: Simulação e comparação de padrões de difração
--  **Ferramentas de Análise**:
+O MatFinder está disponível em **três idiomas**:
+- 🇧🇷 **Português** (padrão)
+- 🇺🇸 **Inglês** (English)
+- 🇩🇪 **Alemão** (Deutsch)
+
+O idioma pode ser alterado em **Configurações → Idioma**. A mudança requer reinicialização do programa.
+
+### Funcionalidades Principais
+
+- **Busca Integrada**: Materials Project, COD (Crystallography Open Database), OQMD, ROD (Raman Open Database)
+- **Análise XRD**: Simulação e comparação de padrões de difração
+- **Ferramentas de Análise**:
   - Editor de arquivos CIF
   - Calculadora estequiométrica
   - Tabela periódica interativa
   - Remoção de background (SNIP, Rolling Ball, Polynomial)
   - Normalização de dados (múltiplos métodos)
--  **Visualização**: Gráficos interativos com customização
--  **Gerenciamento**: Sistema de favoritos e histórico de buscas
+- **Visualização**: Gráficos interativos com customização
+- **Gerenciamento**: Sistema de favoritos e histórico de buscas
 
 ---
 
-##  Instalação
+## Instalação
 
 ### Requisitos
 
@@ -186,15 +197,16 @@ Este projeto está licenciado sob a **GNU General Public License v3.0** - veja o
 
 🟢 **Ativo** - Em desenvolvimento e manutenção
 
-### Versão Atual: 3.23.0
+### Versão Atual: 3.24.0
 
 **Últimas Atualizações**:
--  Normalização por pico específico
--  Diálogo de legenda interativa
--  Remoção de background (SNIP, Rolling Ball, Polynomial)
--  Correção de bugs no editor de CIF
--  Melhorias de performance na plotagem
--  Integração da licença GPL v3
+- 🌍 Suporte multilíngue completo (Português, Inglês, Alemão)
+- Normalização por pico específico
+- Diálogo de legenda interativa
+- Remoção de background (SNIP, Rolling Ball, Polynomial)
+- Correção de bugs no editor de CIF
+- Melhorias de performance na plotagem
+- Integração da licença GPL v3
 
 ---
 

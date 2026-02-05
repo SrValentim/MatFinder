@@ -1,4 +1,6 @@
 import sys
+import json
+import os
 from PySide6.QtWidgets import (
     QApplication, QDialog, QGridLayout, QPushButton, QLabel,
     QVBoxLayout, QHBoxLayout, QFrame, QWidget,
@@ -6,6 +8,37 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtGui import QColor, QPalette, QFont, QIcon, QCursor
 from PySide6.QtCore import Qt, Signal, QTimer, QSize
+
+# Importar sistema de tradução
+try:
+    from matfinder.core.translator import tr, get_current_language
+except ImportError:
+    def tr(key, **kwargs): return key
+    def get_current_language(): return 'pt_BR'
+
+# Função para obter nome traduzido do elemento
+def get_element_name(symbol):
+    """Obtém o nome do elemento traduzido para o idioma atual."""
+    try:
+        base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        elements_file = os.path.join(base_dir, 'assets', 'translations', 'elements.json')
+
+        if os.path.exists(elements_file):
+            with open(elements_file, 'r', encoding='utf-8') as f:
+                elements_data = json.load(f)
+
+            lang = get_current_language()
+            el_info = elements_data.get('elements', {}).get(symbol, {})
+
+            if lang == 'en_US':
+                return el_info.get('name_en', el_info.get('name', symbol))
+            elif lang == 'de_DE':
+                return el_info.get('name_de', el_info.get('name', symbol))
+            else:
+                return el_info.get('name', symbol)
+    except Exception:
+        pass
+    return symbol
 
 # Dados dos elementos e cores (mantidos da sua versão Tkinter para consistência)
 ELEMENTOS = [
@@ -255,8 +288,18 @@ CATEGORY_COLORS = {
     "unknown": "#E0E0E0",
 }
 
-# Traduções para a legenda
-CATEGORY_TRANSLATIONS_PT = {
+# Função para traduzir categoria
+def get_category_translation(category_key):
+    """Traduz a categoria para o idioma atual."""
+    key = category_key.replace(" ", "_").replace("-", "_")
+    translated = tr(f'periodic_table.categories.{key}')
+    if translated.startswith('periodic_table.categories.'):
+        # Fallback para o português original
+        return CATEGORY_TRANSLATIONS_PT_DEFAULT.get(category_key, category_key.replace("-", " ").title())
+    return translated
+
+# Traduções padrão para fallback
+CATEGORY_TRANSLATIONS_PT_DEFAULT = {
     "diatomic nonmetal": "Não Metal Diatômico",
     "polyatomic nonmetal": "Não Metal Poliatômico",
     "alkali metal": "Metal Alcalino",
@@ -271,6 +314,9 @@ CATEGORY_TRANSLATIONS_PT = {
     "unknown": "Desconhecido",
 }
 
+# Alias para compatibilidade
+CATEGORY_TRANSLATIONS_PT = CATEGORY_TRANSLATIONS_PT_DEFAULT
+
 DEFAULT_BUTTON_COLOR = "#D9D9D9"
 SELECTED_BORDER_COLOR = "#FFD700"
 SCINTILLATION_LIGHT_FACTOR = 1.15
@@ -284,7 +330,7 @@ class TabelaPeriodicaDialog(QDialog):
 
     def __init__(self, parent=None, initial_selected_elements=None):
         super().__init__(parent)
-        self.setWindowTitle("Tabela Periódica")
+        self.setWindowTitle(tr('periodic_table.title'))
         self.setFixedSize(880, 660)
 
         self.selected_elements = set(initial_selected_elements) if initial_selected_elements else set()
@@ -304,7 +350,7 @@ class TabelaPeriodicaDialog(QDialog):
         selected_area_group = QFrame()
         selected_area_group.setFrameShape(QFrame.Shape.StyledPanel)
         selected_layout = QVBoxLayout(selected_area_group)
-        selected_layout.addWidget(QLabel("Elementos Selecionados:"))
+        selected_layout.addWidget(QLabel(tr('periodic_table.selected_label')))
         self.selected_elements_text_edit = QTextEdit()
         self.selected_elements_text_edit.setReadOnly(True)
         self.selected_elements_text_edit.setFixedHeight(60)
@@ -331,7 +377,7 @@ class TabelaPeriodicaDialog(QDialog):
         legend_group = QFrame()
         legend_group.setFrameShape(QFrame.Shape.StyledPanel)
         legend_layout_wrapper = QVBoxLayout(legend_group)
-        legend_layout_wrapper.addWidget(QLabel("Legenda:"))
+        legend_layout_wrapper.addWidget(QLabel(tr('periodic_table.legend')))
 
         legend_grid_layout = QGridLayout()
         num_legend_cols = 3
@@ -347,7 +393,7 @@ class TabelaPeriodicaDialog(QDialog):
 
         for category_key in legend_order:
             color_hex = CATEGORY_COLORS.get(category_key)
-            translated_name = CATEGORY_TRANSLATIONS_PT.get(category_key, category_key.replace("-", " ").title())
+            translated_name = get_category_translation(category_key)
             if not color_hex or category_key == "unknown":
                 continue
 
@@ -374,8 +420,9 @@ class TabelaPeriodicaDialog(QDialog):
         self.button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | \
                                            QDialogButtonBox.StandardButton.Cancel | \
                                            QDialogButtonBox.StandardButton.Reset)
-        self.button_box.button(QDialogButtonBox.StandardButton.Ok).setText("Confirmar Seleção")
-        self.button_box.button(QDialogButtonBox.StandardButton.Reset).setText("Limpar Tudo")
+        self.button_box.button(QDialogButtonBox.StandardButton.Ok).setText(tr('periodic_table.confirm'))
+        self.button_box.button(QDialogButtonBox.StandardButton.Cancel).setText(tr('dialogs.confirm.cancel'))
+        self.button_box.button(QDialogButtonBox.StandardButton.Reset).setText(tr('periodic_table.clear'))
 
         self.button_box.accepted.connect(self.confirm_selection)
         self.button_box.rejected.connect(self.reject)
@@ -414,11 +461,15 @@ class TabelaPeriodicaDialog(QDialog):
             btn.setAutoDefault(False)  # Impede que o botão seja acionado por Enter por padrão
             btn.setDefault(False)  # Garante que não é o botão padrão do diálogo
 
+            # Nome traduzido do elemento
+            nome_traduzido = get_element_name(simbolo)
+            categoria_traduzida = tr(f'periodic_table.categories.{categoria.replace(" ", "_").replace("-", "_")}')
+
             tooltip_text = (
-                f"<b>{el_data['nome']} ({simbolo})</b><br>"
-                f"Número Atômico: {el_data['numero']}<br>"
-                f"Massa Atômica: {el_data['massa']:.4f}<br>"
-                f"Categoria: {CATEGORY_TRANSLATIONS_PT.get(categoria, categoria.replace('-', ' ').title())}"
+                f"<b>{nome_traduzido} ({simbolo})</b><br>"
+                f"{tr('periodic_table.atomic_number')}: {el_data['numero']}<br>"
+                f"{tr('periodic_table.atomic_mass')}: {el_data['massa']:.4f}<br>"
+                f"{tr('periodic_table.category')}: {categoria_traduzida}"
             )
             btn.setToolTip(tooltip_text)
 
@@ -439,12 +490,12 @@ class TabelaPeriodicaDialog(QDialog):
             self.grid_layout.addWidget(btn, grid_row, grid_col)
 
         if any(el["categoria"] == "lanthanide" for el in ELEMENTOS):
-            lan_label = QLabel(" Lantanídeos →")
+            lan_label = QLabel(f" {tr('periodic_table.groups.lanthanides')} →")
             lan_label.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
             self.grid_layout.addWidget(lan_label, lanthanide_row, 0, 1, 2)
 
         if any(el["categoria"] == "actinide" for el in ELEMENTOS):
-            act_label = QLabel(" Actinídeos →")
+            act_label = QLabel(f" {tr('periodic_table.groups.actinides')} →")
             act_label.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
             self.grid_layout.addWidget(act_label, actinide_row, 0, 1, 2)
 
@@ -564,7 +615,7 @@ class TabelaPeriodicaDialog(QDialog):
 
     def _update_selected_elements_display(self):
         if not self.selected_elements:
-            self.selected_elements_text_edit.setText("Nenhum elemento selecionado.")
+            self.selected_elements_text_edit.setText(tr('periodic_table.no_selection'))
         else:
             sorted_symbols = sorted(
                 list(self.selected_elements),
@@ -575,11 +626,11 @@ class TabelaPeriodicaDialog(QDialog):
             for symbol in sorted_symbols:
                 el_data = next((el for el in ELEMENTOS if el['simbolo'] == symbol), None)
                 if el_data:
-                    categoria_original = el_data.get('categoria', 'N/A')
-                    categoria_traduzida = CATEGORY_TRANSLATIONS_PT.get(categoria_original,
-                                                                       categoria_original.replace('-', ' ').title())
-                    line = (f"{el_data['simbolo']} ({el_data['nome']}) - "
-                            f"Nº: {el_data['numero']}, Cat: {categoria_traduzida}")
+                    categoria_traduzida = get_category_translation(el_data.get('categoria', 'unknown'))
+                    nome_traduzido = get_element_name(symbol)
+                    line = (f"{el_data['simbolo']} ({nome_traduzido}) - "
+                            f"{tr('periodic_table.atomic_number_short')}: {el_data['numero']}, "
+                            f"{tr('periodic_table.category_short')}: {categoria_traduzida}")
                     display_lines.append(line)
 
             self.selected_elements_text_edit.setText("\n".join(display_lines))
@@ -599,6 +650,14 @@ class TabelaPeriodicaDialog(QDialog):
         self.selected_elements.clear()
         self._update_selected_elements_display()
         self.selection_cleared_signal.emit()
+
+    def keyPressEvent(self, event):
+        """Captura eventos de teclado - Delete limpa todos os elementos selecionados."""
+        if event.key() == Qt.Key.Key_Delete:
+            self.clear_all_selections()
+            event.accept()
+        else:
+            super().keyPressEvent(event)
 
     def reject(self):
         for simbolo in list(self.scintillation_timers.keys()):
