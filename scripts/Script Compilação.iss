@@ -17,7 +17,7 @@ DefaultDirName={autopf}\MatFinder
 ; Nome do grupo no Menu Iniciar
 DefaultGroupName=MatFinder
 ; Nome base do arquivo de setup de saída (ex: MatFinder-3.23-setup.exe)
-OutputBaseFilename=MatFinder3.23-Setup
+OutputBaseFilename=MatFinder3.24-Setup
 ; Diretório de saída para o setup.exe (relativo ao local do .iss)
 ; Cria uma pasta "InstallerOutput" para organizar. (Corrigido de Installer para InstallerOutput)
 OutputDir=.\InstallerOutput

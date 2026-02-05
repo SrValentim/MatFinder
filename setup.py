@@ -8,7 +8,7 @@ APP_NAME = "MatFinder"
 # --- ALTERAÇÃO DE REATORAÇÃO 1: Script Principal ---
 # Agora aponta para o novo ponto de entrada na raiz
 MAIN_SCRIPT = "run_matfinder.py"
-APP_VERSION = "3.23.0"
+APP_VERSION = "3.24.0"
 # --- ALTERAÇÃO DE REATORAÇÃO 2: Caminho do Ícone ---
 # Aponta para a nova pasta 'matfinder/assets/icons/'
 ICON_FILE = os.path.join("matfinder", "assets", "icons", "polvo.ico")
