@@ -5,7 +5,7 @@
 [Setup]
 ; --- Informações da Aplicação ---
 AppName=MatFinder
-AppVersion=3.23
+AppVersion=3.24
 AppPublisher=Raynner Valentim - LabMat
 ; AppPublisherURL=http://www.seuwebsite.com ; (Opcional: seu website)
 ; AppSupportURL=http://www.seuwebsite.com/support ; (Opcional: link para suporte)
