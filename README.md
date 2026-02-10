@@ -84,6 +84,9 @@ Download the latest version from [Releases](https://github.com/SrValentim/MatFin
 
 - **User Manual**: [`docs/Manual do Usuário.pdf`](docs/Manual%20do%20Usuário.pdf)
 - **Compilation Guide**: [`docs/compilation/`](docs/compilation/)
+- **DEBUSSY Windows Setup Guide**: 
+  - [🇧🇷 Portuguese](docs/DEBUSSY_WINDOWS_GUIA.md)
+  - [🇺🇸 English](docs/DEBUSSY_WINDOWS_GUIDE.md)
 - **GPL v3 License**: [`licenses/LICENSE_FULL.txt`](licenses/LICENSE_FULL.txt)
 
 ---
