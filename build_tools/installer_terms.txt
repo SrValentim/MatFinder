@@ -1,0 +1,29 @@
+﻿TERMO DE USO E COMPROMISSO — MatFinder v3.24.0
+
+MatFinder — X-ray diffraction analysis tools
+Desenvolvido na Universidade Federal do Amazonas (UFAM) — Departamento de Física
+(Física de Materiais), Brasil.
+Autor: Raynner Valentim  ·  raynnervalentim@hotmail.com
+
+LICENÇA
+Este software é distribuído sob a GNU General Public License v3.0 (GPL v3).
+O texto completo da licença será exibido na próxima etapa e deverá ser aceito
+para prosseguir com a instalação.
+
+USO ACADÊMICO E CITAÇÃO
+O MatFinder é uma ferramenta de pesquisa. Se você utilizá-lo em trabalhos
+acadêmicos, pedimos a gentileza de citá-lo:
+  Valentim, R. (2026). MatFinder — X-ray diffraction analysis tools (3.24).
+  Zenodo. https://doi.org/10.5281/zenodo.20778196
+
+DADOS DE TERCEIROS
+As buscas utilizam bases externas (Materials Project, COD, OQMD, ROD). O uso dos
+dados obtidos está sujeito aos termos de cada base de dados.
+
+SEM GARANTIA
+O software é fornecido "COMO ESTÁ", sem garantias de qualquer tipo, nos termos
+da GPL v3.
+
+CONTATO E COLABORAÇÃO
+Feedbacks, relatos de erro e colaborações são muito bem-vindos:
+  raynnervalentim@hotmail.com  ·  https://github.com/SrValentim/MatFinder
