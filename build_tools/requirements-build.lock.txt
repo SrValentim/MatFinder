@@ -1,9 +1,9 @@
 # requirements-build.lock.txt - LOCK COMPLETO do venv de build (.venv-build)
-# Gerado por 'pip freeze' em 2026-06-20. Python 3.11.
-# Use ESTE arquivo para reproduzir EXATAMENTE o ambiente de build:
-#   py -3.11 -m venv ..\.venv-build
-#   ..\.venv-build\Scripts\python -m pip install -r build_tools\requirements-build.lock.txt
-# (requirements-build.txt e a versao legivel/minima; este e o reproduzivel.)
+# Gerado por 'pip freeze --all' em 2026-06-20. Python 3.11 / Windows x64.
+# Reproduz EXATAMENTE o ambiente de build:
+#   py -3.11 -m venv .venv-build
+#   .venv-build\Scripts\python -m pip install -r build_tools\requirements-build.lock.txt
+# IMPORTANTE: inclui setuptools<81 (pkg_resources) e backports.tarfile - criticos.
 #
 aioitertools==0.13.0
 altgraph==0.17.5
@@ -110,6 +110,7 @@ paramiko==5.0.0
 parso==0.8.7
 pefile==2023.2.7
 pillow==10.4.0
+pip==26.1.2
 platformdirs==4.10.0
 plotly==6.8.0
 prometheus_client==0.25.0
@@ -162,6 +163,7 @@ s3transfer==0.19.0
 scipy==1.14.1
 Send2Trash==2.1.0
 sentinels==1.1.1
+setuptools==80.10.2
 shiboken6==6.9.0
 six==1.17.0
 smart_open==7.6.1
@@ -188,4 +190,5 @@ wcwidth==0.8.1
 webcolors==25.10.0
 webencodings==0.5.1
 websocket-client==1.9.0
+wheel==0.47.0
 wrapt==2.2.2
