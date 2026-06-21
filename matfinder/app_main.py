@@ -478,7 +478,6 @@ class MaterialsApp(QMainWindow):
                 if (
                         key
                         and key != "COLOQUE_A_SUA_CHAVE_DA_API_DO_MATERIALS_PROJECT_AQUI"
-                        and len(key) == 32
                 ):
                     logging.info(f"Chave API MP carregada de '{config_path}'.")
                     return key
@@ -507,18 +506,46 @@ class MaterialsApp(QMainWindow):
         return False
 
     def open_api_key_dialog(self):
-        # (O conteúdo desta função permanece o mesmo)
+        # Diálogo com campo da chave + ajuda "Como conseguir" (passos + link).
+        # Sem restrição de tamanho: as chaves do MP variam (não são sempre 32).
+        from PySide6.QtWidgets import QDialog, QVBoxLayout, QLabel, QLineEdit, QDialogButtonBox
+
         current_key = self.get_api_key_on_demand() or ""
-        text, ok = QInputDialog.getText(
-            self,
-            tr('dialogs.api_key.title'),
-            tr('dialogs.api_key.prompt'),
-            QLineEdit.EchoMode.Normal,
-            current_key,
+        dlg = QDialog(self)
+        dlg.setWindowTitle(tr('dialogs.api_key.title'))
+        dlg.setMinimumWidth(480)
+        lay = QVBoxLayout(dlg)
+
+        lay.addWidget(QLabel(tr('dialogs.api_key.prompt')))
+        edit = QLineEdit(current_key)
+        edit.setEchoMode(QLineEdit.EchoMode.Normal)
+        lay.addWidget(edit)
+
+        help_lbl = QLabel(tr('dialogs.api_key.how_to'))
+        help_lbl.setWordWrap(True)
+        help_lbl.setStyleSheet(
+            "color:#444; background:#f4f4f4; padding:8px; border-radius:4px;"
         )
-        if ok and text:
-            new_key = text.strip()
-            if len(new_key) == 32:
+        lay.addWidget(help_lbl)
+
+        link = QLabel(
+            '<a href="https://legacy.materialsproject.org/dashboard">'
+            + tr('dialogs.api_key.open_dashboard') + '</a>'
+        )
+        link.setOpenExternalLinks(True)
+        link.setTextInteractionFlags(Qt.TextInteractionFlag.TextBrowserInteraction)
+        lay.addWidget(link)
+
+        bb = QDialogButtonBox(
+            QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel
+        )
+        bb.accepted.connect(dlg.accept)
+        bb.rejected.connect(dlg.reject)
+        lay.addWidget(bb)
+
+        if dlg.exec() == QDialog.DialogCode.Accepted:
+            new_key = edit.text().strip()
+            if new_key:
                 if self.save_api_key_to_config(new_key):
                     self.api_key_mp = new_key
                     QMessageBox.information(
@@ -531,7 +558,6 @@ class MaterialsApp(QMainWindow):
                 QMessageBox.warning(
                     self, tr('dialogs.api_key.invalid'), tr('dialogs.api_key.invalid_msg')
                 )
-                logging.warning("Tentativa de salvar chave API MP com tamanho inválido.")
 
     def open_proxy_config_dialog(self):
         # --- ALTERAÇÃO DE REATORAÇÃO: Importação Local ---

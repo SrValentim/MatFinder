@@ -181,11 +181,13 @@
   "dialogs": {
     "api_key": {
       "title": "Materials Project API Key",
-      "prompt": "Enter your Materials Project API key (32 characters):\nGet one at: materialsproject.org/api",
+      "prompt": "Paste your Materials Project API key:",
+      "how_to": "How to get your key (free):\n1. Open the Materials Project dashboard (link below) and log in / sign up.\n2. Click \"API\".\n3. Copy your \"API Key\" (use \"Generate\" if there isn't one).\n4. Paste it above and click OK.",
+      "open_dashboard": "🔗 Open the Materials Project dashboard",
       "saved": "Key Saved",
       "saved_msg": "Materials Project API key saved successfully!",
       "invalid": "Invalid Key",
-      "invalid_msg": "The API key must have 32 characters.",
+      "invalid_msg": "The API key cannot be empty.",
       "required_title": "API Key Required",
       "required_cif_msg": "The Materials Project API key is required to download CIF files.\nConfigure it in 'Settings > Materials Project API Key...'."
     },

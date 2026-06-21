@@ -181,11 +181,13 @@
   "dialogs": {
     "api_key": {
       "title": "Chave API Materials Project",
-      "prompt": "Insira sua chave da API do Materials Project (32 caracteres):\nObtenha uma em: materialsproject.org/api",
+      "prompt": "Cole sua chave da API do Materials Project:",
+      "how_to": "Como conseguir sua chave (grátis):\n1. Abra o dashboard do Materials Project (link abaixo) e faça login/cadastro.\n2. Clique em \"API\".\n3. Copie a sua \"API Key\" (use \"Generate\" se não houver uma).\n4. Cole no campo acima e clique em OK.",
+      "open_dashboard": "🔗 Abrir o dashboard do Materials Project",
       "saved": "Chave Salva",
       "saved_msg": "Chave da API do Materials Project salva com sucesso!",
       "invalid": "Chave Inválida",
-      "invalid_msg": "A chave da API deve ter 32 caracteres.",
+      "invalid_msg": "A chave da API não pode ficar vazia.",
       "required_title": "Chave API Necessária",
       "required_cif_msg": "A chave da API do Materials Project é necessária para baixar arquivos CIF.\nConfigure-a em 'Configuração > Chave Materials Project...'."
     },

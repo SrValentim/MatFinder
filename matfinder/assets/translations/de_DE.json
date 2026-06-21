@@ -181,11 +181,13 @@
   "dialogs": {
     "api_key": {
       "title": "Materials Project API-Schlüssel",
-      "prompt": "Geben Sie Ihren Materials Project API-Schlüssel ein (32 Zeichen):\nHolen Sie sich einen unter: materialsproject.org/api",
+      "prompt": "Fügen Sie Ihren Materials Project API-Schlüssel ein:",
+      "how_to": "So erhalten Sie Ihren Schlüssel (kostenlos):\n1. Öffnen Sie das Materials-Project-Dashboard (Link unten) und melden Sie sich an.\n2. Klicken Sie auf \"API\".\n3. Kopieren Sie Ihren \"API Key\" (ggf. \"Generate\").\n4. Fügen Sie ihn oben ein und klicken Sie OK.",
+      "open_dashboard": "🔗 Materials-Project-Dashboard öffnen",
       "saved": "Schlüssel gespeichert",
       "saved_msg": "Materials Project API-Schlüssel erfolgreich gespeichert!",
       "invalid": "Ungültiger Schlüssel",
-      "invalid_msg": "Der API-Schlüssel muss 32 Zeichen haben.",
+      "invalid_msg": "Der API-Schlüssel darf nicht leer sein.",
       "required_title": "API-Schlüssel erforderlich",
       "required_cif_msg": "Der Materials Project API-Schlüssel ist erforderlich, um CIF-Dateien herunterzuladen.\nKonfigurieren Sie ihn unter 'Einstellungen > Materials Project API-Schlüssel...'."
     },
