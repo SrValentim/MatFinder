@@ -177,7 +177,17 @@ class CifHandler:
     strings de formato CIF.
     """
 
-    def __init__(self, cif_content: str):
+    # Mapeamento de comprimento de onda numérico → chave interna
+    WAVELENGTH_MAP = {
+        'CuKa': 1.54056,
+        'MoKa': 0.71073,
+        'CoKa': 1.78897,
+        'FeKa': 1.93604,
+        'AgKa': 0.56083,
+        'CrKa': 2.28970,
+    }
+
+    def __init__(self, cif_content: str, wavelength_key: str = None):
         if not PYMATGEN_AVAILABLE:
             raise ImportError("A biblioteca 'pymatgen' é necessária para manipular arquivos CIF.")
 
@@ -185,6 +195,9 @@ class CifHandler:
             raise ValueError("O conteúdo do CIF fornecido é inválido ou está vazio.")
 
         self._original_cif_content = cif_content
+        # Wavelength para metadados do CIF (f', f'', µ, etc.)
+        # Default: CuKa (mais comum em difração de pó)
+        self._wavelength_key = wavelength_key or 'CuKa'
 
         try:
             self.structure = Structure.from_str(cif_content, fmt="cif")
@@ -195,6 +208,32 @@ class CifHandler:
 
         # Preservar metadados de simetria do CIF original para validação
         self._original_symmetry = self._extract_symmetry_metadata(cif_content)
+
+    def set_wavelength(self, wavelength_value: float):
+        """
+        Define o comprimento de onda a partir do valor numérico (Å).
+        Mapeia automaticamente para a chave interna (CuKa, MoKa, etc.)
+        Recalcula µ e f'/f'' para o novo λ.
+        """
+        best_key = 'CuKa'  # fallback
+        best_diff = float('inf')
+        for key, wl in self.WAVELENGTH_MAP.items():
+            diff = abs(wl - wavelength_value)
+            if diff < best_diff:
+                best_diff = diff
+                best_key = key
+        self._wavelength_key = best_key
+        logging.info(f"[CIF] Comprimento de onda definido: {best_key} "
+                     f"(λ={self.WAVELENGTH_MAP[best_key]:.5f} Å, "
+                     f"valor recebido: {wavelength_value:.5f} Å)")
+
+    def get_wavelength_key(self) -> str:
+        """Retorna a chave interna do comprimento de onda atual."""
+        return self._wavelength_key
+
+    def get_wavelength_value(self) -> float:
+        """Retorna o valor numérico do comprimento de onda atual (Å)."""
+        return self.WAVELENGTH_MAP.get(self._wavelength_key, 1.54056)
 
     def get_structure(self):
         """Retorna a estrutura pymatgen (Structure) carregada."""
@@ -379,29 +418,140 @@ class CifHandler:
 
     def _generate_symmetric_cif(self, symprec: float = 0.1) -> str:
         """
-        Gera CIF validável por checkCIF/PLATON usando CifWriter com detecção de simetria.
+        Gera CIF validável usando o CIF ORIGINAL como template, atualizando
+        apenas os parâmetros de rede editados pelo usuário.
 
-        Pós-processamento para conformidade checkCIF:
-        - Labels com indexação a partir de 1 (Ce1 em vez de Ce0)
-        - _atom_site_Wyckoff_symbol adicionado
-        - _chemical_formula_sum por unidade de fórmula (dividido por Z)
-        - _symmetry_space_group_name_H-M com aspas
-        - _symmetry_cell_setting adicionado
-        - _atom_type loop adicionado
-        - Tags de loop_ sem indentação (coluna 1)
-        - Precisão numérica adequada
+        RAZÃO: O CifWriter do pymatgen SEMPRE reduz a célula para primitiva,
+        alterando drasticamente os parâmetros de rede (ex: grafite a=2.46→1.42,
+        Z=6→Z=1). Isso causa deslocamento catastrófico dos picos XRD.
+
+        SOLUÇÃO: Usar o CIF original como template e substituir apenas os
+        parâmetros de rede (a, b, c, α, β, γ, volume). Isso preserva:
+        - Posições atômicas originais
+        - Operações de simetria corretas
+        - Z (número de unidades de fórmula)
+        - Labels e Wyckoff corretos
+
+        O CifWriter é usado APENAS como fallback quando não há CIF original.
+        """
+        # === ABORDAGEM PRINCIPAL: Template do CIF original ===
+        if hasattr(self, '_original_cif_content') and self._original_cif_content:
+            try:
+                cif_str = self._generate_from_original_template()
+                return cif_str
+            except Exception as e:
+                logging.warning(f"Geração via template falhou: {e}. Usando CifWriter como fallback.")
+
+        # === FALLBACK: CifWriter (para CIFs criados do zero, sem original) ===
+        return self._generate_via_cifwriter(symprec)
+
+    def _generate_from_original_template(self) -> str:
+        """
+        Gera CIF usando o original como template, atualizando apenas os
+        parâmetros de rede com os valores editados pelo usuário.
+
+        Preserva: átomos, simetria, Z, labels, Wyckoff, operações XYZ.
+
+        NÃO aplica _postprocess_cif() porque o CIF original já é válido
+        (veio do ICSD/COD/Materials Project). O pós-processamento pesado
+        foi projetado para CIFs gerados pelo CifWriter e pode corromper
+        CIFs originais (ex: "integer modulo by zero" ao re-parsear).
+        """
+        cif_str = self._original_cif_content
+
+        # Obter parâmetros de rede ATUAIS (editados pelo usuário)
+        lattice = self.structure.lattice
+        user_a = lattice.a
+        user_b = lattice.b
+        user_c = lattice.c
+        user_alpha = lattice.alpha
+        user_beta = lattice.beta
+        user_gamma = lattice.gamma
+        user_volume = lattice.volume
+
+        # Substituir _cell_length_a (com ou sem s.u.)
+        cif_str = re.sub(
+            r"(_cell_length_a\s+)[\d.]+(?:\([^)]*\))?",
+            rf"\g<1>{user_a:.5f}",
+            cif_str, count=1
+        )
+        # Substituir _cell_length_b
+        cif_str = re.sub(
+            r"(_cell_length_b\s+)[\d.]+(?:\([^)]*\))?",
+            rf"\g<1>{user_b:.5f}",
+            cif_str, count=1
+        )
+        # Substituir _cell_length_c
+        cif_str = re.sub(
+            r"(_cell_length_c\s+)[\d.]+(?:\([^)]*\))?",
+            rf"\g<1>{user_c:.5f}",
+            cif_str, count=1
+        )
+        # Substituir _cell_angle_alpha
+        cif_str = re.sub(
+            r"(_cell_angle_alpha\s+)[\d.]+(?:\([^)]*\))?",
+            rf"\g<1>{self._format_number(user_alpha, 4)}",
+            cif_str, count=1
+        )
+        # Substituir _cell_angle_beta
+        cif_str = re.sub(
+            r"(_cell_angle_beta\s+)[\d.]+(?:\([^)]*\))?",
+            rf"\g<1>{self._format_number(user_beta, 4)}",
+            cif_str, count=1
+        )
+        # Substituir _cell_angle_gamma
+        cif_str = re.sub(
+            r"(_cell_angle_gamma\s+)[\d.]+(?:\([^)]*\))?",
+            rf"\g<1>{self._format_number(user_gamma, 4)}",
+            cif_str, count=1
+        )
+        # Substituir volume (com ou sem s.u.)
+        cif_str = re.sub(
+            r"(_cell_volume\s+)[\d.]+(?:\([^)]*\))?",
+            rf"\g<1>{user_volume:.4f}",
+            cif_str, count=1
+        )
+
+        logging.info(
+            f"CIF gerado via template original: a={user_a:.5f}, b={user_b:.5f}, "
+            f"c={user_c:.5f}, V={user_volume:.4f} ų"
+        )
+
+        return cif_str
+
+    def _generate_via_cifwriter(self, symprec: float = 0.1) -> str:
+        """
+        Fallback: Gera CIF usando CifWriter quando não há CIF original.
+        CUIDADO: O CifWriter pode reduzir para primitiva.
         """
         try:
-            writer = CifWriter(self.structure, symprec=symprec, significant_figures=8)
+            # Salvar parâmetros do usuário
+            user_lattice = self.structure.lattice
+            user_a, user_b, user_c = user_lattice.a, user_lattice.b, user_lattice.c
+            user_alpha, user_beta, user_gamma = user_lattice.alpha, user_lattice.beta, user_lattice.gamma
+            user_volume = user_lattice.volume
+
+            # Tentar usar célula convencional
+            try:
+                sga = SpacegroupAnalyzer(self.structure, symprec=symprec)
+                conv_structure = sga.get_conventional_standard_structure()
+                conv_volume = conv_structure.lattice.volume
+                if abs(conv_volume - user_volume) > 0.001:
+                    conv_structure.scale_lattice(user_volume)
+                writer = CifWriter(conv_structure, symprec=symprec, significant_figures=8)
+            except Exception:
+                writer = CifWriter(self.structure, symprec=symprec, significant_figures=8)
+
             cif_str = str(writer)
+            cif_str = self._restore_original_space_group(cif_str)
+            cif_str = self._restore_user_lattice_params(
+                cif_str, user_a, user_b, user_c,
+                user_alpha, user_beta, user_gamma, user_volume
+            )
 
-            # Obter dados de Wyckoff do SpacegroupAnalyzer
             wyckoff_map = self._get_wyckoff_map(symprec)
-
-            # Pós-processamento completo para conformidade checkCIF
             cif_str = self._postprocess_cif(cif_str, wyckoff_map)
 
-            # Adicionar cabeçalho
             header = (
                 "# CIF generated by MatFinder/PhaseDRX\n"
                 "# Modified from original using symmetry-aware CIF generator\n"
@@ -418,13 +568,177 @@ class CifHandler:
         except Exception as e:
             logging.warning(f"CifWriter(symprec={symprec}) falhou: {e}")
             if symprec < 1.0:
-                logging.info("Tentando com symprec=0.01 (mais restritivo)...")
                 try:
                     writer = CifWriter(self.structure, symprec=0.01, significant_figures=8)
-                    return self._postprocess_cif(str(writer), self._get_wyckoff_map(0.01))
+                    fallback_str = str(writer)
+                    fallback_str = self._restore_original_space_group(fallback_str)
+                    return self._postprocess_cif(fallback_str, self._get_wyckoff_map(0.01))
                 except Exception:
                     pass
             raise
+
+    def _restore_user_lattice_params(self, cif_str: str,
+                                      a: float, b: float, c: float,
+                                      alpha: float, beta: float, gamma: float,
+                                      volume: float) -> str:
+        """
+        Restaura os parâmetros de rede editados pelo usuário no CIF gerado.
+
+        O CifWriter pode alterar os parâmetros de rede ao converter para
+        célula convencional/primitiva. Esta função garante que os valores
+        exatos do usuário sejam preservados.
+        """
+        # Substituir _cell_length_a
+        cif_str = re.sub(
+            r"_cell_length_a\s+[\d.]+(?:\(\d+\))?",
+            f"_cell_length_a   {a:.5f}",
+            cif_str, count=1
+        )
+        # Substituir _cell_length_b
+        cif_str = re.sub(
+            r"_cell_length_b\s+[\d.]+(?:\(\d+\))?",
+            f"_cell_length_b   {b:.5f}",
+            cif_str, count=1
+        )
+        # Substituir _cell_length_c
+        cif_str = re.sub(
+            r"_cell_length_c\s+[\d.]+(?:\(\d+\))?",
+            f"_cell_length_c   {c:.5f}",
+            cif_str, count=1
+        )
+        # Substituir _cell_angle_alpha
+        cif_str = re.sub(
+            r"_cell_angle_alpha\s+[\d.]+(?:\(\d+\))?",
+            f"_cell_angle_alpha   {self._format_number(alpha, 4)}",
+            cif_str, count=1
+        )
+        # Substituir _cell_angle_beta
+        cif_str = re.sub(
+            r"_cell_angle_beta\s+[\d.]+(?:\(\d+\))?",
+            f"_cell_angle_beta   {self._format_number(beta, 4)}",
+            cif_str, count=1
+        )
+        # Substituir _cell_angle_gamma
+        cif_str = re.sub(
+            r"_cell_angle_gamma\s+[\d.]+(?:\(\d+\))?",
+            f"_cell_angle_gamma   {self._format_number(gamma, 4)}",
+            cif_str, count=1
+        )
+
+        logging.debug(
+            f"Parâmetros de rede restaurados: a={a:.5f}, b={b:.5f}, c={c:.5f}, "
+            f"α={alpha:.2f}°, β={beta:.2f}°, γ={gamma:.2f}°, V={volume:.4f} ų"
+        )
+        return cif_str
+
+    def _restore_original_space_group(self, cif_str: str) -> str:
+        """
+        Restaura o grupo espacial original E as operações de simetria no CIF
+        gerado pelo CifWriter, caso o CifWriter tenha detectado um grupo diferente.
+
+        Resolve SYMMG02: inconsistência entre nome H-M e operações XYZ.
+        Quando o CifWriter reduz a célula (ex: Z=6→Z=1), as operações mudam
+        (ex: P 63/m m c → P6/mmm). Restauramos AMBOS: nome E operações.
+        """
+        orig_sg_hm = self._original_symmetry.get('space_group_hm')
+        orig_sg_number = self._original_symmetry.get('space_group_number')
+        orig_symops = self._original_symmetry.get('symmetry_operations', [])
+
+        if not orig_sg_hm or not orig_sg_number:
+            return cif_str  # Sem metadados originais, não podemos restaurar
+
+        # Verificar se o CifWriter mudou o grupo espacial
+        generated_sg_match = re.search(
+            r"_symmetry_space_group_name_H-M\s+['\"]?(.+?)['\"]?\s*$",
+            cif_str, re.MULTILINE
+        )
+        generated_sg_num_match = re.search(
+            r"_symmetry_Int_Tables_number\s+(\d+)",
+            cif_str
+        )
+
+        if generated_sg_match:
+            generated_hm = generated_sg_match.group(1).strip().strip("'\"")
+            generated_num = generated_sg_num_match.group(1).strip() if generated_sg_num_match else '?'
+
+            if generated_num != str(orig_sg_number):
+                logging.warning(
+                    f"CifWriter mudou grupo espacial: {generated_hm} (#{generated_num}) "
+                    f"→ restaurando original: {orig_sg_hm} (#{orig_sg_number})"
+                )
+                # Substituir _symmetry_space_group_name_H-M
+                cif_str = re.sub(
+                    r"_symmetry_space_group_name_H-M\s+['\"]?.*?['\"]?\s*$",
+                    f"_symmetry_space_group_name_H-M   '{orig_sg_hm}'",
+                    cif_str, count=1, flags=re.MULTILINE
+                )
+                # Substituir _symmetry_Int_Tables_number
+                cif_str = re.sub(
+                    r"_symmetry_Int_Tables_number\s+\d+",
+                    f"_symmetry_Int_Tables_number   {orig_sg_number}",
+                    cif_str, count=1
+                )
+                # Substituir _symmetry_cell_setting
+                orig_crystal_system = self._original_symmetry.get('crystal_system', '')
+                if orig_crystal_system:
+                    cif_str = re.sub(
+                        r"_symmetry_cell_setting\s+\w+",
+                        f"_symmetry_cell_setting   {orig_crystal_system}",
+                        cif_str, count=1
+                    )
+
+                # === CRÍTICO: Substituir as operações de simetria XYZ ===
+                # As operações do CifWriter correspondem ao grupo ERRADO.
+                # Devemos usar as operações do CIF ORIGINAL para evitar SYMMG02.
+                if orig_symops:
+                    cif_str = self._replace_symmetry_operations(cif_str, orig_symops)
+
+        return cif_str
+
+    def _replace_symmetry_operations(self, cif_str: str, original_symops: list) -> str:
+        """
+        Substitui o bloco de operações de simetria no CIF gerado pelas
+        operações originais do CIF fonte.
+
+        Resolve SYMMG02 (inconsistência entre H-M e operações XYZ).
+        """
+        # Construir novo bloco de operações
+        new_symop_block_lines = [
+            "loop_",
+            "_symmetry_equiv_pos_site_id",
+            "_symmetry_equiv_pos_as_xyz",
+        ]
+        for idx, op in enumerate(original_symops, 1):
+            new_symop_block_lines.append(f"{idx}  '{op}'")
+
+        new_symop_block = '\n'.join(new_symop_block_lines)
+
+        # Padrão 1: _symmetry_equiv_pos_site_id + _symmetry_equiv_pos_as_xyz
+        pattern1 = re.compile(
+            r"loop_\s*\n\s*_symmetry_equiv_pos_site_id\s*\n\s*_symmetry_equiv_pos_as_xyz\s*\n"
+            r"(.*?)(?=\nloop_|\n_[a-z]|\n#|\Z)",
+            re.DOTALL
+        )
+        match1 = pattern1.search(cif_str)
+        if match1:
+            cif_str = cif_str[:match1.start()] + new_symop_block + cif_str[match1.end():]
+            logging.info(f"Operações de simetria substituídas: {len(original_symops)} operações originais restauradas")
+            return cif_str
+
+        # Padrão 2: apenas _symmetry_equiv_pos_as_xyz (sem id)
+        pattern2 = re.compile(
+            r"loop_\s*\n\s*_symmetry_equiv_pos_as_xyz\s*\n"
+            r"(.*?)(?=\nloop_|\n_[a-z]|\n#|\Z)",
+            re.DOTALL
+        )
+        match2 = pattern2.search(cif_str)
+        if match2:
+            cif_str = cif_str[:match2.start()] + new_symop_block + cif_str[match2.end():]
+            logging.info(f"Operações de simetria substituídas: {len(original_symops)} operações originais restauradas")
+            return cif_str
+
+        logging.warning("Não foi possível localizar bloco de operações de simetria para substituição")
+        return cif_str
 
     def _get_wyckoff_map(self, symprec: float = 0.1) -> dict:
         """
@@ -538,37 +852,78 @@ class CifHandler:
         except Exception:
             return 0.0
 
-    def _build_atom_type_loop(self, atom_symbols: list, wavelength: str = 'MoKa') -> list:
+    @staticmethod
+    def _parse_ion_symbol(sym: str):
         """
-        Gera o bloco loop_ _atom_type com fatores de espalhamento anômalo.
-        Obrigatório pelo checkCIF. Inclui f' e f'' (PLAT981, PLAT986).
+        Analisa um símbolo atômico (possivelmente iônico) e retorna
+        (full_symbol, base_element, oxidation_number).
+
+        Exemplos:
+            'C0+'  → ('C0+', 'C', 0)
+            'Ce4+' → ('Ce4+', 'Ce', 4)
+            'O2-'  → ('O2-', 'O', -2)
+            'C'    → ('C', 'C', 0)
+            'Fe3+' → ('Fe3+', 'Fe', 3)
+        """
+        sym = sym.strip()
+        ion_match = re.match(r'^([A-Za-z]+)(\d+)([+-])$', sym)
+        if ion_match:
+            base = ion_match.group(1)
+            charge = int(ion_match.group(2))
+            sign = ion_match.group(3)
+            oxidation = charge if sign == '+' else -charge
+            return sym, base, oxidation
+        # Bare element (no charge)
+        base_match = re.match(r'^([A-Za-z]+)', sym)
+        base = base_match.group(1) if base_match else sym
+        return base, base, 0
+
+    def _build_atom_type_loop(self, atom_symbols: list, wavelength: str = None) -> list:
+        """
+        Gera o bloco UNIFICADO loop_ _atom_type com estado de oxidação E
+        fatores de espalhamento anômalo em um ÚNICO loop_.
+
+        Resolve:
+        - Duplicação de _atom_type_symbol (IUCr: tag única por bloco de dados)
+        - Inconsistência de símbolos entre _atom_site e _atom_type
+        - PLAT981, PLAT986 (fatores de dispersão ausentes)
+        - CELLZ01/FORMU01/DENSD01 (símbolos iônicos não reconhecidos pelo parser)
+
+        IMPORTANTE: Usa o ELEMENTO BASE (ex: 'C', não 'C0+') como _atom_type_symbol.
+        O checkCIF/PLATON requer símbolos de elementos da tabela periódica.
+        O estado de oxidação é armazenado separadamente em _atom_type_oxidation_number.
 
         Args:
-            atom_symbols: Lista de símbolos atômicos
-            wavelength: 'MoKa' (0.71073 Å) ou 'CuKa' (1.54184 Å)
+            atom_symbols: Lista de símbolos atômicos (podem incluir notação iônica, ex: 'C0+', 'Ce4+')
+            wavelength: chave do λ ('MoKa', 'CuKa', etc.) — default: self._wavelength_key
         """
-        # Extrair elementos únicos preservando ordem
+        if wavelength is None:
+            wavelength = self._wavelength_key
+
+        # Extrair símbolos únicos, NORMALIZANDO para elemento base
         seen = set()
-        unique_symbols = []
+        unique_entries = []  # Lista de (base_element, oxidation)
         for sym in atom_symbols:
-            base = re.match(r'^([A-Za-z]+)', sym)
-            base_elem = base.group(1) if base else sym
+            full_sym, base_elem, oxidation = self._parse_ion_symbol(sym)
             if base_elem not in seen:
                 seen.add(base_elem)
-                unique_symbols.append(base_elem)
+                unique_entries.append((base_elem, oxidation))
 
         lines = [
             "loop_",
             "_atom_type_symbol",
+            "_atom_type_oxidation_number",
             "_atom_type_scat_dispersion_real",
             "_atom_type_scat_dispersion_imag",
             "_atom_type_scat_source"
         ]
-        for sym in unique_symbols:
-            scattering = ANOMALOUS_SCATTERING.get(sym, {})
+        for base_elem, oxidation in unique_entries:
+            scattering = ANOMALOUS_SCATTERING.get(base_elem, {})
             f_prime, f_double_prime = scattering.get(wavelength, (0.0, 0.0))
-            source = f"'International Tables Vol C Tables 4.2.6.8 and 6.1.1.4'"
-            lines.append(f"{sym}   {f_prime:.4f}   {f_double_prime:.4f}   {source}")
+            source = "'International Tables Vol C Tables 4.2.6.8 and 6.1.1.4'"
+            lines.append(
+                f"{base_elem}   {oxidation}   {f_prime:.4f}   {f_double_prime:.4f}   {source}"
+            )
         return lines
 
     def _calculate_mu(self, wavelength: str = 'MoKa') -> float:
@@ -618,18 +973,73 @@ class CifHandler:
             logging.warning(f"Erro ao calcular F(000): {e}")
             return 0.0
 
+    def _find_symmetry_code(self, neighbor_frac, equiv_sites_list, symm_ops, target_equiv_idx):
+        """
+        Determina o código de simetria CIF para um vizinho.
+
+        O código CIF tem formato: n_pqr
+        - n = índice da operação de simetria (1-based)
+        - p,q,r = translação + 5 (5 = sem translação, 4 = -1, 6 = +1)
+
+        Se o vizinho está na posição identidade sem translação, retorna '.'
+
+        Args:
+            neighbor_frac: coordenadas fracionárias do vizinho
+            equiv_sites_list: lista de listas de sites equivalentes (da SymmetrizedStructure)
+            symm_ops: lista de SymmOp
+            target_equiv_idx: índice do grupo equivalente ao qual o vizinho pertence
+
+        Returns:
+            str: código de simetria CIF (ex: '2_655', '1_555', ou '.')
+        """
+        target_sites = equiv_sites_list[target_equiv_idx]
+        # Coordenada fracionária de referência do site assimétrico
+        ref_frac = target_sites[0].frac_coords
+
+        best_code = '.'
+        best_dist = float('inf')
+
+        for op_idx, op in enumerate(symm_ops):
+            # Aplicar operação de simetria à coordenada de referência
+            transformed = op.operate(ref_frac)
+
+            # Testar translações de rede (-1, 0, +1 em cada direção)
+            for tx in [-1, 0, 1]:
+                for ty in [-1, 0, 1]:
+                    for tz in [-1, 0, 1]:
+                        test_frac = transformed + np.array([tx, ty, tz])
+
+                        # Verificar se essa posição coincide com o vizinho
+                        diff = neighbor_frac - test_frac
+                        if np.max(np.abs(diff)) < 0.01:
+                            dist = np.sum(np.abs(diff))
+                            if dist < best_dist:
+                                best_dist = dist
+                                p = tx + 5
+                                q = ty + 5
+                                r = tz + 5
+                                n = op_idx + 1  # 1-based
+                                if n == 1 and p == 5 and q == 5 and r == 5:
+                                    best_code = '.'
+                                else:
+                                    best_code = f"{n}_{p}{q}{r}"
+
+        return best_code
+
     def _build_bond_geometry_loop(self) -> list:
         """
         Calcula e gera o loop_ de distâncias interatômicas (bonds).
-        Resolve GEOM001, GEOM002, GEOM003.
+        Resolve GEOM001, GEOM002, GEOM003, PLAT721.
 
-        Usa o SpacegroupAnalyzer para trabalhar com a unidade assimétrica
-        e gerar bonds com informação de simetria.
+        Usa o SpacegroupAnalyzer + SymmetrizedStructure para:
+        - Trabalhar com a unidade assimétrica
+        - Gerar bonds com informação de simetria correta (código CIF n_pqr)
+        - Considerar condições de contorno periódicas (PBC)
         """
         try:
-            # Usar estrutura simétrica para obter os sites independentes
             sga = SpacegroupAnalyzer(self.structure, symprec=0.1)
             sym_structure = sga.get_symmetrized_structure()
+            symm_ops = sga.get_symmetry_operations()
 
             lines = [
                 "loop_",
@@ -642,8 +1052,8 @@ class CifHandler:
             # Criar labels para os sites equivalentes
             site_labels = {}
             atom_counter = {}
-            equiv_site_list = []
-            for i, equiv_sites in enumerate(sym_structure.equivalent_sites):
+            equiv_sites_list = list(sym_structure.equivalent_sites)
+            for i, equiv_sites in enumerate(equiv_sites_list):
                 site = equiv_sites[0]
                 elem = site.specie.symbol
                 if elem not in atom_counter:
@@ -651,45 +1061,80 @@ class CifHandler:
                 label = f"{elem}{atom_counter[elem]}"
                 atom_counter[elem] += 1
                 site_labels[i] = label
-                equiv_site_list.append(site)
 
-            # Calcular bonds usando a biblioteca de ligações
+            # Importar biblioteca de ligações para validação de distâncias
             try:
                 from matfinder.tools.xrd.bond_library import get_bond_distance
             except ImportError:
                 get_bond_distance = None
 
             added_bonds = set()
-            for i, site_i in enumerate(equiv_site_list):
+
+            for i, equiv_sites_i in enumerate(equiv_sites_list):
                 label_i = site_labels[i]
+                site_i = equiv_sites_i[0]  # Site representativo da unidade assimétrica
                 elem_i = site_i.specie.symbol
 
-                # Encontrar TODOS os vizinhos dentro de 3.5 Å
+                # Encontrar vizinhos dentro de 3.5 Å (usando PBC automaticamente via pymatgen)
                 neighbors = self.structure.get_neighbors(site_i, 3.5)
 
-                # Agrupar vizinhos por tipo de elemento e pegar a menor distância de cada tipo
-                best_by_elem = {}
                 for neighbor in neighbors:
                     n_site = neighbor[0] if isinstance(neighbor, tuple) else neighbor
                     n_dist = neighbor[1] if isinstance(neighbor, tuple) else neighbor.nn_distance
                     n_elem = n_site.specie.symbol if hasattr(n_site, 'specie') else ''
 
-                    # Validar distância com a biblioteca
+                    # Validar distância com a biblioteca de ligações
                     if get_bond_distance is not None:
                         max_dist = get_bond_distance(elem_i, n_elem)
                     else:
                         max_dist = 3.0
 
-                    if n_dist <= max_dist:
-                        # Encontrar qual site equivalente este vizinho corresponde
-                        for j, site_j in enumerate(equiv_site_list):
-                            if site_j.specie.symbol == n_elem:
-                                label_j = site_labels[j]
-                                bond_key = tuple(sorted([label_i, label_j])) + (round(n_dist, 3),)
-                                if bond_key not in added_bonds:
-                                    added_bonds.add(bond_key)
-                                    lines.append(f"{label_i}   {label_j}   {n_dist:.4f}   .")
+                    if n_dist > max_dist:
+                        continue
+
+                    # Obter coordenadas fracionárias do vizinho
+                    n_frac = n_site.frac_coords if hasattr(n_site, 'frac_coords') else None
+                    if n_frac is None:
+                        continue
+
+                    # Encontrar o grupo equivalente correspondente ao vizinho
+                    target_equiv_idx = -1
+                    for j, equiv_sites_j in enumerate(equiv_sites_list):
+                        if equiv_sites_j[0].specie.symbol == n_elem:
+                            for eq_site in equiv_sites_j:
+                                diff = n_frac - eq_site.frac_coords
+                                diff -= np.round(diff)
+                                if np.max(np.abs(diff)) < 0.05:
+                                    target_equiv_idx = j
+                                    break
+                            if target_equiv_idx >= 0:
                                 break
+
+                    if target_equiv_idx < 0:
+                        # Fallback: usar o primeiro grupo com o mesmo elemento
+                        for j, equiv_sites_j in enumerate(equiv_sites_list):
+                            if equiv_sites_j[0].specie.symbol == n_elem:
+                                target_equiv_idx = j
+                                break
+                        if target_equiv_idx < 0:
+                            continue
+
+                    label_j = site_labels[target_equiv_idx]
+
+                    # Calcular código de simetria CIF
+                    symm_code = self._find_symmetry_code(
+                        n_frac, equiv_sites_list, symm_ops, target_equiv_idx
+                    )
+
+                    # Evitar duplicatas (considerar labels + distância arredondada + symmetry code)
+                    bond_key = (
+                        tuple(sorted([label_i, label_j])),
+                        round(n_dist, 3),
+                        symm_code
+                    )
+                    if bond_key not in added_bonds:
+                        added_bonds.add(bond_key)
+                        lines.append(f"{label_i}   {label_j}   {n_dist:.4f}   {symm_code}")
 
             if len(lines) <= 5:  # Apenas headers, sem dados
                 return []
@@ -703,10 +1148,14 @@ class CifHandler:
         """
         Calcula e gera o loop_ de ângulos interatômicos.
         Resolve GEOM006, GEOM007, GEOM008.
+
+        Usa SymmetrizedStructure e operações de simetria para gerar
+        códigos de simetria corretos para cada átomo no ângulo.
         """
         try:
             sga = SpacegroupAnalyzer(self.structure, symprec=0.1)
             sym_structure = sga.get_symmetrized_structure()
+            symm_ops = sga.get_symmetry_operations()
 
             lines = [
                 "loop_",
@@ -721,8 +1170,8 @@ class CifHandler:
             # Criar labels
             site_labels = {}
             atom_counter = {}
-            equiv_site_list = []
-            for i, equiv_sites in enumerate(sym_structure.equivalent_sites):
+            equiv_sites_list = list(sym_structure.equivalent_sites)
+            for i, equiv_sites in enumerate(equiv_sites_list):
                 site = equiv_sites[0]
                 elem = site.specie.symbol
                 if elem not in atom_counter:
@@ -730,7 +1179,6 @@ class CifHandler:
                 label = f"{elem}{atom_counter[elem]}"
                 atom_counter[elem] += 1
                 site_labels[i] = label
-                equiv_site_list.append(site)
 
             try:
                 from matfinder.tools.xrd.bond_library import get_bond_distance
@@ -740,12 +1188,13 @@ class CifHandler:
             added_angles = set()
 
             # Para cada átomo central, encontrar vizinhos bonded e calcular ângulos
-            for i, site_i in enumerate(equiv_site_list):
+            for i, equiv_sites_i in enumerate(equiv_sites_list):
                 label_i = site_labels[i]
+                site_i = equiv_sites_i[0]
                 elem_i = site_i.specie.symbol
 
                 # Encontrar vizinhos bonded
-                neighbors_info = []  # (label, coords, distance)
+                neighbors_info = []  # (label, coords, distance, symm_code)
                 all_neighbors = self.structure.get_neighbors(site_i, 3.5)
 
                 for neighbor in all_neighbors:
@@ -753,8 +1202,9 @@ class CifHandler:
                     n_dist = neighbor[1] if isinstance(neighbor, tuple) else neighbor.nn_distance
                     n_elem = n_site.specie.symbol if hasattr(n_site, 'specie') else ''
                     n_coords = n_site.coords if hasattr(n_site, 'coords') else None
+                    n_frac = n_site.frac_coords if hasattr(n_site, 'frac_coords') else None
 
-                    if n_coords is None:
+                    if n_coords is None or n_frac is None:
                         continue
 
                     # Validar que é uma ligação real
@@ -763,12 +1213,35 @@ class CifHandler:
                     else:
                         max_dist = 3.0
 
-                    if n_dist <= max_dist:
-                        # Determinar label do vizinho
-                        for j, site_j in enumerate(equiv_site_list):
-                            if site_j.specie.symbol == n_elem:
-                                neighbors_info.append((site_labels[j], n_coords, n_dist))
+                    if n_dist > max_dist:
+                        continue
+
+                    # Determinar label e código de simetria do vizinho
+                    target_equiv_idx = -1
+                    for j, equiv_sites_j in enumerate(equiv_sites_list):
+                        if equiv_sites_j[0].specie.symbol == n_elem:
+                            for eq_site in equiv_sites_j:
+                                diff = n_frac - eq_site.frac_coords
+                                diff -= np.round(diff)
+                                if np.max(np.abs(diff)) < 0.05:
+                                    target_equiv_idx = j
+                                    break
+                            if target_equiv_idx >= 0:
                                 break
+
+                    if target_equiv_idx < 0:
+                        for j, equiv_sites_j in enumerate(equiv_sites_list):
+                            if equiv_sites_j[0].specie.symbol == n_elem:
+                                target_equiv_idx = j
+                                break
+                        if target_equiv_idx < 0:
+                            continue
+
+                    n_label = site_labels[target_equiv_idx]
+                    symm_code = self._find_symmetry_code(
+                        n_frac, equiv_sites_list, symm_ops, target_equiv_idx
+                    )
+                    neighbors_info.append((n_label, n_coords, n_dist, symm_code))
 
                 # Calcular ângulos entre pares de vizinhos
                 for ni in range(len(neighbors_info)):
@@ -777,6 +1250,8 @@ class CifHandler:
                         label_nj = neighbors_info[nj][0]
                         coords_ni = neighbors_info[ni][1]
                         coords_nj = neighbors_info[nj][1]
+                        symm_code_ni = neighbors_info[ni][3]
+                        symm_code_nj = neighbors_info[nj][3]
 
                         vec1 = coords_ni - site_i.coords
                         vec2 = coords_nj - site_i.coords
@@ -792,12 +1267,16 @@ class CifHandler:
                             if angle < 5.0 or angle > 175.0:
                                 continue
 
-                            # Evitar duplicatas (sort labels mas manter central)
-                            sorted_ends = tuple(sorted([label_ni, label_nj]))
+                            # Evitar duplicatas
+                            sorted_ends = tuple(sorted([(label_ni, symm_code_ni),
+                                                        (label_nj, symm_code_nj)]))
                             angle_key = (sorted_ends[0], label_i, sorted_ends[1], round(angle, 1))
                             if angle_key not in added_angles:
                                 added_angles.add(angle_key)
-                                lines.append(f"{label_ni}   {label_i}   {label_nj}   {angle:.2f}   .   .")
+                                lines.append(
+                                    f"{label_ni}   {label_i}   {label_nj}   "
+                                    f"{angle:.2f}   {symm_code_ni}   {symm_code_nj}"
+                                )
 
             if len(lines) <= 7:  # Apenas headers
                 return []
@@ -807,20 +1286,23 @@ class CifHandler:
             logging.warning(f"Erro ao gerar geometria de ângulos: {e}")
             return []
 
-    def _build_checkcif_metadata_block(self, z_val: int, wavelength: str = 'MoKa') -> list:
+    def _build_checkcif_metadata_block(self, z_val: int, wavelength: str = None) -> list:
         """
         Gera bloco de metadados para conformidade com checkCIF/PLATON.
         Resolve alertas: EXPT005, DIFF003, PLAT197, PLAT198, PLAT699,
-        PLAT183-185, PLAT880-881, PLAT029, ATOM007.
+        PLAT029, ATOM007.
 
         Args:
             z_val: Número de unidades de fórmula (Z)
-            wavelength: 'MoKa' ou 'CuKa'
+            wavelength: 'MoKa' ou 'CuKa' (default: usa self._wavelength_key)
         """
+        if wavelength is None:
+            wavelength = self._wavelength_key
+
         lines = []
 
-        # Wavelength info
-        wl = 0.71073 if wavelength == 'MoKa' else 1.54184
+        # Wavelength info — usa o valor correto da tabela WAVELENGTH_MAP
+        wl = self.WAVELENGTH_MAP.get(wavelength, 1.54056)
         lines.append(f"_diffrn_radiation_wavelength   {wl:.5f}")
         rad_type = wavelength.replace('Ka', ' K\\a')
         lines.append(f"_diffrn_radiation_type   '{rad_type}'")
@@ -834,19 +1316,12 @@ class CifHandler:
         lines.append("_cell_measurement_temperature   293(2)")
         lines.append("_diffrn_ambient_temperature   293(2)")
 
-        # Experimental data not applicable for computational CIF (PLAT183-185)
-        lines.append("_cell_measurement_reflns_used   .")
-        lines.append("_cell_measurement_theta_min   .")
-        lines.append("_cell_measurement_theta_max   .")
+        # NOTA: Campos experimentais como _diffrn_reflns_number, _cell_measurement_reflns_used,
+        # _diffrn_reflns_av_R_equivalents, _diffrn_measured_fraction_theta_full/max
+        # NÃO são incluídos em CIFs computacionais/teóricos. Esses campos só fazem sentido
+        # em CIFs provenientes de experimentos reais de difração.
 
-        # Diffraction reflections not applicable (PLAT880, PLAT881, PLAT882)
-        lines.append("_diffrn_reflns_number   .")
-        lines.append("_diffrn_reflns_av_R_equivalents   .")
-        lines.append("_diffrn_reflns_av_unetI/netI   .")
-        lines.append("_diffrn_measured_fraction_theta_full   .")
-        lines.append("_diffrn_measured_fraction_theta_max   .")
-
-        # Absorption coefficient µ (mm⁻¹)
+        # Absorption coefficient µ (mm⁻¹) — calculado para o λ correto
         mu = self._calculate_mu(wavelength)
         lines.append(f"_exptl_absorpt_coefficient_mu   {mu:.3f}")
 
@@ -873,9 +1348,10 @@ class CifHandler:
         3. _chemical_formula_sum por unidade de fórmula (/ Z)
         4. _symmetry_space_group_name_H-M com aspas simples
         5. _symmetry_cell_setting adicionado
-        6. _atom_type loop adicionado antes do _atom_site loop
+        6. _atom_type loop UNIFICADO (oxidação + espalhamento) antes do _atom_site
         7. Tags de loop_ sem indentação (coluna 1)
         8. Precisão numérica adequada nos parâmetros de rede
+        9. Remoção de TODOS os blocos _atom_type pré-existentes (duplicatas)
         """
         lines = cif_str.split('\n')
         result_lines = []
@@ -918,12 +1394,39 @@ class CifHandler:
         if atom_loop_line >= 0 and lines[atom_loop_line].strip() != 'loop_':
             atom_loop_line = -1
 
+        # Pre-scan: identificar linhas de blocos _atom_type ANTES do _atom_site para pular
+        skip_atom_type_lines = set()
+        scan_i = 0
+        while scan_i < (atom_block_start if atom_block_start >= 0 else len(lines)):
+            s = lines[scan_i].strip()
+            if s == 'loop_' and scan_i + 1 < len(lines) and lines[scan_i + 1].strip().startswith('_atom_type_'):
+                # Marcar loop_ e todas as linhas deste bloco _atom_type
+                skip_atom_type_lines.add(scan_i)
+                j = scan_i + 1
+                while j < len(lines):
+                    sj = lines[j].strip()
+                    if sj.startswith('_atom_type_'):
+                        skip_atom_type_lines.add(j)
+                        j += 1
+                    elif sj and not sj.startswith(('#', 'loop_', '_', 'data_')):
+                        skip_atom_type_lines.add(j)  # Dados (ex: "C0+ 0")
+                        j += 1
+                    else:
+                        break
+                scan_i = j
+            else:
+                scan_i += 1
+
         for i in range(atom_block_start if atom_block_start >= 0 else len(lines)):
             line = lines[i]
             stripped = line.strip()
 
             # --- Pular o loop_ que pertence ao bloco _atom_site ---
             if i == atom_loop_line:
+                continue
+
+            # --- Pular blocos _atom_type pré-existentes (serão substituídos pelo nosso unificado) ---
+            if i in skip_atom_type_lines:
                 continue
 
             # --- Fix _chemical_formula_sum: dividir por Z ---
@@ -976,6 +1479,7 @@ class CifHandler:
                 continue
 
             # --- Pular campos que já adicionamos programaticamente ---
+            # Também pula campos experimentais que não devem aparecer em CIFs computacionais
             if stripped.startswith(('_chemical_formula_moiety', '_exptl_crystal_density_diffrn',
                                     '_chemical_formula_weight',
                                     '_diffrn_radiation_', '_exptl_crystal_description',
@@ -983,10 +1487,15 @@ class CifHandler:
                                     '_cell_measurement_temperature', '_diffrn_ambient_temperature',
                                     '_cell_measurement_reflns_used', '_cell_measurement_theta_',
                                     '_diffrn_reflns_number', '_diffrn_reflns_av_',
+                                    '_diffrn_reflns_limit_', '_diffrn_reflns_theta_',
                                     '_diffrn_measured_fraction_',
                                     '_exptl_absorpt_coefficient_mu', '_exptl_crystal_F_000',
                                     '_computing_structure_solution', '_audit_creation_method',
-                                    '_atom_sites_solution_primary')):
+                                    '_atom_sites_solution_primary',
+                                    # Campos experimentais que não pertencem a CIF computacional
+                                    '_refine_ls_', '_reflns_number_', '_reflns_threshold_',
+                                    '_exptl_absorpt_correction_', '_exptl_crystal_size_',
+                                    '_exptl_crystal_colour', '_exptl_crystal_density_meas')):
                 continue
 
             # --- Limpar precisão numérica em parâmetros de rede (com s.u.) ---
@@ -1035,6 +1544,14 @@ class CifHandler:
 
             # --- Linha genérica: remover indentação desnecessária de tags ---
             if stripped.startswith('_'):
+                # === Restaurar Z original ===
+                # O CifWriter pode gerar Z diferente do original (ex: Z=1 para primitiva
+                # quando original é Z=6). Restaurar o Z original.
+                if stripped.startswith('_cell_formula_units_Z'):
+                    orig_z = self._original_symmetry.get('z', None)
+                    if orig_z:
+                        result_lines.append(f"_cell_formula_units_Z   {orig_z}")
+                        continue
                 result_lines.append(stripped)
                 continue
 
@@ -1121,14 +1638,25 @@ class CifHandler:
         # Identificar índices das coordenadas fracionárias e occupancy nos headers
         fract_indices = set()
         occ_index = -1
+        type_symbol_idx = -1
         for idx, field in enumerate(header_fields):
             if 'fract_x' in field or 'fract_y' in field or 'fract_z' in field:
                 fract_indices.add(idx)
             if 'occupancy' in field:
                 occ_index = idx
+            if field == '_atom_site_type_symbol':
+                type_symbol_idx = idx
 
         for atom_idx, data_line in enumerate(atom_data_lines):
             parts = data_line.split()
+
+            # === NORMALIZAR _atom_site_type_symbol ===
+            # Converter notação iônica (C0+, Ce4+, O2-) para elemento base (C, Ce, O)
+            # O checkCIF requer símbolos de elementos da tabela periódica padrão.
+            # O estado de oxidação é preservado separadamente em _atom_type_oxidation_number.
+            if type_symbol_idx >= 0 and type_symbol_idx < len(parts):
+                _, base_elem, _ = self._parse_ion_symbol(parts[type_symbol_idx])
+                parts[type_symbol_idx] = base_elem
 
             # Corrigir label (indexação a partir de 1)
             if label_field_idx >= 0 and label_field_idx < len(parts):
@@ -1174,7 +1702,7 @@ class CifHandler:
 
         # Adicionar linhas restantes do CIF (após o bloco _atom_site)
         # Precisamos pular: linhas de dados de átomos (já processadas)
-        # e o bloco _atom_type do pymatgen (já adicionamos o nosso)
+        # e TODOS os blocos _atom_type do pymatgen/original (já adicionamos o nosso unificado)
         past_atom_block = False
         in_atom_type_block = False
         for i in range(atom_block_header_end, len(lines)):
@@ -1185,7 +1713,7 @@ class CifHandler:
                 else:
                     continue  # Pular linhas de dados de átomos (já processadas)
             if past_atom_block:
-                # Detectar início do bloco _atom_type (loop_ seguido de _atom_type_)
+                # Detectar início de QUALQUER bloco _atom_type (loop_ seguido de _atom_type_)
                 if stripped == 'loop_' and i + 1 < len(lines) and lines[i + 1].strip().startswith('_atom_type_'):
                     in_atom_type_block = True
                     continue
@@ -1194,9 +1722,24 @@ class CifHandler:
                     if stripped.startswith('_atom_type_'):
                         continue  # Tag do bloco
                     elif stripped and not stripped.startswith(('#', 'loop_', '_', 'data_')):
-                        continue  # Linha de dados do bloco (ex: "Ce4+  4.0")
+                        continue  # Linha de dados do bloco (ex: "Ce4+  4.0", "C0+  0.0")
                     else:
-                        in_atom_type_block = False  # Fim do bloco _atom_type
+                        in_atom_type_block = False  # Fim deste bloco _atom_type
+                        # Verificar se o PRÓXIMO bloco é também _atom_type (duplicata)
+                        if stripped == 'loop_' and i + 1 < len(lines) and lines[i + 1].strip().startswith('_atom_type_'):
+                            in_atom_type_block = True
+                            continue
+                        # Se é linha vazia seguida de outro _atom_type loop, pular
+                        if not stripped:
+                            # Olhar adiante para ver se há outro _atom_type loop
+                            next_non_empty = i + 1
+                            while next_non_empty < len(lines) and not lines[next_non_empty].strip():
+                                next_non_empty += 1
+                            if (next_non_empty < len(lines) and
+                                    lines[next_non_empty].strip() == 'loop_' and
+                                    next_non_empty + 1 < len(lines) and
+                                    lines[next_non_empty + 1].strip().startswith('_atom_type_')):
+                                continue  # Pular linha vazia antes de outro bloco _atom_type
                 result_lines.append(lines[i])
 
         # Garantir final limpo
@@ -1358,18 +1901,34 @@ class CifHandler:
 
         Preserva: grupo espacial, operações de simetria, labels de átomos,
         multiplicidade, Wyckoff e Z.
+
+        Suporta ambos os estilos de tags:
+        - _symmetry_space_group_name_H-M (estilo antigo)
+        - _space_group_name_H-M_alt (estilo ICSD/novo)
         """
         metadata = {}
 
-        # Grupo espacial H-M
+        # Grupo espacial H-M (estilo antigo)
         match = re.search(r"_symmetry_space_group_name_H-M\s+['\"]?(.+?)['\"]?\s*$", cif_content, re.MULTILINE)
         if match:
             metadata['space_group_hm'] = match.group(1).strip().strip("'\"")
 
-        # Número do grupo espacial
+        # Grupo espacial H-M (estilo ICSD/novo: _space_group_name_H-M_alt)
+        if 'space_group_hm' not in metadata:
+            match = re.search(r"_space_group_name_H-M_alt\s+['\"]?(.+?)['\"]?\s*$", cif_content, re.MULTILINE)
+            if match:
+                metadata['space_group_hm'] = match.group(1).strip().strip("'\"")
+
+        # Número do grupo espacial (estilo antigo)
         match = re.search(r"_symmetry_Int_Tables_number\s+(\d+)", cif_content)
         if match:
             metadata['space_group_number'] = match.group(1).strip()
+
+        # Número do grupo espacial (estilo ICSD/novo: _space_group_IT_number)
+        if 'space_group_number' not in metadata:
+            match = re.search(r"_space_group_IT_number\s+(\d+)", cif_content)
+            if match:
+                metadata['space_group_number'] = match.group(1).strip()
 
         # Sistema cristalino
         match = re.search(r"_symmetry_cell_setting\s+(\w+)", cif_content)
@@ -1399,10 +1958,16 @@ class CifHandler:
         return metadata
 
     def _extract_symmetry_operations(self, cif_content: str) -> list:
-        """Extrai as operações de simetria do CIF."""
+        """
+        Extrai as operações de simetria do CIF.
+
+        Suporta:
+        - _symmetry_equiv_pos_site_id / _symmetry_equiv_pos_as_xyz (estilo antigo)
+        - _space_group_symop_id / _space_group_symop_operation_xyz (estilo ICSD/novo)
+        """
         symops = []
 
-        # Padrão 1: com _symmetry_equiv_pos_site_id e _symmetry_equiv_pos_as_xyz (formato com id)
+        # Padrão 1: _symmetry_equiv_pos_site_id + _symmetry_equiv_pos_as_xyz (formato com id)
         pattern = re.compile(
             r"loop_\s*\n\s*_symmetry_equiv_pos_site_id\s*\n\s*_symmetry_equiv_pos_as_xyz\s*\n(.*?)(?:\nloop_|\n_|\n#|\Z)",
             re.DOTALL
@@ -1424,7 +1989,28 @@ class CifHandler:
                     symops.append(op)
             return symops
 
-        # Padrão 2: apenas _symmetry_equiv_pos_as_xyz (sem id)
+        # Padrão 2: _space_group_symop_id + _space_group_symop_operation_xyz (estilo ICSD)
+        pattern_icsd = re.compile(
+            r"loop_\s*\n\s*_space_group_symop_id\s*\n\s*_space_group_symop_operation_xyz\s*\n(.*?)(?:\nloop_|\n_|\n#|\Z)",
+            re.DOTALL
+        )
+        match_icsd = pattern_icsd.search(cif_content)
+        if match_icsd:
+            block = match_icsd.group(1).strip()
+            for line in block.split('\n'):
+                line = line.strip()
+                if not line or line.startswith('_') or line.startswith('#') or line.startswith('loop'):
+                    break
+                parts = line.split(None, 1)
+                if len(parts) >= 2:
+                    op = parts[1].strip().strip("'\"")
+                    symops.append(op)
+                elif len(parts) == 1:
+                    op = parts[0].strip().strip("'\"")
+                    symops.append(op)
+            return symops
+
+        # Padrão 3: apenas _symmetry_equiv_pos_as_xyz (sem id)
         pattern2 = re.compile(
             r"loop_\s*\n\s*_symmetry_equiv_pos_as_xyz\s*\n(.*?)(?:\nloop_|\n_|\n#|\Z)",
             re.DOTALL
@@ -1532,7 +2118,13 @@ class CifHandler:
             logging.warning(f"CIF gerado em P1, original era SG #{orig_sg_num}")
 
         # Verificar se tem operações de simetria
-        if "'x, y, z'" not in cif_string and "x,y,z" not in cif_string:
+        has_symops = (
+            "'x, y, z'" in cif_string or
+            "x,y,z" in cif_string or
+            "_symmetry_equiv_pos_as_xyz" in cif_string or
+            "_space_group_symop_operation_xyz" in cif_string
+        )
+        if not has_symops:
             result['valid'] = False
             result['issues'].append("Sem operações de simetria")
 

@@ -74,6 +74,9 @@ class CifEditorDialog(QDialog):
             if not PYMATGEN_AVAILABLE:
                 raise ImportError("A biblioteca 'pymatgen' não foi encontrada.")
             self.cif_handler = CifHandler(cif_content)
+            # Propagar o comprimento de onda do usuário para o CIF handler
+            # para que µ, f'/f'' e λ sejam escritos corretamente no CIF
+            self.cif_handler.set_wavelength(self._wavelength)
             self._populate_fields_from_handler()
             self._apply_crystal_system_constraints()
             self._populate_peak_list()
@@ -101,8 +104,9 @@ class CifEditorDialog(QDialog):
         self.c_spin = self._create_spinbox(step=0.01, wheel_step=0.05)
         self.alpha_spin = self._create_spinbox(0, 180, step=0.01, wheel_step=0.05)
         self.beta_spin = self._create_spinbox(0, 180, step=0.01, wheel_step=0.05)
-        self.gamma_spin = self._create_spinbox(0, 180, step=0.01, wheel_step=0.05)
-        self.volume_spin = self._create_spinbox(decimals=4, step=1.0, wheel_step=0.2)
+        self.gamma_spin = self._create_spinbox(0,
+                                               180, step=0.01, wheel_step=0.05)
+        self.volume_spin = self._create_spinbox(min_val=0 ,max_val=5000.0, decimals=4, step=1.0, wheel_step=0.2)
 
         params_grid.addWidget(QLabel("a (Å)"), 0, 0);
         params_grid.addWidget(self.a_spin, 0, 1)
