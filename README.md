@@ -10,6 +10,15 @@
   [![Platform](https://img.shields.io/badge/platform-Windows-lightgrey.svg)](https://www.microsoft.com/windows)
   
   🌐 **Available in:** Português | English | Deutsch
+
+  <br/><br/>
+
+  <a href="https://github.com/SrValentim/MatFinder/releases/latest">
+    <img src="https://img.shields.io/badge/DOWNLOAD-Windows_64--bit-2ea44f?style=for-the-badge&logo=windows&logoColor=white" alt="Download MatFinder for Windows"/>
+  </a>
+
+  <br/>
+  <sub><b>~172 MB</b> · no Python required · just extract and run <code>MatFinder.exe</code></sub>
 </div>
 
 ---
@@ -41,42 +50,35 @@ MatFinder is available in:
 
 ---
 
-## Installation
+## 🚀 Get MatFinder
 
-### Requirements
+### ⬇️ Option 1 — Download the ready-to-use app (recommended)
 
-- **Operating System**: Windows 10/11 (64-bit)
-- **Python**: 3.11 or higher
-- **RAM**: 4GB minimum (8GB recommended)
-- **Disk Space**: 500MB
+1. Open **[Releases ▸ latest](https://github.com/SrValentim/MatFinder/releases/latest)**.
+2. Download **`MatFinder-3.24.0-win64.zip`** (~172 MB).
+3. Extract and run **`MatFinder/MatFinder.exe`**. No Python, no install.
 
-### Installation via Python
+> Works on **Windows 10/11 (64-bit)**. 4 GB RAM minimum (8 GB recommended).
 
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/SrValentim/MatFinder.git
-   cd MatFinder
-   ```
+### 🐍 Option 2 — Run from source
 
-2. **Create a virtual environment**:
-   ```bash
-   python -m venv .venv
-   .venv\Scripts\activate
-   ```
+```bash
+git clone https://github.com/SrValentim/MatFinder.git
+cd MatFinder
+py -3.11 -m venv .venv
+.venv\Scripts\python -m pip install -r build_tools\requirements-build.lock.txt
+.venv\Scripts\python run_matfinder.py
+```
 
-3. **Install dependencies**:
-   ```bash
-   pip install -r requirements.txt
-   ```
+> Requires **Python 3.11 (64-bit)**. The pinned `build_tools/requirements-build.lock.txt`
+> is the reproducible dependency set (the root `requirements.txt` is a full env freeze).
 
-4. **Run the program**:
-   ```bash
-   python run_matfinder.py
-   ```
+### 🔨 Option 3 — Compile your own optimized `.exe`
 
-### Pre-compiled Executable
+1. Double-click **`INSTALAR_REQUISITOS.bat`** — installs Python 3.11 + dependencies (once).
+2. Double-click **`COMPILAR.bat`** — produces `dist/MatFinder/MatFinder.exe` (~402 MB).
 
-Download the latest version from [Releases](https://github.com/SrValentim/MatFinder/releases) and run `MatFinder.exe`.
+Full guide: **[`COMO_COMPILAR.md`](COMO_COMPILAR.md)** · [`docs/compilation/GUIA_COMPILACAO.md`](docs/compilation/GUIA_COMPILACAO.md)
 
 ---
 
@@ -94,43 +96,46 @@ Download the latest version from [Releases](https://github.com/SrValentim/MatFin
 
 ```
 MatFinder/
-├── matfinder/              # Main source code
-│   ├── core/              # Core modules
-│   ├── data/              # Data handling (CIF, APIs)
-│   ├── tools/             # Tools (calculator, XRD, etc.)
-│   └── assets/            # Resources (icons, logos, configs)
-├── build_tools/           # Compilation scripts
-│   ├── MatFinder.spec     # PyInstaller configuration
-│   ├── build_optimized.py # Optimized build script
-│   └── COMPILE.bat        # Automated compilation
-├── scripts/               # Auxiliary scripts
-│   ├── hooks/            # Custom PyInstaller hooks
-│   └── build_msi.py      # MSI installer generator
-├── docs/                  # Documentation
-├── licenses/              # License files
-├── tests/                 # Tests
-├── run_matfinder.py       # Application entry point
-├── setup.py               # Installation configuration
-└── requirements.txt       # Python dependencies
+├── matfinder/                       # Main source code
+│   ├── core/                       # Core modules
+│   ├── data/                       # Data handling (CIF, APIs)
+│   ├── tools/                      # Tools (calculator, XRD, etc.)
+│   └── assets/                     # Resources (icons, logos, configs)
+├── build_tools/
+│   ├── MatFinder.spec              # PyInstaller config (collect_all + Qt DLL filter)
+│   ├── build_clean.py              # Build pipeline: map imports + build + selftest
+│   ├── gen_hiddenimports.py        # Maps the app's real import closure
+│   ├── requirements-build.lock.txt # Exact, reproducible deps (Python 3.11)
+│   └── requirements-build.txt      # Readable/minimal deps
+├── .github/workflows/
+│   └── build-release.yml           # CI: build on Windows + publish Release
+├── docs/                           # Documentation (incl. compilation guide)
+├── licenses/                       # License files
+├── tests/                          # Tests
+├── INSTALAR_REQUISITOS.bat         # 1-click: install Python 3.11 + deps
+├── COMPILAR.bat                    # 1-click: compile the .exe
+├── COMO_COMPILAR.md                # Build walkthrough (PT)
+├── run_matfinder.py                # Entry point (supports --selftest)
+└── requirements.txt                # Full environment freeze (not for building)
 ```
 
 ### Compilation
 
-To compile MatFinder into an executable:
+Optimized build (~402 MB, no "missing module" loop). One-time setup with
+`INSTALAR_REQUISITOS.bat`, then `COMPILAR.bat` to build:
 
-1. **Navigate to the build tools folder**:
-   ```bash
-   cd build_tools
-   ```
+```bat
+INSTALAR_REQUISITOS.bat       :: 1x: Python 3.11 + deps (from the lock)
+COMPILAR.bat                  :: build -> dist\MatFinder\MatFinder.exe
+COMPILAR.bat --clean          :: pristine rebuild (clears the cache)
+```
 
-2. **Run the compilation script**:
-   ```bash
-   COMPILE.bat
-   ```
+- Self-check after a build (lists any missing module at once): `MatFinder.exe --selftest`
+- **CI:** pushing a tag `vX.Y.Z` triggers `.github/workflows/build-release.yml`,
+  which builds on Windows and publishes a Release with the `.zip`.
 
-3. **The executable will be generated at**: `dist/MatFinder/MatFinder.exe`
-
-For more details, see [`docs/compilation/BUILD_GUIDE.md`](docs/compilation/).
+For details, see **[`COMO_COMPILAR.md`](COMO_COMPILAR.md)** and
+[`docs/compilation/GUIA_COMPILACAO.md`](docs/compilation/GUIA_COMPILACAO.md).
 
 ### Technologies Used
 
