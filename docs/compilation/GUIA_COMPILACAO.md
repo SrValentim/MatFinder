@@ -79,7 +79,19 @@ O `build_clean.py` faz tudo: compila → roda `MatFinder.exe --selftest` (headle
 
 ## Tamanho
 
-- **Atual: ~426 MB.** Maiores pesos: OpenBLAS (numpy+scipy ~73 MB), PySide6/Qt,
-  `opengl32sw.dll` (~20 MB), cryptography `_rust.pyd`, plotly (~10 MB).
+- **Atual: ~402 MB.** Maiores pesos: OpenBLAS (numpy+scipy ~73 MB), PySide6/Qt,
+  `opengl32sw.dll` (~20 MB), cryptography `_rust.pyd`.
 - WebEngine/Quick/Multimedia/3D/Charts do PySide6_Addons são removidos pelo
   filtro de DLL (`excluded_binaries`).
+- `plotly` NÃO usa `collect_all` (o app não cria figuras plotly; vem só transitivo
+  do pymatgen) → de 40 MB/1594 módulos para ~14 MB só com o mínimo importável.
+
+## Velocidade do build
+
+- A fase lenta é a **análise** do PyInstaller (~4 min, inerente ao stack
+  scipy/numpy/matplotlib/PySide6/pymatgen). Cópia dos arquivos é rápida (~13 s).
+- Otimizações aplicadas: `collect_all` **sem tests/examples** (cortou centenas de
+  `pyqtgraph.examples.*`); build **sem `--clean`** por padrão (reusa cache);
+  o gerador de imports **só roda na 1ª vez** (pula se o arquivo já existe).
+- Rebuild do zero (pristine): `build_clean.py --clean` (ou `COMPILAR.bat --clean`).
+- 1ª compilação ~5–6 min; repetidas um pouco mais rápidas.

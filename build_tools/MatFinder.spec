@@ -79,20 +79,36 @@ COLLECT_ALL_PKGS = [
     'spglib',       # simetria (binário + dados)
     'pyqtgraph',    # visualização 3D (carrega itens GL dinamicamente)
     'cloudscraper', # scraping (resolve módulos em runtime)
-    'plotly',       # usado por matfinder.core.api_logic e mp_api (dados + lazy)
+    # plotly: NAO usar collect_all. O app nao usa plotly (vem so transitivo do
+    # pymatgen e nunca cria figuras). collect_all puxava 1594 modulos + 40MB de
+    # validadores inuteis e dominava o tempo de analise. O gerador + analise
+    # estatica incluem o minimo para o IMPORT funcionar.
     'uncertainties',# dep do pymatgen
     'ruamel',       # YAML usado por pymatgen/monty
     'latexcodec',   # dep do pybtex (citações no pymatgen)
     'pybtex',       # bibliografia (pymatgen)
 ]
 
+_SKIP_SEGS = {'tests', 'test', 'testing', '_tests', 'examples', 'example', 'docs'}
+
+def _is_test_or_example(modname):
+    return any(seg in _SKIP_SEGS for seg in modname.split('.'))
+
+def _skip_data(dest):
+    parts = dest.replace('\\', '/').split('/')
+    return any(seg in _SKIP_SEGS for seg in parts)
+
 for pkg in COLLECT_ALL_PKGS:
     try:
         d, b, h = collect_all(pkg)
+        # Tira tests/examples/docs: o app nao usa, e eles dominavam o tempo de
+        # analise (centenas de pyqtgraph.examples.*) e incham o bundle.
+        h = [m for m in h if not _is_test_or_example(m)]
+        d = [(s, dst) for (s, dst) in d if not _skip_data(dst)]
         datas += d
         binaries += b
         hiddenimports += h
-        print(f"[SPEC] collect_all('{pkg}'): +{len(d)} datas, +{len(b)} bins, +{len(h)} hidden")
+        print(f"[SPEC] collect_all('{pkg}'): +{len(d)} datas, +{len(b)} bins, +{len(h)} hidden (sem tests/examples)")
     except Exception as e:
         print(f"[SPEC] AVISO: collect_all('{pkg}') falhou ({e}) - seguindo.")
 
@@ -173,6 +189,11 @@ excludes = [
     'PySide6.QtDesigner', 'PySide6.QtHelp', 'PySide6.QtScxml',
     # matplotlib 3D (usamos pyqtgraph)
     'mpl_toolkits.mplot3d',
+    # exemplos/testes que so pesavam o build (nao usados pelo app)
+    'pyqtgraph.examples',
+    'pyqtgraph.opengl.examples',
+    'chempy.util.tests',
+    'pymatgen.util.testing',
 ]
 
 # -----------------------------------------------------------------------------

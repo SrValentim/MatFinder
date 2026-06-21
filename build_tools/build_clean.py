@@ -63,18 +63,27 @@ def main():
         print("    (ou passe --allow-any-venv se souber o que está fazendo)")
         return 2
 
-    # 0) Gera o fecho real de imports (hiddenimports_generated.txt) com este venv.
-    #    Mantém o build autossuficiente e o arquivo gerado fora do repo.
-    gen = os.path.join(HERE, "gen_hiddenimports.py")
-    r = sh("PASSO 1/3  -  Mapeando imports reais (gen_hiddenimports.py)",
-           [sys.executable, gen], cwd=ROOT)
-    if r.returncode != 0:
-        print("\n[!] AVISO: gen_hiddenimports.py falhou; seguindo com o que houver.")
+    full = ("--clean" in sys.argv) or ("--full" in sys.argv)
+    gen_file = os.path.join(HERE, "hiddenimports_generated.txt")
 
-    # 1) PyInstaller (ele mesmo limpa build/ com --clean; dist é sobrescrito com --noconfirm)
-    r = sh("PASSO 2/3  -  Compilando com PyInstaller",
-           [sys.executable, "-m", "PyInstaller", "--clean", "--noconfirm", SPEC],
-           cwd=ROOT)
+    # 0) Fecho real de imports (hiddenimports_generated.txt). Só (re)gera se faltar
+    #    ou se pedirem --regen/--full. Pular isto economiza ~1 min em builds repetidos.
+    gen = os.path.join(HERE, "gen_hiddenimports.py")
+    if (not os.path.exists(gen_file)) or ("--regen" in sys.argv) or full:
+        r = sh("PASSO 1/3  -  Mapeando imports reais (gen_hiddenimports.py)",
+               [sys.executable, gen], cwd=ROOT)
+        if r.returncode != 0:
+            print("\n[!] AVISO: gen_hiddenimports.py falhou; seguindo com o que houver.")
+    else:
+        print("\nPASSO 1/3  -  Mapa de imports reutilizado (use --regen para refazer).")
+
+    # 1) PyInstaller. Por padrão NÃO usa --clean (reusa o cache em build/ -> bem
+    #    mais rápido). Use 'build_clean.py --clean' para um rebuild do zero.
+    cmd = [sys.executable, "-m", "PyInstaller", "--noconfirm", SPEC]
+    if full:
+        cmd.insert(3, "--clean")
+    r = sh("PASSO 2/3  -  Compilando com PyInstaller" + ("  [--clean]" if full else "  [cache]"),
+           cmd, cwd=ROOT)
     if r.returncode != 0:
         print("\n[X] Falha na compilação do PyInstaller.")
         return r.returncode
