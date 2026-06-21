@@ -10,9 +10,41 @@ from PySide6.QtWidgets import QApplication, QSplashScreen, QMessageBox
 from PySide6.QtGui import QPixmap, QColor
 from PySide6.QtCore import Qt, QSize, QLockFile
 
+
+# --- Diretório de dados GRAVÁVEL (correção: instalado em Program Files é
+#     somente-leitura) ------------------------------------------------------
+# O app grava por caminho relativo (cwd): matfinder.log, settings.json,
+# historico_buscas.json, favorites.json e temp_cifs/. Instalado em
+# "C:\Program Files\MatFinder" isso quebrava com PermissionError no boot.
+# Escolhemos aqui um diretório gravável e damos chdir ANTES de qualquer escrita
+# (inclusive o logging logo abaixo):
+#   - pasta do app gravável (modo portátil/.zip)  -> usa ela (dados junto do app)
+#   - sem permissão (Program Files)               -> %LOCALAPPDATA%\MatFinder
+# Leitura de assets usa resource_path()/_MEIPASS (caminho absoluto), então o
+# chdir não afeta o carregamento de ícones, traduções, etc.
+def _ensure_writable_data_dir():
+    if getattr(sys, "frozen", False):
+        app_dir = os.path.dirname(sys.executable)
+    else:
+        app_dir = os.path.dirname(os.path.abspath(__file__))
+    try:
+        _probe = os.path.join(app_dir, ".write_test")
+        with open(_probe, "w", encoding="utf-8") as _f:
+            _f.write("ok")
+        os.remove(_probe)
+        return app_dir
+    except Exception:
+        base = (os.environ.get("LOCALAPPDATA") or os.environ.get("APPDATA")
+                or tempfile.gettempdir())
+        data_dir = os.path.join(base, "MatFinder")
+        os.makedirs(data_dir, exist_ok=True)
+        return data_dir
+
+
+os.chdir(_ensure_writable_data_dir())
+
 # --- Configuração básica do Logging ---
-# (Mantido como está. O ficheiro 'matfinder.log' será criado
-# na pasta raiz onde este script é executado, o que está correto.)
+# matfinder.log é criado no diretório de dados gravável definido acima.
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - [%(module)s:%(lineno)d] - %(message)s",
