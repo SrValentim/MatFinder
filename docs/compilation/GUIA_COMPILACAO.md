@@ -7,14 +7,28 @@
 ## TL;DR — como compilar
 
 ```bat
-REM 1x: criar o venv de build limpo (fora da pasta do repo)
+REM 1x: criar o venv de build (fora da pasta do repo), Python 3.11
 py -3.11 -m venv ..\.venv-build
-..\.venv-build\Scripts\python -m pip install -r build_tools\requirements-build.txt
+REM use o LOCK para reproduzir EXATAMENTE o ambiente (recomendado):
+..\.venv-build\Scripts\python -m pip install -r build_tools\requirements-build.lock.txt
 
 REM sempre que for compilar:
 build_tools\COMPILE.bat
 REM (ou:  ..\.venv-build\Scripts\python build_tools\build_clean.py)
 ```
+
+### Reprodutibilidade ("dá o mesmo resultado em outra máquina?")
+
+- **`requirements-build.lock.txt`** = lock COMPLETO (184 pacotes fixados). Use
+  ESTE para reproduzir o ambiente exato. Requer **Python 3.11** (os wheels são cp311).
+- **`requirements-build.txt`** = versão legível/mínima (30 pins + comentários).
+  Mostra o que importa, mas deixa transitivas livres → pode driftar com o tempo.
+- O `.exe` em si **não** é byte-idêntico entre builds (o PyInstaller embute
+  timestamps/paths). Com o lock + Python 3.11, o resultado é **funcionalmente o
+  mesmo**: ~426 MB, abre, e `--selftest` = 0 módulos faltando.
+- O venv inclui jupyter/boto3/etc. de propósito (são deps transitivas de
+  chempy→pyodesys e maggma). Eles ficam no `excludes` do spec e **não** entram no
+  `.exe`. Para atualizar o lock após mudar deps: `pip freeze > build_tools\requirements-build.lock.txt`.
 
 O `build_clean.py` faz tudo: compila → roda `MatFinder.exe --selftest` (headless)
 → imprime tamanho final. Se faltar módulo, o selftest lista **todos** de uma vez.

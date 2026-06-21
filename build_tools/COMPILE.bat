@@ -15,9 +15,9 @@ set "VENVPY=..\.venv-build\Scripts\python.exe"
 if not exist "%VENVPY%" (
     echo [ERRO] venv de build nao encontrado em %VENVPY%
     echo.
-    echo Crie-o uma vez com:
+    echo Crie-o uma vez com ^(Python 3.11^):
     echo   py -3.11 -m venv ..\.venv-build
-    echo   ..\.venv-build\Scripts\python -m pip install -r build_tools\requirements-build.txt
+    echo   ..\.venv-build\Scripts\python -m pip install -r build_tools\requirements-build.lock.txt
     echo.
     pause
     exit /b 1
