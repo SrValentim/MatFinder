@@ -16,6 +16,7 @@ USO (com o python do venv limpo):
 """
 
 import importlib
+import importlib.util
 import os
 import pkgutil
 import sys
@@ -77,17 +78,38 @@ def main():
     # Entry point real (puxa a árvore de imports de verdade).
     safe_import("matfinder.app_main")
 
+    # Prefixos que o spec EXCLUI ou que o hook oficial trata melhor (evita
+    # "ERROR: Hidden import ... not found" no log de build).
+    drop_prefixes = ("mpl_toolkits.mplot3d", "PySide6.support", "requests.packages",
+                     "shibokensupport", "signature_bootstrap")
+
+    def locatable(modname):
+        # Mantém só o que o import machinery realmente acha (mesmo criterio do
+        # PyInstaller). Se find_spec falha, o PyInstaller tambem reportaria
+        # "not found" -> nada a perder removendo.
+        try:
+            return importlib.util.find_spec(modname) is not None
+        except (ImportError, AttributeError, ValueError, ModuleNotFoundError):
+            return False
+
     mods = set()
     for name, mod in list(sys.modules.items()):
         if not name or mod is None:
             continue
-        top = name.split(".")[0]
-        if top in JUNK_TOPLEVEL:
+        segs = name.split(".")
+        if segs[0] in JUNK_TOPLEVEL:
             continue
         if name in sys.builtin_module_names:
             continue
+        # pula pseudo-modulos dunder (__feature__, __mp_main__, ...)
+        if any(s.startswith("__") and s.endswith("__") for s in segs):
+            continue
+        if any(name == p or name.startswith(p + ".") for p in drop_prefixes):
+            continue
         # precisa ter origem real (descarta módulos sintéticos)
         if getattr(mod, "__spec__", None) is None and getattr(mod, "__file__", None) is None:
+            continue
+        if not locatable(name):
             continue
         mods.add(name)
 
