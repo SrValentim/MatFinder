@@ -5,6 +5,7 @@
   
   **Crystalline Materials Search and Analysis**
   
+  [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20778195.svg)](https://doi.org/10.5281/zenodo.20778195)
   [![License](https://img.shields.io/badge/license-GPL%20v3-blue.svg)](licenses/LICENSE)
   [![Python](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/)
   [![Platform](https://img.shields.io/badge/platform-Windows-lightgrey.svg)](https://www.microsoft.com/windows)
@@ -159,6 +160,34 @@ Contributions are welcome! To contribute:
 3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
 4. Push to the branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
+
+---
+
+## 📖 How to cite
+
+If you use MatFinder in your research, please cite it (archived on **Zenodo**):
+
+> Valentim, R. (2026). *MatFinder - X-ray diffraction analysis tools* (3.24). Zenodo. https://doi.org/10.5281/zenodo.20778196
+
+**DOI:** [10.5281/zenodo.20778196](https://doi.org/10.5281/zenodo.20778196) (version 3.24) · [10.5281/zenodo.20778195](https://doi.org/10.5281/zenodo.20778195) (all versions, always latest)
+
+<details>
+<summary>BibTeX</summary>
+
+```bibtex
+@software{valentim_matfinder_2026,
+  author    = {Valentim, Raynner},
+  title     = {{MatFinder - X-ray diffraction analysis tools}},
+  year      = {2026},
+  publisher = {Zenodo},
+  version   = {3.24},
+  doi       = {10.5281/zenodo.20778196},
+  url       = {https://doi.org/10.5281/zenodo.20778196}
+}
+```
+</details>
+
+> 💡 GitHub also generates a **"Cite this repository"** button (sidebar of the repo page) from [`CITATION.cff`](CITATION.cff).
 
 ---
 

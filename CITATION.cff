@@ -1,0 +1,35 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "MatFinder - X-ray diffraction analysis tools"
+abstract: >-
+  MatFinder is a complete desktop application for searching, visualizing, and
+  analyzing crystalline material structures. Developed at the Federal University
+  of Amazonas (UFAM), Brazil, it integrates multiple crystallographic databases
+  and X-ray diffraction analysis tools.
+type: software
+authors:
+  - family-names: Valentim
+    given-names: Raynner
+    affiliation: "Federal University of Amazonas (UFAM)"
+version: "3.24"
+date-released: "2026-06-20"
+doi: 10.5281/zenodo.20778196
+license: GPL-3.0-only
+repository-code: "https://github.com/SrValentim/MatFinder"
+url: "https://doi.org/10.5281/zenodo.20778196"
+keywords:
+  - Python
+  - Databases
+  - Crystallography
+  - X-ray diffraction
+languages:
+  - pt
+  - en
+  - de
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.20778195
+    description: "Concept DOI (all versions; always resolves to the latest)"
+  - type: doi
+    value: 10.5281/zenodo.20778196
+    description: "Version 3.24 DOI"
