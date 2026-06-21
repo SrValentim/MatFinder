@@ -1,457 +1,225 @@
 # -*- mode: python ; coding: utf-8 -*-
 """
-MatFinder.spec - Arquivo de configuração OTIMIZADO para PyInstaller
-Versão: 3.24.0
+MatFinder.spec - Configuração OTIMIZADA para PyInstaller (v2)
 Autor: Raynner Valentim - UFAM
 
-Este arquivo configura a compilação do MatFinder com:
-- Modo onedir (mais rápido que onefile)
-- Hooks customizados para reduzir tamanho (~500-600MB alvo)
-- Exclusão agressiva de módulos não usados
-- Filtragem de DLLs pesadas do Qt
+ESTRATÉGIA (resolve o "loop infinito de módulo faltando" + o tamanho de 1,5GB):
+
+  1) Compilar a partir de um VENV LIMPO e dedicado (build_tools/requirements-build.txt),
+     SEM jupyter/jax/opencv/PyQt5/boto3/... O PyInstaller não empacota o que não está
+     instalado. É a maior parte da otimização de tamanho.
+
+  2) collect_all() / collect_submodules() para os pacotes de IMPORT DINÂMICO/LAZY
+     (pymatgen, mp_api, emmet, monty, chempy, spglib, pyqtgraph, cloudscraper, ...).
+     Pega TODOS os submódulos + arquivos de dados + binários de uma vez, em vez de
+     listar módulo por módulo (que é o que causava o whack-a-mole).
+
+  3) collect_submodules('matfinder') garante que TODO o código próprio entre,
+     mesmo os módulos carregados sob demanda.
+
+  4) Filtro de DLLs do Qt remove WebEngine/Quick/Multimedia/3D/Charts (PySide6_Addons),
+     que sozinhos são ~300MB.
 
 IMPORTANTE:
-- NÃO usar UPX em DLLs do Qt (causa crashes)
-- Os hooks em scripts/hooks/ são carregados automaticamente
-- Execute da RAIZ do projeto: pyinstaller build_tools/MatFinder.spec
+  - NÃO usar UPX em DLLs do Qt (causa crashes).
+  - PyInstaller 6.x: NÃO existe mais 'cipher'/'block_cipher' (removidos).
+  - Rode da RAIZ do projeto com o python do venv limpo:
+      .venv-build\\Scripts\\pyinstaller --clean --noconfirm build_tools\\MatFinder.spec
 """
 
 import os
-import sys
-from PyInstaller.utils.hooks import collect_data_files, collect_submodules
+from PyInstaller.utils.hooks import collect_all, collect_submodules, collect_data_files
 
-block_cipher = None
-
-# Caminho base do projeto - detecta automaticamente
-# Se executado da raiz do projeto, usa o diretório atual
-# Se executado de build_tools, sobe um nível
+# -----------------------------------------------------------------------------
+# Caminho base do projeto (raiz onde está run_matfinder.py)
+# -----------------------------------------------------------------------------
 spec_dir = os.path.dirname(os.path.abspath(SPECPATH))
 if os.path.basename(spec_dir) == 'build_tools':
     base_path = os.path.dirname(spec_dir)
 else:
     base_path = spec_dir
 
-# Garante que estamos no diretório correto
 if not os.path.exists(os.path.join(base_path, 'run_matfinder.py')):
-    # Tenta o diretório atual
     base_path = os.getcwd()
     if not os.path.exists(os.path.join(base_path, 'run_matfinder.py')):
         raise FileNotFoundError(
-            f"run_matfinder.py não encontrado! Execute o PyInstaller da raiz do projeto MatFinderRefactor.\n"
-            f"Diretório atual: {os.getcwd()}\n"
-            f"Diretório do spec: {spec_dir}"
+            "run_matfinder.py não encontrado! Rode o PyInstaller da raiz do projeto.\n"
+            f"Diretório atual: {os.getcwd()}\nDiretório do spec: {spec_dir}"
         )
 
 print(f"[SPEC] Base path: {base_path}")
 
-# =============================================================================
-# ARQUIVOS DE DADOS DO PROJETO
-# =============================================================================
-
-added_files = [
-    # Assets do MatFinder
+# -----------------------------------------------------------------------------
+# Arquivos de dados do PRÓPRIO projeto (assets, licença, versão)
+# -----------------------------------------------------------------------------
+datas = [
     (os.path.join(base_path, 'matfinder', 'assets', 'icons'), os.path.join('matfinder', 'assets', 'icons')),
     (os.path.join(base_path, 'matfinder', 'assets', 'logos'), os.path.join('matfinder', 'assets', 'logos')),
     (os.path.join(base_path, 'matfinder', 'assets', 'config'), os.path.join('matfinder', 'assets', 'config')),
     (os.path.join(base_path, 'matfinder', 'assets', 'translations'), os.path.join('matfinder', 'assets', 'translations')),
-
-    # Licença
     (os.path.join(base_path, 'licenses', 'LICENSE_FULL.txt'), '.'),
-
-    # VERSION file
     (os.path.join(base_path, 'VERSION'), '.'),
 ]
+binaries = []
 
-# =============================================================================
-# HIDDEN IMPORTS - Módulos que DEVEM ser incluídos
-# Os hooks já cuidam da maioria, mas alguns precisam ser explícitos
-# =============================================================================
+# Inclui TODO o código próprio (módulos carregados sob demanda inclusos).
+hiddenimports = collect_submodules('matfinder')
 
-hidden_imports = [
-    # =========================================================================
-    # NumPy 2.x - Módulos críticos
-    # NOTA: Os hooks cuidam da maioria, aqui só os essenciais
-    # =========================================================================
-    'numpy',
-    'numpy.core',
-    'numpy.core._multiarray_umath',
-    'numpy.linalg',
-    'numpy.fft',
-    'numpy.random',
-    'numpy.ma',
-    'numpy.lib',
-    'numpy.polynomial',
-
-    # =========================================================================
-    # SciPy - Módulos usados para processamento de sinais
-    # =========================================================================
-    'scipy._lib',
-    'scipy._lib.messagestream',
-    'scipy._lib._ccallback',
-    'scipy.signal',
-    'scipy.signal._savitzky_golay',
-    'scipy.signal._peak_finding',
-    'scipy.ndimage',
-    'scipy.sparse',
-    'scipy.sparse.linalg',
-    'scipy.linalg',
-    'scipy.special',
-    'scipy.special._ufuncs',
-    'scipy.special.cython_special',
-    'scipy.interpolate',
-    'scipy.optimize',
-
-    # =========================================================================
-    # PySide6 - Interface gráfica
-    # =========================================================================
-    'PySide6.QtCore',
-    'PySide6.QtGui',
-    'PySide6.QtWidgets',
-    'PySide6.QtNetwork',
-    'PySide6.QtPrintSupport',
-    'PySide6.QtOpenGL',
-    'PySide6.QtOpenGLWidgets',
-    'shiboken6',
-    'shiboken6.Shiboken',
-
-    # =========================================================================
-    # Matplotlib - Gráficos
-    # =========================================================================
-    'matplotlib.backends.backend_qtagg',
-    'matplotlib.backends.backend_qt5agg',
-    'matplotlib.backends.backend_agg',
-    'matplotlib.backends.backend_qt',
-    'matplotlib.pyplot',
-    'matplotlib.figure',
-    'matplotlib.axes',
-    'matplotlib.ticker',
-    'matplotlib.patches',
-    'matplotlib.lines',
-    'matplotlib.legend',
-    'matplotlib.widgets',
-    'matplotlib.font_manager',
-    'matplotlib.colors',
-    'matplotlib.cm',
-
-    # =========================================================================
-    # PyQtGraph + OpenGL - Visualização 3D
-    # =========================================================================
-    'pyqtgraph',
-    'pyqtgraph.Qt',
-    'pyqtgraph.opengl',
-    'pyqtgraph.opengl.GLViewWidget',
-    'pyqtgraph.opengl.items.GLMeshItem',
-    'pyqtgraph.opengl.items.GLLinePlotItem',
-    'pyqtgraph.opengl.items.GLScatterPlotItem',
-    'pyqtgraph.opengl.items.GLGridItem',
-    'pyqtgraph.opengl.MeshData',
-    'OpenGL',
-    'OpenGL.GL',
-    'OpenGL.GLU',
-    'OpenGL.arrays',
-    'OpenGL.arrays.numpymodule',
-    'OpenGL.platform',
-    'OpenGL.platform.win32',
-
-    # =========================================================================
-    # Pymatgen - Análise cristalográfica
-    # =========================================================================
-    'pymatgen.core',
-    'pymatgen.core.composition',
-    'pymatgen.core.lattice',
-    'pymatgen.core.periodic_table',
-    'pymatgen.core.structure',
-    'pymatgen.core.sites',
-    'pymatgen.core.bonds',
-    'pymatgen.io',
-    'pymatgen.io.cif',
-    'pymatgen.symmetry',
-    'pymatgen.symmetry.analyzer',
-    'pymatgen.symmetry.groups',
-    'pymatgen.analysis',
-    'pymatgen.analysis.diffraction',
-    'pymatgen.analysis.diffraction.xrd',
-    'pymatgen.analysis.diffraction.core',
-    'pymatgen.analysis.local_env',
-    'pymatgen.transformations',
-    'pymatgen.util',
-
-    # =========================================================================
-    # Materials Project API
-    # =========================================================================
-    'mp_api',
-    'mp_api.client',
-    'mp_api.client.core',
-    'mp_api.client.core.client',
-    'mp_api.client.routes',
-    'mp_api.client.routes.materials',
-    'mp_api.client.routes.materials.summary',
-
-    # =========================================================================
-    # Dependências do Pymatgen/MP-API
-    # =========================================================================
-    'emmet.core',
-    'emmet.core.utils',
-    'emmet.core.symmetry',
-    'monty',
-    'monty.io',
-    'monty.json',
-    'monty.serialization',
-    'spglib',
-    'orjson',
-
-    # =========================================================================
-    # Pydantic - Validação de dados
-    # =========================================================================
-    'pydantic',
-    'pydantic.main',
-    'pydantic.fields',
-    'pydantic_core',
-
-    # =========================================================================
-    # Pandas - Manipulação de dados
-    # =========================================================================
-    'pandas',
-    'pandas._libs',
-    'pandas._libs.lib',
-    'pandas._libs.tslibs',
-    'pandas._libs.algos',
-    'pandas._libs.hashtable',
-    'pandas.core',
-    'pandas.core.frame',
-    'pandas.io',
-
-    # =========================================================================
-    # Outros módulos necessários
-    # =========================================================================
-    'requests',
-    'urllib3',
-    'certifi',
-    'charset_normalizer',
-    'idna',
-    'json',
-    'logging',
-    'pkg_resources',
-    'packaging',
-    'packaging.version',
-    'packaging.specifiers',
-    'packaging.requirements',
+# -----------------------------------------------------------------------------
+# Coleta COMPLETA dos pacotes de import dinâmico/lazy.
+# collect_all -> (datas, binaries, hiddenimports). É isto que mata o whack-a-mole:
+# pega submódulos + dados (ex.: tabela periódica do pymatgen) + binários de uma vez.
+# -----------------------------------------------------------------------------
+COLLECT_ALL_PKGS = [
+    'pymatgen',     # cristalografia - MUITO import dinâmico + arquivos de dados (JSON)
+    'mp_api',       # Materials Project - rotas resolvidas dinamicamente
+    'emmet',        # modelos de dados (pydantic) do MP
+    'monty',        # IO/serialização do pymatgen
+    'chempy',       # balanceamento estequiométrico (usa sympy)
+    'spglib',       # simetria (binário + dados)
+    'pyqtgraph',    # visualização 3D (carrega itens GL dinamicamente)
+    'cloudscraper', # scraping (resolve módulos em runtime)
+    'plotly',       # usado por matfinder.core.api_logic e mp_api (dados + lazy)
+    'uncertainties',# dep do pymatgen
+    'ruamel',       # YAML usado por pymatgen/monty
+    'latexcodec',   # dep do pybtex (citações no pymatgen)
+    'pybtex',       # bibliografia (pymatgen)
 ]
 
-# =============================================================================
-# MÓDULOS A EXCLUIR - Reduz drasticamente o tamanho!
-# =============================================================================
+for pkg in COLLECT_ALL_PKGS:
+    try:
+        d, b, h = collect_all(pkg)
+        datas += d
+        binaries += b
+        hiddenimports += h
+        print(f"[SPEC] collect_all('{pkg}'): +{len(d)} datas, +{len(b)} bins, +{len(h)} hidden")
+    except Exception as e:
+        print(f"[SPEC] AVISO: collect_all('{pkg}') falhou ({e}) - seguindo.")
 
-excluded_modules = [
-    # =========================================================================
-    # Módulos de teste/desenvolvimento
-    # =========================================================================
-    'pytest',
-    'pytest_cov',
-    'unittest',
-    'nose',
-    'test',
-    'tests',
-    '_pytest',
-    'IPython',
-    'jupyter',
-    'jupyter_client',
-    'jupyter_core',
-    'notebook',
-    'nbformat',
-    'nbconvert',
-    'sphinx',
-    'docutils',
+# Submódulos extras de import dinâmico (sem precisar de collect_all completo).
+for pkg in ['scipy.signal', 'scipy.optimize', 'scipy.interpolate', 'scipy.special',
+            'matplotlib.backends']:
+    try:
+        hiddenimports += collect_submodules(pkg)
+    except Exception as e:
+        print(f"[SPEC] AVISO: collect_submodules('{pkg}') falhou ({e}).")
 
-    # =========================================================================
-    # GUIs não usadas
-    # =========================================================================
-    'tkinter',
-    '_tkinter',
-    'Tkinter',
-    'wx',
-    'wxPython',
-    'PyQt4',
-    'PyQt5',
-    'PyQt6',
+# Dados do pymatgen às vezes ficam fora do pacote importável -> reforço.
+try:
+    datas += collect_data_files('pymatgen', includes=['**/*.json', '**/*.json.gz', '**/*.yaml', '**/*.csv'])
+except Exception:
+    pass
 
-    # =========================================================================
-    # PySide6 - Módulos PESADOS não usados (~300MB economia!)
-    # =========================================================================
-    'PySide6.QtWebEngine',
-    'PySide6.QtWebEngineCore',
-    'PySide6.QtWebEngineWidgets',
-    'PySide6.QtWebChannel',
-    'PySide6.QtWebSockets',
-    'PySide6.Qt3DCore',
-    'PySide6.Qt3DRender',
-    'PySide6.Qt3DInput',
-    'PySide6.Qt3DLogic',
-    'PySide6.Qt3DAnimation',
-    'PySide6.Qt3DExtras',
-    'PySide6.QtQuick',
-    'PySide6.QtQuick3D',
-    'PySide6.QtQuickControls2',
-    'PySide6.QtQuickWidgets',
-    'PySide6.QtQml',
-    'PySide6.QtQmlModels',
-    'PySide6.QtMultimedia',
-    'PySide6.QtMultimediaWidgets',
-    'PySide6.QtPositioning',
-    'PySide6.QtLocation',
-    'PySide6.QtSensors',
-    'PySide6.QtSerialPort',
-    'PySide6.QtSerialBus',
-    'PySide6.QtBluetooth',
-    'PySide6.QtDBus',
-    'PySide6.QtDesigner',
-    'PySide6.QtHelp',
-    'PySide6.QtNfc',
-    'PySide6.QtPdf',
-    'PySide6.QtPdfWidgets',
-    'PySide6.QtRemoteObjects',
-    'PySide6.QtScxml',
-    'PySide6.QtSql',
-    'PySide6.QtTest',
-    'PySide6.QtTextToSpeech',
-    'PySide6.QtUiTools',
-    'PySide6.QtXml',
-    'PySide6.QtConcurrent',
-    'PySide6.QtDataVisualization',
-    'PySide6.QtCharts',
-    'PySide6.QtStateMachine',
-    'PySide6.QtVirtualKeyboard',
-    'PySide6.QtLanguageServer',
+# Hidden imports pontuais que não vêm por dependência óbvia.
+hiddenimports += [
+    'PySide6.QtPrintSupport', 'PySide6.QtOpenGLWidgets', 'PySide6.QtOpenGL',
+    'OpenGL.platform.win32', 'OpenGL.arrays.numpymodule',
+    'pydantic.deprecated.decorator',
+    'encodings.idna',
+    # pkg_resources/setuptools._vendor: o runtime hook do PyInstaller carrega
+    # pkg_resources no boot, que faz "from backports import tarfile" e
+    # "from jaraco... import ...". Sem isto o .exe quebra ANTES de rodar qualquer
+    # código (erro clássico "No module named 'backports'").
+    'backports', 'backports.tarfile',
+]
+# Coleta TODO o setuptools._vendor (backports, jaraco, more_itertools,
+# platformdirs, ...) - mata a classe inteira do pkg_resources de uma vez.
+try:
+    hiddenimports += collect_submodules('setuptools._vendor')
+except Exception as e:
+    print(f"[SPEC] AVISO: collect_submodules('setuptools._vendor') falhou ({e}).")
 
-    # =========================================================================
-    # Matplotlib - módulos não usados
-    # =========================================================================
-    'matplotlib.tests',
-    'matplotlib.testing',
-    'matplotlib.sphinxext',
-    'mpl_toolkits.mplot3d',  # Usamos pyqtgraph para 3D
+# -----------------------------------------------------------------------------
+# QUEBRA-CICLO: lista COMPLETA de imports do app, gerada rodando o app no venv
+# limpo (build_tools/gen_hiddenimports.py). Inclui imports dinâmicos/lazy que a
+# análise estática perderia. Se o arquivo não existir, o build segue sem ele.
+# -----------------------------------------------------------------------------
+_gen = os.path.join(base_path, 'build_tools', 'hiddenimports_generated.txt')
+if os.path.exists(_gen):
+    with open(_gen, encoding='utf-8') as _fh:
+        _extra = [ln.strip() for ln in _fh if ln.strip() and not ln.startswith('#')]
+    hiddenimports += _extra
+    print(f"[SPEC] hiddenimports_generated.txt: +{len(_extra)} módulos do fecho real")
+else:
+    print("[SPEC] AVISO: hiddenimports_generated.txt ausente (rode gen_hiddenimports.py).")
 
-    # =========================================================================
-    # Outros módulos grandes não usados
-    # =========================================================================
-    'PIL.ImageQt',  # Conflita com PySide
-    'cv2',
-    'tensorflow',
-    'torch',
-    'keras',
-    'sklearn',
-    'scikit-learn',
+# -----------------------------------------------------------------------------
+# EXCLUDES - lixo que não deve entrar (no venv limpo a maioria nem existe;
+# mantido como cinto-de-segurança). NÃO excluir sympy/networkx/pandas: o
+# pymatgen/chempy precisam deles.
+# -----------------------------------------------------------------------------
+excludes = [
+    # GUIs/toolkits não usados
+    'tkinter', '_tkinter', 'PyQt5', 'PyQt6', 'PySide2', 'wx',
+    # Ciência/ML pesado não usado pelo app
+    # (plotly NÃO entra aqui: matfinder.core.api_logic e mp_api o importam)
+    'cv2', 'opencv', 'tensorflow', 'torch', 'jax', 'jaxlib', 'sklearn',
+    'mediapipe', 'h5py', 'sounddevice', 'xrayutilities',
+    # Notebook/dev
+    'IPython', 'ipykernel', 'jupyter', 'jupyterlab', 'notebook', 'nbconvert',
+    'nbformat', 'debugpy', 'pytest', '_pytest', 'nose', 'sphinx',
+    # Cloud não usado
+    'boto3', 'botocore', 's3transfer',
+    # PySide6 Addons pesados (DLLs também filtradas abaixo)
+    'PySide6.QtWebEngineCore', 'PySide6.QtWebEngineWidgets', 'PySide6.QtWebEngineQuick',
+    'PySide6.QtWebChannel', 'PySide6.QtWebSockets', 'PySide6.QtQuick', 'PySide6.QtQml',
+    'PySide6.QtQuick3D', 'PySide6.QtQuickWidgets', 'PySide6.QtQuickControls2',
+    'PySide6.QtMultimedia', 'PySide6.QtMultimediaWidgets',
+    'PySide6.Qt3DCore', 'PySide6.Qt3DRender', 'PySide6.Qt3DInput', 'PySide6.Qt3DLogic',
+    'PySide6.Qt3DAnimation', 'PySide6.Qt3DExtras', 'PySide6.QtCharts',
+    'PySide6.QtDataVisualization', 'PySide6.QtPdf', 'PySide6.QtPdfWidgets',
+    'PySide6.QtBluetooth', 'PySide6.QtNfc', 'PySide6.QtPositioning', 'PySide6.QtLocation',
+    'PySide6.QtSensors', 'PySide6.QtSerialPort', 'PySide6.QtSql', 'PySide6.QtTest',
+    'PySide6.QtDesigner', 'PySide6.QtHelp', 'PySide6.QtScxml',
+    # matplotlib 3D (usamos pyqtgraph)
+    'mpl_toolkits.mplot3d',
 ]
 
-# =============================================================================
+# -----------------------------------------------------------------------------
 # ANÁLISE
-# =============================================================================
-
+# -----------------------------------------------------------------------------
 a = Analysis(
     [os.path.join(base_path, 'run_matfinder.py')],
     pathex=[base_path],
-    binaries=[],
-    datas=added_files,
-    hiddenimports=hidden_imports,
-    hookspath=[os.path.join(base_path, 'scripts', 'hooks')],
+    binaries=binaries,
+    datas=datas,
+    hiddenimports=sorted(set(hiddenimports)),
+    hookspath=[],          # NÃO usar os hooks antigos de scripts/hooks (substituídos por collect_all)
     hooksconfig={},
     runtime_hooks=[],
-    excludes=excluded_modules,
-    win_no_prefer_redirects=False,
-    win_private_assemblies=False,
-    cipher=block_cipher,
+    excludes=excludes,
     noarchive=False,
+    optimize=1,            # remove asserts e nível 1 de otimização de bytecode
 )
 
-# =============================================================================
-# FILTRAGEM DE BINÁRIOS - Remove DLLs pesadas não usadas
-# =============================================================================
-
-# DLLs do PySide6/Qt que devem ser EXCLUÍDAS (economia de ~300MB!)
+# -----------------------------------------------------------------------------
+# FILTRO DE BINÁRIOS - remove DLLs pesadas do Qt (PySide6_Addons) ~300MB
+# -----------------------------------------------------------------------------
 excluded_binaries = [
-    # WebEngine - ENORME (~150MB sozinho)
-    'Qt6WebEngineCore',
-    'Qt6WebEngine',
-    'QtWebEngine',
-
-    # Quick/QML - não usado
-    'Qt6Quick',
-    'Qt6Qml',
-    'Qt6QmlModels',
-    'Qt6QmlCore',
-    'Qt6QmlWorkerScript',
-    'Qt6QuickControls2',
-    'Qt6QuickLayouts',
-    'Qt6QuickParticles',
-    'Qt6QuickShapes',
-    'Qt6QuickTemplates2',
-    'Qt6QuickWidgets',
-    'QtQuick',
-    'QtQml',
-
-    # Multimedia - não usado
-    'Qt6Multimedia',
-    'Qt6MultimediaWidgets',
-    'QtMultimedia',
-    'avcodec',
-    'avformat',
-    'avutil',
-    'swresample',
-    'swscale',
-
-    # 3D Qt (usamos pyqtgraph)
-    'Qt63DCore',
-    'Qt63DRender',
-    'Qt63DInput',
-    'Qt63DLogic',
-    'Qt63DAnimation',
-    'Qt63DExtras',
-    'Qt3D',
-
-    # PDF
-    'Qt6Pdf',
-    'Qt6PdfWidgets',
-
-    # Outros
-    'Qt6WebChannel',
-    'Qt6WebSockets',
-    'Qt6Bluetooth',
-    'Qt6Designer',
-    'Qt6Help',
-    'Qt6Location',
-    'Qt6Nfc',
-    'Qt6Positioning',
-    'Qt6RemoteObjects',
-    'Qt6Scxml',
-    'Qt6Sensors',
-    'Qt6SerialPort',
-    'Qt6SerialBus',
-    'Qt6Sql',
-    'Qt6Test',
-    'Qt6TextToSpeech',
-    'Qt6VirtualKeyboard',
-    'Qt6Charts',
-    'Qt6DataVisualization',
-    'Qt6StateMachine',
-    'Qt6LanguageServer',
+    'Qt6WebEngineCore', 'Qt6WebEngine', 'QtWebEngine', 'QtWebEngineProcess',
+    'Qt6Quick', 'Qt6Qml', 'Qt6QmlModels', 'Qt6QmlCore', 'Qt6QmlWorkerScript',
+    'Qt6QuickControls2', 'Qt6QuickLayouts', 'Qt6QuickParticles', 'Qt6QuickShapes',
+    'Qt6QuickTemplates2', 'Qt6QuickWidgets', 'Qt6QuickDialogs2', 'QtQuick', 'QtQml',
+    'Qt6Multimedia', 'Qt6MultimediaWidgets', 'QtMultimedia',
+    'avcodec', 'avformat', 'avutil', 'swresample', 'swscale',
+    'Qt63DCore', 'Qt63DRender', 'Qt63DInput', 'Qt63DLogic', 'Qt63DAnimation',
+    'Qt63DExtras', 'Qt3D',
+    'Qt6Pdf', 'Qt6PdfWidgets',
+    'Qt6WebChannel', 'Qt6WebSockets', 'Qt6Bluetooth', 'Qt6Designer', 'Qt6Help',
+    'Qt6Location', 'Qt6Nfc', 'Qt6Positioning', 'Qt6RemoteObjects', 'Qt6Scxml',
+    'Qt6Sensors', 'Qt6SerialPort', 'Qt6SerialBus', 'Qt6Sql', 'Qt6Test',
+    'Qt6TextToSpeech', 'Qt6VirtualKeyboard', 'Qt6Charts', 'Qt6DataVisualization',
+    'Qt6StateMachine', 'Qt6LanguageServer', 'Qt6Quick3D',
 ]
-
-# Aplicar filtro de binários
 a.binaries = [
-    (name, path, type_)
-    for name, path, type_ in a.binaries
+    (name, path, typ) for (name, path, typ) in a.binaries
     if not any(excl in name for excl in excluded_binaries)
 ]
 
-# =============================================================================
+# -----------------------------------------------------------------------------
 # EMPACOTAMENTO
-# =============================================================================
-
-pyz = PYZ(
-    a.pure,
-    a.zipped_data,
-    cipher=block_cipher
-)
+# -----------------------------------------------------------------------------
+pyz = PYZ(a.pure, a.zipped_data)
 
 exe = EXE(
     pyz,
@@ -462,42 +230,21 @@ exe = EXE(
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
-    upx=False,  # DESABILITADO - UPX causa crashes em DLLs do Qt!
-    console=False,  # Aplicação GUI sem console
+    upx=False,             # UPX desligado (DLLs do Qt quebram com UPX)
+    console=False,         # GUI sem console
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
     icon=os.path.join(base_path, 'matfinder', 'assets', 'icons', 'polvo.ico'),
-    version_file=None,
 )
-
-# =============================================================================
-# COLEÇÃO FINAL
-# =============================================================================
-
-# Lista de arquivos que NÃO devem ser comprimidos com UPX
-# (DLLs do Qt falham quando comprimidas)
-upx_exclude_list = [
-    'Qt*.dll',
-    'PySide6*.dll',
-    'shiboken*.dll',
-    'python*.dll',
-    'vcruntime*.dll',
-    'msvcp*.dll',
-    'ucrtbase.dll',
-    'api-ms-*.dll',
-]
 
 coll = COLLECT(
     exe,
     a.binaries,
-    a.zipfiles,
     a.datas,
     strip=False,
-    upx=False,  # Desabilitado globalmente para estabilidade
-    upx_exclude=upx_exclude_list,
+    upx=False,
     name='MatFinder',
 )
-

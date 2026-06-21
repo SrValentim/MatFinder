@@ -1,63 +1,43 @@
 @echo off
-echo ============================================================
-echo     COMPILACAO OTIMIZADA - MatFinder v3.24.0
-echo     Hooks otimizados para ~500-600MB
-echo ============================================================
+REM ============================================================
+REM   COMPILACAO OTIMIZADA - MatFinder
+REM   Usa o VENV LIMPO dedicado (.venv-build) + build_clean.py
+REM   (build + smoke test headless + relatorio de tamanho)
+REM ============================================================
 echo.
 
-echo [1/4] Limpando builds anteriores...
-cd ..
-if exist build rmdir /s /q build
-if exist dist rmdir /s /q dist
-echo OK!
-echo.
+REM Vai para a raiz do projeto (este .bat esta em build_tools\)
+cd /d "%~dp0.."
 
-echo [2/4] Verificando dependencias...
-python -c "import pyinstaller; print('PyInstaller OK')" 2>nul || (
-    echo PyInstaller nao encontrado! Instalando...
-    pip install pyinstaller
+REM Python do venv LIMPO (fica fora da pasta do repo, em MatFinderRefactor\.venv-build)
+set "VENVPY=..\.venv-build\Scripts\python.exe"
+
+if not exist "%VENVPY%" (
+    echo [ERRO] venv de build nao encontrado em %VENVPY%
+    echo.
+    echo Crie-o uma vez com:
+    echo   py -3.11 -m venv ..\.venv-build
+    echo   ..\.venv-build\Scripts\python -m pip install -r build_tools\requirements-build.txt
+    echo.
+    pause
+    exit /b 1
 )
+
+echo Compilando com o venv limpo: %VENVPY%
 echo.
+"%VENVPY%" build_tools\build_clean.py
+set RC=%ERRORLEVEL%
 
-echo [3/4] Compilando com PyInstaller (isso pode levar 5-10 minutos)...
-echo       Logs detalhados serao exibidos abaixo:
 echo.
-pyinstaller --clean --noconfirm build_tools\MatFinder.spec
-echo.
-
-if exist dist\MatFinder\MatFinder.exe (
-    echo [4/4] Sucesso! Executavel criado.
-    echo.
-
-    REM Calcular tamanho da pasta
-    for /f "tokens=3" %%a in ('dir dist\MatFinder /s ^| findstr "arquivo(s)"') do set SIZE=%%a
-
+if "%RC%"=="0" (
     echo ============================================================
-    echo     COMPILACAO FINALIZADA COM SUCESSO!
+    echo   SUCESSO! Executavel em: dist\MatFinder\MatFinder.exe
     echo ============================================================
-    echo.
-    echo Executavel em: dist\MatFinder\MatFinder.exe
-    echo.
-    echo Para testar:
-    echo   cd dist\MatFinder
-    echo   MatFinder.exe
-    echo.
-    echo Para criar instalador MSI:
-    echo   cd scripts
-    echo   python build_msi.py
-    echo.
 ) else (
-    echo [4/4] ERRO! Executavel nao foi criado.
-    echo.
-    echo Possiveis causas:
-    echo   1. Modulo faltando - verifique os logs acima
-    echo   2. Erro de sintaxe no spec file
-    echo   3. DLL faltando
-    echo.
-    echo Dica: Execute novamente com --debug para mais detalhes:
-    echo   pyinstaller --debug all build_tools\MatFinder.spec
-    echo.
+    echo ============================================================
+    echo   FALHOU (codigo %RC%). Veja o relatorio do selftest acima.
+    echo ============================================================
 )
-
+echo.
 pause
-
+exit /b %RC%

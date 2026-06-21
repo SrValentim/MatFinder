@@ -41,6 +41,10 @@ matfinder/assets/config/config.txt
 
 # Arquivos Temporários
 temp_cifs/*.cif
+selftest_report.txt
+temp_cif_for_pyobjcryst.cif
+# gerado automaticamente pelo build (gen_hiddenimports.py)
+build_tools/hiddenimports_generated.txt
 *.bak
 *_old.py
 *_backup.py

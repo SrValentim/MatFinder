@@ -1,0 +1,64 @@
+# =============================================================================
+# requirements-build.txt - Dependências MÍNIMAS para compilar o MatFinder
+# =============================================================================
+# Versões ALINHADAS ao venv que comprovadamente roda o app (PyCharm "venv",
+# Python 3.11.9). NÃO use o requirements.txt da raiz (pip freeze do ambiente
+# inteiro, com jupyter/jax/opencv/PyQt5/boto3 que o app NÃO usa).
+#
+# IMPORTANTE: a cadeia pymatgen <-> emmet-core <-> mp-api é FRÁGIL. Estas
+# versões casam entre si (pymatgen 2024.10.29 + emmet-core 0.84.7rc1). Pular
+# para pymatgen 2025.x quebra com "No module named 'pymatgen.core.graphs'".
+# Por isso fixamos também as transitivas críticas.
+# =============================================================================
+
+# --- GUI ---
+PySide6==6.9.0
+pyqtgraph==0.13.7
+PyOpenGL==3.1.10
+# (sem PyOpenGL-accelerate: o app não usa e ele atrapalha o PyInstaller)
+
+# --- Núcleo científico ---
+numpy==1.26.4
+scipy==1.14.1
+matplotlib==3.9.2
+PyWavelets==1.9.0
+
+# --- Cristalografia / dados de materiais (cadeia fixada junta) ---
+pymatgen==2024.10.29
+mp-api==0.45.5
+emmet-core==0.84.7rc1
+maggma==0.71.5
+monty==2025.3.3
+spglib==2.5.0
+chempy==0.9.0
+
+# --- Transitivas críticas fixadas (evitam drift que quebra a cadeia acima) ---
+pydantic==2.10.2
+pydantic-settings==2.9.1
+ruamel.yaml==0.18.6
+uncertainties==3.2.2
+sympy==1.13.3
+networkx==3.4.2
+pandas==2.2.3
+pybtex==0.24.0
+latexcodec==3.0.0
+
+# --- IO / web / utilidades ---
+pillow==10.4.0
+openpyxl==3.1.5
+beautifulsoup4==4.12.3
+lxml==5.4.0
+cloudscraper==1.2.71
+requests==2.32.3
+
+# --- Build ---
+pyinstaller==6.16.0
+pyinstaller-hooks-contrib
+# setuptools 81+ REMOVEU pkg_resources, que o pybtex (dep do pymatgen) ainda usa.
+setuptools<81
+# backports.tarfile real (top-level): o pkg_resources/setuptools._vendor faz
+# "from backports import tarfile"; sem o pacote real, o .exe quebra no boot.
+backports.tarfile
+
+# NOTA: pyobjcryst é OPCIONAL (o app cai pro pymatgen se faltar) e difícil de
+# instalar no Windows via pip -> deixado de fora de propósito.

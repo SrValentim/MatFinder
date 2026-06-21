@@ -1,83 +1,71 @@
-# Guia de Compilação do MatFinder v3.24.0
+# Guia de Compilação do MatFinder (otimizado)
 
-## Estrutura dos Hooks
+> Objetivo: build **pequeno (~426 MB, era ~1,5 GB)** e **sem o ciclo "compila →
+> abre → falta módulo → compila..."**. A chave é (1) um venv de build LIMPO e
+> (2) um **smoke test headless** que lista todos os módulos faltantes de uma vez.
 
-Os hooks em `scripts/hooks/` são responsáveis por identificar os módulos necessários de cada biblioteca:
+## TL;DR — como compilar
 
-| Hook | Biblioteca | Função |
-|------|-----------|--------|
-| hook-numpy.py | NumPy 2.x | Core matemático - CRÍTICO |
-| hook-scipy.py | SciPy | Processamento de sinais |
-| hook-PySide6.py | PySide6 | Interface gráfica (Qt) |
-| hook-matplotlib.py | Matplotlib | Gráficos 2D |
-| hook-pyqtgraph.py | PyQtGraph | Visualização 3D |
-| hook-OpenGL.py | PyOpenGL | Renderização 3D |
-| hook-pymatgen.py | Pymatgen | Análise cristalográfica |
-| hook-mp_api.py | MP-API | Materials Project |
-| hook-emmet.py | Emmet | Modelos de dados |
-| hook-monty.py | Monty | I/O e serialização |
-| hook-pandas.py | Pandas | Manipulação de dados |
-| hook-pydantic.py | Pydantic | Validação de dados |
-| hook-spglib.py | Spglib | Simetria cristalográfica |
-| hook-orjson.py | orjson | JSON rápido |
+```bat
+REM 1x: criar o venv de build limpo (fora da pasta do repo)
+py -3.11 -m venv ..\.venv-build
+..\.venv-build\Scripts\python -m pip install -r build_tools\requirements-build.txt
 
-## Estratégia de Otimização
-
-### O que é INCLUÍDO:
-- Módulos core de cada biblioteca
-- DLLs necessárias para funcionamento
-- Arquivos de dados (fontes, configurações, etc.)
-
-### O que é EXCLUÍDO:
-- Módulos de teste (pytest, unittest)
-- Documentação e samples
-- Módulos Qt não usados (~300MB de economia):
-  - WebEngine
-  - Quick/QML
-  - Multimedia
-  - 3D (usamos pyqtgraph)
-  - Bluetooth, NFC, Sensors, etc.
-
-### UPX:
-- **DESABILITADO** para DLLs do Qt (causa crashes)
-- Pode ser usado em outros arquivos se necessário
-
-## Como Compilar
-
-### Opção 1: Usando o BAT (recomendado)
-```batch
-cd build_tools
-COMPILE.bat
+REM sempre que for compilar:
+build_tools\COMPILE.bat
+REM (ou:  ..\.venv-build\Scripts\python build_tools\build_clean.py)
 ```
 
-### Opção 2: Comando direto
-```batch
-cd MatFinderRefactor
-pyinstaller --clean --noconfirm build_tools\MatFinder.spec
-```
+O `build_clean.py` faz tudo: compila → roda `MatFinder.exe --selftest` (headless)
+→ imprime tamanho final. Se faltar módulo, o selftest lista **todos** de uma vez.
 
-## Solução de Problemas
+## Por que o build inchava e dava "módulo faltando" (causas-raiz)
 
-### Erro: "ModuleNotFoundError"
-1. Identifique o módulo faltando no erro
-2. Adicione ao `hiddenimports` no spec OU
-3. Crie/atualize o hook correspondente
+1. **Venv poluído.** O `requirements.txt` da raiz é um `pip freeze` do ambiente
+   inteiro do PyCharm (jupyter, jax, opencv, PyQt5, boto3, tensorflow...). O
+   PyInstaller seguia esses imports e empacotava tudo → 1,5 GB. **Solução:** o
+   `.venv-build` tem só o que o app usa (`requirements-build.txt`).
 
-### Erro: "DLL load failed"
-1. Verifique se a DLL está sendo copiada
-2. Adicione ao `binaries` do hook correspondente
-3. Verifique se não foi excluída no `excluded_binaries`
+2. **Imports dinâmicos/lazy** (pymatgen, mp_api, emmet, monty, chempy, plotly):
+   a análise estática do PyInstaller não os enxerga. **Solução:** `collect_all()`
+   no spec + `gen_hiddenimports.py` (mede o fecho real de imports rodando o app).
 
-### Tamanho muito grande (>700MB)
-1. Verifique se os filtros de DLL estão funcionando
-2. Confirme que WebEngine não está incluído
-3. Execute com `--debug imports` para ver o que está sendo incluído
+3. **Cadeia frágil pymatgen ↔ emmet-core ↔ mp-api.** pymatgen 2025.x quebra com
+   `No module named 'pymatgen.core.graphs'`. **Solução:** versões fixadas e
+   casadas em `requirements-build.txt` (pymatgen 2024.10.29 + emmet-core 0.84.7rc1).
 
-## Tamanho Esperado
+4. **setuptools 81+ removeu `pkg_resources`** (que o pybtex usa) e o
+   `backports`/`jaraco` vendorizados não eram empacotados → crash no boot
+   (`No module named 'backports'`). **Solução:** `setuptools<81` +
+   `backports.tarfile` real + `collect_submodules('setuptools._vendor')`.
 
-- **Alvo**: 500-600 MB
-- **PySide6 otimizado**: ~150MB (vs ~450MB completo)
-- **NumPy + SciPy**: ~100MB
-- **Matplotlib**: ~50MB
-- **Pymatgen + dependências**: ~50MB
-- **Outros**: ~100MB
+5. **`cipher=block_cipher`** no spec antigo: removido no PyInstaller 6 (podia
+   quebrar o spec). O novo spec não usa.
+
+## Arquivos do build
+
+| Arquivo | Papel |
+|---|---|
+| `build_tools/requirements-build.txt` | deps mínimas, versões casadas |
+| `build_tools/MatFinder.spec` | spec novo (collect_all + filtro DLL Qt + lê o gerado) |
+| `build_tools/gen_hiddenimports.py` | mede o fecho real de imports → `hiddenimports_generated.txt` |
+| `build_tools/build_clean.py` | pipeline: compila + smoke test + tamanho |
+| `build_tools/COMPILE.bat` | atalho que chama o venv limpo + build_clean.py |
+| `run_matfinder.py --selftest` | importa tudo headless; sai 0/1; grava `selftest_report.txt` |
+| `MatFinder.spec.legacy.bak` | spec antigo (referência) |
+
+## Diagnóstico (quebrar o ciclo, não tentativa-e-erro)
+
+- **Build OK mas .exe não abre?** Rode `MatFinder.exe --selftest` (defina
+  `QT_QPA_PLATFORM=offscreen`). Ele lista **todos** os módulos faltantes de uma
+  vez no `selftest_report.txt`. Para cada um, prefira `collect_all('<pkg>')` no
+  spec a adicioná-lo solto.
+- **Mudou dependência?** Rode `gen_hiddenimports.py` de novo antes de compilar.
+- **Faltou DLL?** Veja se não foi removida pelo filtro `excluded_binaries` no spec.
+
+## Tamanho
+
+- **Atual: ~426 MB.** Maiores pesos: OpenBLAS (numpy+scipy ~73 MB), PySide6/Qt,
+  `opengl32sw.dll` (~20 MB), cryptography `_rust.pyd`, plotly (~10 MB).
+- WebEngine/Quick/Multimedia/3D/Charts do PySide6_Addons são removidos pelo
+  filtro de DLL (`excluded_binaries`).

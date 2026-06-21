@@ -33,6 +33,86 @@ def resource_path(relative_path):
     return os.path.join(base_path, relative_path)
 
 
+def _selftest():
+    """Auto-teste do build congelado (headless) — valida que NENHUM módulo ficou de fora.
+
+    Importa todas as libs de terceiros que o app usa (inclusive as de import
+    dinâmico/lazy, que o PyInstaller costuma perder) e todos os submódulos do
+    pacote 'matfinder'. Reporta cada módulo ausente e sai 1 se faltar algo, 0 se OK.
+
+    Uso:  MatFinder.exe --selftest
+    Isso troca o ciclo "compila 15min -> abre -> crasha por módulo faltando" por
+    uma verificação de ~10s que lista de uma vez tudo que falta.
+    """
+    import importlib
+    import pkgutil
+
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    missing = []
+    ok = 0
+
+    # 1) Libs de terceiros realmente usadas pelo MatFinder (incl. submódulos lazy).
+    third_party = [
+        "PySide6.QtWidgets", "PySide6.QtGui", "PySide6.QtCore",
+        "PySide6.QtOpenGLWidgets", "PySide6.QtPrintSupport", "PySide6.QtNetwork",
+        "numpy", "scipy", "scipy.signal", "scipy.optimize", "scipy.interpolate",
+        "scipy.ndimage", "scipy.special", "scipy.sparse",
+        "matplotlib", "matplotlib.pyplot", "matplotlib.backends.backend_qtagg",
+        "pyqtgraph", "pyqtgraph.opengl", "OpenGL.GL",
+        "pymatgen.core", "pymatgen.core.structure", "pymatgen.io.cif",
+        "pymatgen.symmetry.analyzer", "pymatgen.analysis.diffraction.xrd",
+        "mp_api.client", "emmet.core", "monty.json", "monty.serialization",
+        "spglib", "pydantic", "pydantic_core",
+        "PIL.Image", "openpyxl", "bs4", "chempy", "cloudscraper", "requests",
+        "pywt", "pandas",
+    ]
+    for name in third_party:
+        try:
+            importlib.import_module(name)
+            ok += 1
+        except ModuleNotFoundError as e:
+            missing.append(f"{name}  (falta: {e.name})")
+        except Exception as e:  # DLL ausente, etc. — também é problema de build
+            missing.append(f"{name}  ({type(e).__name__}: {e})")
+
+    # 2) Todos os submódulos do pacote 'matfinder'.
+    try:
+        import matfinder
+        for info in pkgutil.walk_packages(matfinder.__path__, prefix="matfinder."):
+            try:
+                importlib.import_module(info.name)
+                ok += 1
+            except ModuleNotFoundError as e:
+                missing.append(f"{info.name}  (falta: {e.name})")
+            except Exception as e:
+                msg = str(e)
+                # Só nos importam falhas por módulo ausente; ignora erros de runtime/UI.
+                if "No module named" in msg:
+                    missing.append(f"{info.name}  ({msg})")
+    except Exception as e:
+        missing.append(f"matfinder (pacote raiz)  ({type(e).__name__}: {e})")
+
+    # O .exe final é windowed (sem stdout); por isso gravamos um relatório em
+    # arquivo. O exit code (0/1) é a fonte da verdade pro smoke test.
+    lines = [f"[SELFTEST] modulos importados com sucesso: {ok}"]
+    if missing:
+        lines.append(f"[SELFTEST] FALHAS ({len(missing)}):")
+        lines += ["   - " + m for m in missing]
+        lines.append("[SELFTEST] RESULTADO: FALHOU")
+    else:
+        lines.append("[SELFTEST] RESULTADO: OK - nenhum modulo ausente")
+    report = "\n".join(lines)
+    print(report)
+    try:
+        report_path = os.environ.get("MATFINDER_SELFTEST_REPORT",
+                                     os.path.join(os.getcwd(), "selftest_report.txt"))
+        with open(report_path, "w", encoding="utf-8") as fh:
+            fh.write(report + "\n")
+    except Exception:
+        pass
+    return 1 if missing else 0
+
+
 def main():
     """
     Função principal que inicializa a aplicação, mostra a splash screen
@@ -118,4 +198,6 @@ def main():
 
 
 if __name__ == "__main__":
+    if "--selftest" in sys.argv:
+        sys.exit(_selftest())
     main()
