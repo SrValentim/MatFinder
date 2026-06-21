@@ -1,0 +1,71 @@
+name: Build & Release (Windows)
+
+# Dispara:
+#  - ao enviar uma tag vX.Y.Z  -> compila e PUBLICA um Release com o .zip
+#  - manualmente (aba Actions > Run workflow) -> compila e sobe o .zip como artifact
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write   # necessario para criar Releases
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 40
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configurar Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: build_tools/requirements-build.lock.txt
+
+      - name: Instalar dependencias (lock)
+        run: python -m pip install -r build_tools/requirements-build.lock.txt
+
+      - name: Compilar (build + selftest headless)
+        run: python build_tools/build_clean.py --allow-any-venv
+
+      - name: Empacotar .zip
+        shell: pwsh
+        run: |
+          $ver = (Get-Content VERSION -Raw).Trim()
+          if ([string]::IsNullOrWhiteSpace($ver)) { $ver = "0.0.0" }
+          $zip = "MatFinder-$ver-win64.zip"
+          Compress-Archive -Path dist/MatFinder -DestinationPath $zip -Force
+          "ZIP=$zip"     | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          "VERSION=$ver" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          Write-Host "Gerado: $zip"
+
+      - name: Subir artifact (sempre)
+        uses: actions/upload-artifact@v4
+        with:
+          name: MatFinder-win64
+          path: ${{ env.ZIP }}
+          retention-days: 14
+
+      - name: Publicar Release (somente em tag v*)
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $notes = @"
+          Build automatico do MatFinder (Windows x64, ~400 MB).
+
+          Como usar:
+          1. Baixe o .zip abaixo.
+          2. Extraia.
+          3. Rode MatFinder/MatFinder.exe.
+          "@
+          gh release create "${{ github.ref_name }}" "$env:ZIP" `
+            --title "MatFinder ${{ github.ref_name }}" `
+            --notes "$notes"

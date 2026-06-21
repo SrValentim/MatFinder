@@ -1,6 +1,10 @@
 # Como compilar o MatFinder (Windows)
 
-Você vai gerar `dist\MatFinder\MatFinder.exe` — versão **otimizada (~426 MB)** que
+> **Só quer usar o programa?** Não precisa compilar nada: baixe o `.zip` pronto na
+> aba **[Releases](../../releases)** do GitHub, extraia e rode `MatFinder/MatFinder.exe`.
+> O guia abaixo é para quem quer **compilar** a partir do código.
+
+Você vai gerar `dist\MatFinder\MatFinder.exe` — versão **otimizada (~402 MB)** que
 abre sem erro de "módulo faltando". São **2 passos**:
 
 ## Passo 1 — Instalar requisitos (só na 1ª vez)
@@ -46,6 +50,20 @@ type selftest_report.txt
 
 Para cada módulo da lista, adicione `collect_all('pacote')` em
 `build_tools\MatFinder.spec`. (Detalhes em `docs\compilation\GUIA_COMPILACAO.md`.)
+
+## Publicar uma versão (mantenedor)
+
+O GitHub Actions compila o `.exe` na nuvem e publica sozinho. Para lançar:
+
+```bat
+:: ajuste o numero em VERSION, depois:
+git tag v3.24.0
+git push origin v3.24.0
+```
+
+Isso dispara `.github/workflows/build-release.yml`, que compila no Windows e cria
+um **Release** com o `.zip` anexado. Para só testar sem lançar: aba **Actions ▸
+Build & Release ▸ Run workflow** (sobe o `.zip` como *artifact*, sem criar release).
 
 ## Observações honestas
 
