@@ -85,7 +85,6 @@ Full guide: **[`COMO_COMPILAR.md`](COMO_COMPILAR.md)** · [`docs/compilation/GUI
 
 ## Documentation
 
-- **User Manual**: [`docs/Manual do Usuário.pdf`](docs/Manual%20do%20Usuário.pdf)
 - **Compilation Guide**: [`docs/compilation/`](docs/compilation/)
 - **GPL v3 License**: [`licenses/LICENSE_FULL.txt`](licenses/LICENSE_FULL.txt)
 

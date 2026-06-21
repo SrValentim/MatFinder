@@ -11,6 +11,7 @@ authors:
   - family-names: Valentim
     given-names: Raynner
     affiliation: "Federal University of Amazonas (UFAM)"
+    orcid: "https://orcid.org/0009-0004-3470-6893"
 version: "3.24"
 date-released: "2026-06-20"
 doi: 10.5281/zenodo.20778196
