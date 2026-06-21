@@ -55,7 +55,8 @@ print(f"[SPEC] Base path: {base_path}")
 datas = [
     (os.path.join(base_path, 'matfinder', 'assets', 'icons'), os.path.join('matfinder', 'assets', 'icons')),
     (os.path.join(base_path, 'matfinder', 'assets', 'logos'), os.path.join('matfinder', 'assets', 'logos')),
-    (os.path.join(base_path, 'matfinder', 'assets', 'config'), os.path.join('matfinder', 'assets', 'config')),
+    # NÃO empacotar 'assets/config': continha a MP_API_KEY (config.txt) e o
+    # language.json com de_DE. A chave agora fica em pasta gravável do usuário.
     (os.path.join(base_path, 'matfinder', 'assets', 'translations'), os.path.join('matfinder', 'assets', 'translations')),
     (os.path.join(base_path, 'licenses', 'LICENSE_FULL.txt'), '.'),
     (os.path.join(base_path, 'VERSION'), '.'),

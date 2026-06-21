@@ -15,7 +15,7 @@ SUPPORTED_LANGUAGES = {
     'de_DE': 'Deutsch'
 }
 
-DEFAULT_LANGUAGE = 'pt_BR'
+DEFAULT_LANGUAGE = 'en_US'
 
 
 class Translator(QObject):
@@ -59,47 +59,33 @@ class Translator(QObject):
         self._load_translations(self._current_language)
 
     def _load_saved_language(self):
-        """Carrega o idioma salvo no arquivo de configuração na pasta raiz."""
+        """Carrega o idioma salvo em settings.json no diretório de dados GRAVÁVEL
+        (cwd, definido no boot do app). 1ª execução (sem settings) usa o padrão
+        (DEFAULT_LANGUAGE = inglês). Não lê mais o config/language.json embarcado."""
         try:
-            # Primeiro tenta o settings.json na pasta raiz
-            root_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-            settings_file = os.path.join(root_dir, 'settings.json')
-
+            settings_file = os.path.join(os.getcwd(), 'settings.json')
             if os.path.exists(settings_file):
                 with open(settings_file, 'r', encoding='utf-8') as f:
                     config = json.load(f)
-                    saved_lang = config.get('language', DEFAULT_LANGUAGE)
-                    if saved_lang in SUPPORTED_LANGUAGES:
-                        self._current_language = saved_lang
-                        logging.info(f"Idioma carregado: {saved_lang}")
-                        return
-
-            # Fallback para o antigo local
-            config_dir = os.path.dirname(self._translations_dir)
-            config_file = os.path.join(config_dir, 'config', 'language.json')
-
-            if os.path.exists(config_file):
-                with open(config_file, 'r', encoding='utf-8') as f:
-                    config = json.load(f)
-                    saved_lang = config.get('language', DEFAULT_LANGUAGE)
-                    if saved_lang in SUPPORTED_LANGUAGES:
-                        self._current_language = saved_lang
-                        logging.info(f"Idioma carregado (fallback): {saved_lang}")
+                saved_lang = config.get('language', DEFAULT_LANGUAGE)
+                if saved_lang in SUPPORTED_LANGUAGES:
+                    self._current_language = saved_lang
+                    logging.info(f"Idioma carregado: {saved_lang}")
         except Exception as e:
             logging.warning(f"Erro ao carregar idioma salvo: {e}")
 
     def _save_language(self, language: str):
-        """Salva o idioma atual no arquivo settings.json na pasta raiz."""
+        """Salva o idioma em settings.json no diretório de dados GRAVÁVEL (cwd).
+        (Antes gravava na pasta do app -> falhava quando instalado em Program Files.)"""
         try:
-            # Salvar na pasta raiz do projeto
-            root_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-            settings_file = os.path.join(root_dir, 'settings.json')
-
-            # Carregar configurações existentes ou criar novo
+            settings_file = os.path.join(os.getcwd(), 'settings.json')
             settings = {}
             if os.path.exists(settings_file):
-                with open(settings_file, 'r', encoding='utf-8') as f:
-                    settings = json.load(f)
+                try:
+                    with open(settings_file, 'r', encoding='utf-8') as f:
+                        settings = json.load(f)
+                except Exception:
+                    settings = {}
 
             settings['language'] = language
 

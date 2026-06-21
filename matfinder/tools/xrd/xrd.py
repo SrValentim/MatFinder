@@ -2416,15 +2416,16 @@ class PhaseDRXTool(QMainWindow):
         Tamanho fixo e centralização usando coordenadas da figura (figure coordinates).
         """
         try:
-            # Caminho da logo
+            # Caminho da logo (CORREÇÃO: no app congelado os assets ficam sob
+            # 'matfinder/assets/...' dentro do _MEIPASS; faltava o prefixo
+            # 'matfinder', então a marca d'água nunca aparecia no .exe/instalador).
             if getattr(sys, 'frozen', False):
-                # Executável compilado
-                base_path = sys._MEIPASS
+                # Executável compilado: _MEIPASS/matfinder/assets/logos/...
+                logo_path = os.path.join(sys._MEIPASS, 'matfinder', 'assets', 'logos', 'PhaseDRX.png')
             else:
-                # Desenvolvimento
+                # Desenvolvimento: base_path == .../matfinder
                 base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-            logo_path = os.path.join(base_path, 'assets', 'logos', 'PhaseDRX.png')
+                logo_path = os.path.join(base_path, 'assets', 'logos', 'PhaseDRX.png')
 
             if os.path.exists(logo_path):
                 # Carregar a imagem

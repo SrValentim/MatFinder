@@ -39,6 +39,8 @@ favorites.json
 # Configurações locais do usuário
 settings.json
 matfinder/assets/config/config.txt
+matfinder/assets/config/config_test.txt
+matfinder/assets/config/config_console_test.txt
 
 # Arquivos Temporários
 temp_cifs/*.cif

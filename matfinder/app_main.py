@@ -68,6 +68,13 @@ def _ensure_mp_api():
     if MPRester is None:
         from mp_api.client import MPRester as _MPRester
         MPRester = _MPRester
+        # Aceitar IDs alfanuméricos novos do MP (ex.: 'mp-aaadipjz') com o
+        # emmet-core fixado. Sem isto, a consulta quebra com "Invalid MPID Format".
+        try:
+            from matfinder import _mp_compat
+            _mp_compat.apply()
+        except Exception:
+            pass
     return MPRester
 
 
@@ -453,52 +460,45 @@ class MaterialsApp(QMainWindow):
         base_path = getattr(sys, "_MEIPASS", os.path.abspath("."))
         return os.path.join(base_path, relative_path)
 
+    def _api_key_path(self):
+        """Caminho GRAVÁVEL da chave (cwd = pasta de dados definida no boot).
+        A chave NÃO é mais empacotada no .exe (era um vazamento de segurança)."""
+        return os.path.join(os.getcwd(), "config.txt")
+
     def read_api_key_from_config(self):
-        # --- ALTERAÇÃO DE REATORAÇÃO: Caminho do Asset ---
-        config_path = self.resource_path(os.path.join("matfinder", "assets", "config", "config.txt"))
-        try:
-            with open(config_path, "r") as f:
-                key = f.readline().strip()
-            if (
-                    key
-                    and key != "COLOQUE_A_SUA_CHAVE_DA_API_DO_MATERIALS_PROJECT_AQUI"
-                    and len(key) == 32
-            ):
-                logging.info("Chave API MP carregada do config.txt.")
-                return key
-        except FileNotFoundError:
-            logging.info(
-                f"Arquivo de configuração '{config_path}' não encontrado ao tentar ler a chave API."
-            )
-        except IOError as ioe:
-            logging.error(f"Erro de E/S ao ler chave de API do config.txt: {ioe}")
-        except Exception as e:
-            logging.error(f"Erro inesperado ao ler chave de API do config.txt: {e}")
+        # Lê de um local gravável (cwd). Fallback: config.txt da fonte (modo dev).
+        candidates = [
+            self._api_key_path(),
+            self.resource_path(os.path.join("matfinder", "assets", "config", "config.txt")),
+        ]
+        for config_path in candidates:
+            try:
+                with open(config_path, "r") as f:
+                    key = f.readline().strip()
+                if (
+                        key
+                        and key != "COLOQUE_A_SUA_CHAVE_DA_API_DO_MATERIALS_PROJECT_AQUI"
+                        and len(key) == 32
+                ):
+                    logging.info(f"Chave API MP carregada de '{config_path}'.")
+                    return key
+            except FileNotFoundError:
+                continue
+            except Exception as e:
+                logging.error(f"Erro ao ler chave de API de '{config_path}': {e}")
 
         logging.warning("Chave API MP não encontrada ou inválida.")
         return None
 
     def save_api_key_to_config(self, api_key):
-        # --- ALTERAÇÃO DE REATORAÇÃO: Caminho do Asset ---
-        config_path = self.resource_path(os.path.join("matfinder", "assets", "config", "config.txt"))
+        config_path = self._api_key_path()
         try:
             with open(config_path, "w") as f:
                 f.write(api_key)
             logging.info(f"Chave da API salva em {config_path}")
             return True
-        except IOError as ioe:
-            logging.error(
-                f"Erro de E/S ao salvar a chave da API em '{config_path}': {ioe}"
-            )
-            QMessageBox.critical(
-                self,
-                "Erro ao Salvar Chave",
-                f"Não foi possível salvar a chave da API (erro de E/S) em '{config_path}':\n{ioe}",
-            )
         except Exception as e:
-            logging.error(
-                f"Erro inesperado ao salvar a chave da API em '{config_path}': {e}"
-            )
+            logging.error(f"Erro ao salvar a chave da API em '{config_path}': {e}")
             QMessageBox.critical(
                 self,
                 "Erro ao Salvar Chave",
@@ -2446,12 +2446,17 @@ class MaterialsApp(QMainWindow):
                 )
 
         if source_db == "Materials Project":
-            action_baixar_cif_mp = menu.addAction(tr('context_menu.download_cif_mp'))
-            action_baixar_cif_mp.triggered.connect(
-                lambda checked=False, name=name_display, id_val=id_original: self.trigger_baixar_cif_mp(
-                    name, id_val
+            menu_cif_mp = menu.addMenu(tr('context_menu.download_cif_mp'))
+            for _mode, _key in (
+                ("symmetrized", 'context_menu.cif_symmetrized'),
+                ("conventional", 'context_menu.cif_conventional'),
+                ("primitive", 'context_menu.cif_primitive'),
+            ):
+                _act_cif = menu_cif_mp.addAction(tr(_key))
+                _act_cif.triggered.connect(
+                    lambda checked=False, name=name_display, id_val=id_original, mode=_mode:
+                    self.trigger_baixar_cif_mp(name, id_val, mode)
                 )
-            )
             icsd_numeric_codes = compound_data.get("icsd_codes_list", [])
             if icsd_numeric_codes:
                 menu_icsd_principal = menu.addMenu(tr('context_menu.icsd_via_mp'))
@@ -2566,8 +2571,7 @@ class MaterialsApp(QMainWindow):
         elif source_db == "COD":
             self.trigger_baixar_cif_cod(id_original, name_display)
 
-    def trigger_baixar_cif_mp(self, formula_pretty: str, material_id: str):
-        # (O conteúdo desta função permanece o mesmo)
+    def trigger_baixar_cif_mp(self, formula_pretty: str, material_id: str, mode: str = "symmetrized"):
         if self.get_api_key_on_demand() is None:
             QMessageBox.warning(
                 self,
@@ -2592,6 +2596,7 @@ class MaterialsApp(QMainWindow):
             "fetch_cif_mp",
             material_id,
             formula_pretty,
+            mode,
         )
         cif_worker.cif_data_ready.connect(self.handle_cif_data_ready_mp)
         cif_worker.task_error.connect(self.handle_cif_fetch_error)
@@ -2599,7 +2604,9 @@ class MaterialsApp(QMainWindow):
         self.cif_fetch_thread.daemon = True
         self.cif_fetch_thread.start()
 
-    def _fetch_cif_data_logic_mp(self, material_id: str, formula_pretty: str):
+    def _fetch_cif_data_logic_mp(self, material_id: str, formula_pretty: str, mode: str = "symmetrized"):
+        # mode: "symmetrized" (célula convencional + grupo espacial),
+        #       "conventional" (célula convencional em P1) ou "primitive" (célula primitiva).
         # Carregar módulos sob demanda
         _ensure_mp_api()
 
@@ -2621,22 +2628,32 @@ class MaterialsApp(QMainWindow):
                 old_proxies_env["HTTPS_PROXY"] = os.environ.get("HTTPS_PROXY")
                 os.environ["HTTPS_PROXY"] = proxies["https"]
         try:
+            use_conventional = (mode != "primitive")
             with MPRester(api_key=self.api_key_mp) as mpr:
                 structure = mpr.get_structure_by_material_id(
-                    material_id, conventional_unit_cell=True
+                    material_id, conventional_unit_cell=use_conventional
                 )
                 if structure:
                     try:
                         from pymatgen.io.cif import CifWriter
-                        writer = CifWriter(structure, symprec=0.1, significant_figures=8)
+                        if mode == "symmetrized":
+                            # Detecta simetria e escreve com grupo espacial.
+                            writer = CifWriter(structure, symprec=0.1, significant_figures=8)
+                        else:
+                            # Convencional ou primitiva, sem reduzir por simetria (P1).
+                            writer = CifWriter(structure, significant_figures=8)
                         cif_string = str(writer)
                     except Exception as cif_err:
-                        logging.warning(f"CifWriter com simetria falhou: {cif_err}. Usando fallback P1.")
+                        logging.warning(f"CifWriter falhou: {cif_err}. Usando fallback P1.")
                         cif_string = structure.to(fmt="cif")
                     safe_formula = "".join(
                         c if c.isalnum() else "_" for c in formula_pretty
                     )
-                    suggested_filename = f"MP_{material_id}_{safe_formula}.cif"
+                    _suffix = {"symmetrized": "sym", "conventional": "conv", "primitive": "prim"}.get(mode, "")
+                    suggested_filename = (
+                        f"MP_{material_id}_{safe_formula}_{_suffix}.cif" if _suffix
+                        else f"MP_{material_id}_{safe_formula}.cif"
+                    )
                     return cif_string, suggested_filename
                 else:
                     raise Exception(
