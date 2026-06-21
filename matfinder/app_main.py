@@ -686,10 +686,18 @@ class MaterialsApp(QMainWindow):
 
         # Menu Sobre
         menu_sobre = menubar.addMenu(tr('menu.about.title'))
-        instrucoes_action = QAction(tr('menu.about.instructions'), self)
-        instrucoes_action.setStatusTip(tr('menu.about.instructions_tip'))
-        instrucoes_action.triggered.connect(self.open_readme)
-        menu_sobre.addAction(instrucoes_action)
+
+        # "Instrução de uso" ocultada por enquanto (manual desatualizado).
+        # Reativar quando o novo manual estiver pronto:
+        # instrucoes_action = QAction(tr('menu.about.instructions'), self)
+        # instrucoes_action.setStatusTip(tr('menu.about.instructions_tip'))
+        # instrucoes_action.triggered.connect(self.open_readme)
+        # menu_sobre.addAction(instrucoes_action)
+
+        cite_action = QAction(tr('menu.about.cite'), self)
+        cite_action.setStatusTip(tr('menu.about.cite_tip'))
+        cite_action.triggered.connect(self.show_citation)
+        menu_sobre.addAction(cite_action)
 
         licenca_action = QAction(tr('menu.about.license'), self)
         licenca_action.setStatusTip(tr('menu.about.license_tip'))
@@ -3460,6 +3468,123 @@ class MaterialsApp(QMainWindow):
         from matfinder.ui_dialogs import GplLicenseDialog
         dialog = GplLicenseDialog(license_text, self)
         dialog.setModal(True)
+        dialog.exec()
+
+    def show_citation(self):
+        """Diálogo 'Citar este software': propósito, onde foi desenvolvido,
+        contato para feedback/colaboração e a citação do Zenodo (com DOI)."""
+        from PySide6.QtWidgets import (
+            QDialog, QVBoxLayout, QHBoxLayout, QTextBrowser, QPushButton
+        )
+        from PySide6.QtGui import QGuiApplication
+
+        labels = {
+            "pt_BR": {
+                "title": "Citar este software",
+                "purpose": "Aplicativo de desktop para busca, visualização e análise de "
+                           "estruturas de materiais cristalinos, integrando bases de dados "
+                           "cristalográficas e ferramentas de difração de raios X.",
+                "developed": "Desenvolvido na",
+                "dev_place": "Universidade Federal do Amazonas (UFAM) — Departamento de "
+                             "Física (Física de Materiais), Brasil.",
+                "contact": "Autor e contato",
+                "welcome": "Feedbacks e colaborações são muito bem-vindos.",
+                "howto": "Como citar (Zenodo)",
+                "version": "versão 3.24",
+                "all_versions": "todas as versões",
+                "copy": "Copiar citação", "copied": "Copiado!", "close": "Fechar",
+            },
+            "en_US": {
+                "title": "Cite this software",
+                "purpose": "Desktop application for searching, visualizing and analyzing "
+                           "crystalline material structures, integrating crystallographic "
+                           "databases and X-ray diffraction tools.",
+                "developed": "Developed at the",
+                "dev_place": "Federal University of Amazonas (UFAM) — Department of Physics "
+                             "(Materials Physics), Brazil.",
+                "contact": "Author and contact",
+                "welcome": "Feedback and collaborations are very welcome.",
+                "howto": "How to cite (Zenodo)",
+                "version": "version 3.24",
+                "all_versions": "all versions",
+                "copy": "Copy citation", "copied": "Copied!", "close": "Close",
+            },
+            "de_DE": {
+                "title": "Diese Software zitieren",
+                "purpose": "Desktop-Anwendung zum Suchen, Visualisieren und Analysieren "
+                           "kristalliner Materialstrukturen; integriert kristallographische "
+                           "Datenbanken und Röntgenbeugungs-Werkzeuge.",
+                "developed": "Entwickelt an der",
+                "dev_place": "Bundesuniversität von Amazonas (UFAM) — Institut für Physik "
+                             "(Materialphysik), Brasilien.",
+                "contact": "Autor und Kontakt",
+                "welcome": "Feedback und Kooperationen sind herzlich willkommen.",
+                "howto": "Zitierweise (Zenodo)",
+                "version": "Version 3.24",
+                "all_versions": "alle Versionen",
+                "copy": "Zitat kopieren", "copied": "Kopiert!", "close": "Schließen",
+            },
+        }
+        try:
+            lang = get_current_language()
+        except Exception:
+            lang = "en_US"
+        S = labels.get(lang, labels["en_US"])
+
+        apa = ("Valentim, R. (2026). MatFinder - X-ray diffraction analysis tools "
+               "(3.24). Zenodo. https://doi.org/10.5281/zenodo.20778196")
+        apa_html = (
+            "Valentim, R. (2026). <i>MatFinder - X-ray diffraction analysis tools</i> "
+            "(3.24). Zenodo. "
+            "<a href='https://doi.org/10.5281/zenodo.20778196'>"
+            "https://doi.org/10.5281/zenodo.20778196</a>"
+        )
+
+        html = f"""
+        <div style="font-family:'Segoe UI',sans-serif;">
+          <h2 style="margin:0;">MatFinder
+            <span style="color:#888;font-size:13px;">v3.24</span></h2>
+          <p style="color:#555;margin:2px 0 10px 0;"><b>X-ray diffraction analysis tools</b></p>
+          <p>{S['purpose']}</p>
+          <p><b>{S['developed']}</b> {S['dev_place']}</p>
+          <p><b>{S['contact']}:</b> Raynner Valentim<br>
+             &#9993; <a href="mailto:raynnervalentim@hotmail.com">raynnervalentim@hotmail.com</a><br>
+             ORCID: <a href="https://orcid.org/0009-0004-3470-6893">0009-0004-3470-6893</a><br>
+             GitHub: <a href="https://github.com/SrValentim/MatFinder">github.com/SrValentim/MatFinder</a></p>
+          <p style="color:#1a7f37;"><i>{S['welcome']}</i></p>
+          <hr>
+          <p style="margin-bottom:4px;"><b>{S['howto']}:</b></p>
+          <p style="background:#f4f4f4;padding:8px;border-radius:4px;">{apa_html}</p>
+          <p style="font-size:12px;color:#555;">DOI:
+             <a href="https://doi.org/10.5281/zenodo.20778196">10.5281/zenodo.20778196</a> ({S['version']})
+             &middot;
+             <a href="https://doi.org/10.5281/zenodo.20778195">10.5281/zenodo.20778195</a> ({S['all_versions']})</p>
+        </div>
+        """
+
+        dialog = QDialog(self)
+        dialog.setWindowTitle(S["title"])
+        dialog.resize(600, 540)
+        v = QVBoxLayout(dialog)
+        browser = QTextBrowser(dialog)
+        browser.setOpenExternalLinks(True)
+        browser.setHtml(html)
+        v.addWidget(browser)
+
+        btns = QHBoxLayout()
+        copy_btn = QPushButton(S["copy"], dialog)
+
+        def _copy():
+            QGuiApplication.clipboard().setText(apa)
+            copy_btn.setText(S["copied"])
+
+        copy_btn.clicked.connect(_copy)
+        close_btn = QPushButton(S["close"], dialog)
+        close_btn.clicked.connect(dialog.accept)
+        btns.addWidget(copy_btn)
+        btns.addStretch()
+        btns.addWidget(close_btn)
+        v.addLayout(btns)
         dialog.exec()
 
     def closeEvent(self, event):

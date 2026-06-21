@@ -61,7 +61,9 @@
       "instructions": "&User Instructions",
       "instructions_tip": "Open the instructions file (Readme.txt)",
       "license": "&License",
-      "license_tip": "View the complete software license"
+      "license_tip": "View the complete software license",
+      "cite": "&Cite this software",
+      "cite_tip": "How to cite MatFinder (Zenodo DOI), purpose and contact"
     }
   },
   "search": {

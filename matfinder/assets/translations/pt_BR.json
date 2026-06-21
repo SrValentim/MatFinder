@@ -61,7 +61,9 @@
       "instructions": "&Instruções de uso",
       "instructions_tip": "Abrir o arquivo de instruções (Leiame.txt)",
       "license": "&Licença",
-      "license_tip": "Visualizar a licença completa do software"
+      "license_tip": "Visualizar a licença completa do software",
+      "cite": "&Citar este software",
+      "cite_tip": "Como citar o MatFinder (DOI Zenodo), propósito e contato"
     }
   },
   "search": {
