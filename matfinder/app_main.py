@@ -2970,7 +2970,7 @@ class MaterialsApp(QMainWindow):
         # (O conteúdo desta função permanece o mesmo)
         url_map = {
             "OQMD": f"https://oqmd.org/materials/entry/{material_id}",
-            "Materials Project": f"https://legacy.materialsproject.org/materials/{material_id}",
+            "Materials Project": f"https://next-gen.materialsproject.org/materials/{material_id}",
             "COD": f"https://www.crystallography.net/cod/{material_id}.html",
             "ROD": f"{ROD_ENTRY_BASE_URL}{material_id}.html",
         }
