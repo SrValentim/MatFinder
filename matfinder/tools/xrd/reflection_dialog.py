@@ -11,6 +11,7 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QColor, QIcon
+from matfinder.core.translator import ptr
 
 try:
     from pymatgen.core import Structure
@@ -18,7 +19,7 @@ try:
     PYMATGEN_AVAILABLE = True
 except ImportError:
     PYMATGEN_AVAILABLE = False
-    logging.warning("Pymatgen não disponível para cálculo de reflexões.")
+    logging.warning(ptr("Pymatgen não disponível para cálculo de reflexões."))
 
 
 class ReflectionDialog(QDialog):
@@ -80,12 +81,12 @@ class ReflectionDialog(QDialog):
         # Aba "Condições"
         self.conditions_widget = QWidget()
         self._create_conditions_tab()
-        self.tab_widget.addTab(self.conditions_widget, "Conditions")
+        self.tab_widget.addTab(self.conditions_widget, ptr("Conditions"))
 
         # Aba "Reflexões" (tabela principal)
         self.reflections_widget = QWidget()
         self._create_reflections_tab()
-        self.tab_widget.addTab(self.reflections_widget, "Reflections")
+        self.tab_widget.addTab(self.reflections_widget, ptr("Reflections"))
 
 
         layout.addWidget(self.tab_widget)
@@ -94,7 +95,7 @@ class ReflectionDialog(QDialog):
         button_layout = QHBoxLayout()
         button_layout.addStretch()
 
-        close_button = QPushButton("Fechar")
+        close_button = QPushButton(ptr("Fechar"))
         close_button.clicked.connect(self.accept)
         button_layout.addWidget(close_button)
 

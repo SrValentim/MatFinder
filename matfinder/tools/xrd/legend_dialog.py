@@ -12,6 +12,7 @@ from PySide6.QtGui import QIcon
 import logging
 import sys
 import os
+from matfinder.core.translator import ptr
 
 
 class LegendDialog(QDialog):
@@ -22,7 +23,7 @@ class LegendDialog(QDialog):
 
         self.current_settings = current_settings or self._get_default_settings()
 
-        self.setWindowTitle("Personalizar Legenda")
+        self.setWindowTitle(ptr("Personalizar Legenda"))
         self.setMinimumWidth(500)
         self.setModal(True)
 
@@ -90,9 +91,9 @@ class LegendDialog(QDialog):
             QDialogButtonBox.StandardButton.Ok |
             QDialogButtonBox.StandardButton.Cancel
         )
-        button_box.button(QDialogButtonBox.StandardButton.Apply).setText("Aplicar")
-        button_box.button(QDialogButtonBox.StandardButton.Ok).setText("Aceitar")
-        button_box.button(QDialogButtonBox.StandardButton.Cancel).setText("Cancelar")
+        button_box.button(QDialogButtonBox.StandardButton.Apply).setText(ptr("Aplicar"))
+        button_box.button(QDialogButtonBox.StandardButton.Ok).setText(ptr("Aceitar"))
+        button_box.button(QDialogButtonBox.StandardButton.Cancel).setText(ptr("Cancelar"))
 
         button_box.button(QDialogButtonBox.StandardButton.Apply).clicked.connect(self.apply_settings)
         button_box.accepted.connect(self.accept)
@@ -102,20 +103,20 @@ class LegendDialog(QDialog):
 
     def _create_font_group(self):
         """Cria grupo de configurações de fonte."""
-        group = QGroupBox("Aparência da Fonte")
+        group = QGroupBox(ptr("Aparência da Fonte"))
         layout = QFormLayout(group)
 
         # Tamanho da fonte
         self.fontsize_spin = QSpinBox()
         self.fontsize_spin.setRange(6, 72)
         self.fontsize_spin.setValue(10)
-        self.fontsize_spin.setSuffix(" pt")
+        self.fontsize_spin.setSuffix(ptr(" pt"))
         layout.addRow("Tamanho da Fonte:", self.fontsize_spin)
 
         # Negrito e Itálico
         style_layout = QHBoxLayout()
-        self.bold_check = QCheckBox("Negrito")
-        self.italic_check = QCheckBox("Itálico")
+        self.bold_check = QCheckBox(ptr("Negrito"))
+        self.italic_check = QCheckBox(ptr("Itálico"))
         style_layout.addWidget(self.bold_check)
         style_layout.addWidget(self.italic_check)
         style_layout.addStretch()
@@ -125,11 +126,11 @@ class LegendDialog(QDialog):
 
     def _create_frame_group(self):
         """Cria grupo de configurações de borda."""
-        group = QGroupBox("Borda e Estilo")
+        group = QGroupBox(ptr("Borda e Estilo"))
         layout = QFormLayout(group)
 
         # Mostrar borda
-        self.frameon_check = QCheckBox("Mostrar borda ao redor da legenda")
+        self.frameon_check = QCheckBox(ptr("Mostrar borda ao redor da legenda"))
         self.frameon_check.setChecked(True)
         layout.addRow(self.frameon_check)
 
@@ -142,12 +143,12 @@ class LegendDialog(QDialog):
         layout.addRow("Opacidade da Borda:", self.framealpha_spin)
 
         # Cantos arredondados
-        self.fancybox_check = QCheckBox("Cantos arredondados")
+        self.fancybox_check = QCheckBox(ptr("Cantos arredondados"))
         self.fancybox_check.setChecked(True)
         layout.addRow(self.fancybox_check)
 
         # Sombra
-        self.shadow_check = QCheckBox("Adicionar sombra")
+        self.shadow_check = QCheckBox(ptr("Adicionar sombra"))
         self.shadow_check.setChecked(False)
         layout.addRow(self.shadow_check)
 
@@ -155,7 +156,7 @@ class LegendDialog(QDialog):
 
     def _create_position_group(self):
         """Cria grupo de configurações de posição."""
-        group = QGroupBox("Posição e Comportamento")
+        group = QGroupBox(ptr("Posição e Comportamento"))
         layout = QFormLayout(group)
 
         # Localização
@@ -177,7 +178,7 @@ class LegendDialog(QDialog):
         layout.addRow("Localização Inicial:", self.location_combo)
 
         # Travar posição
-        self.draggable_check = QCheckBox("Permitir mover legenda com o mouse")
+        self.draggable_check = QCheckBox(ptr("Permitir mover legenda com o mouse"))
         self.draggable_check.setChecked(True)
         self.draggable_check.setToolTip(
             "Se ativado, você pode clicar e arrastar a legenda para qualquer posição no gráfico.\n"
@@ -187,14 +188,14 @@ class LegendDialog(QDialog):
 
         # Info sobre arrastar
         info_label = QLabel(
-            "<i>Dica: Com a opção acima ativada, clique e arraste a legenda no gráfico para reposicioná-la.</i>"
+            ptr("<i>Dica: Com a opção acima ativada, clique e arraste a legenda no gráfico para reposicioná-la.</i>")
         )
         info_label.setWordWrap(True)
         info_label.setStyleSheet("color: gray; font-size: 9pt;")
         layout.addRow(info_label)
 
         # Botão para resetar posição customizada
-        self.reset_position_btn = QPushButton("Resetar Posição Customizada")
+        self.reset_position_btn = QPushButton(ptr("Resetar Posição Customizada"))
         self.reset_position_btn.setToolTip(
             "Clique para remover qualquer posição customizada (arrastada) "
             "e usar a localização selecionada acima."
@@ -210,7 +211,7 @@ class LegendDialog(QDialog):
             self.current_settings.pop("bbox_to_anchor")
             QMessageBox.information(
                 self,
-                "Posição Resetada",
+                ptr("Posição Resetada"),
                 "A posição customizada foi removida.\n"
                 "A legenda agora usará a localização selecionada acima.\n\n"
                 "Clique em 'Aplicar' ou 'Aceitar' para ver o resultado."
@@ -219,7 +220,7 @@ class LegendDialog(QDialog):
 
     def _create_layout_group(self):
         """Cria grupo de configurações de layout."""
-        group = QGroupBox("Layout da Legenda")
+        group = QGroupBox(ptr("Layout da Legenda"))
         layout = QFormLayout(group)
 
         # Número de colunas
@@ -234,7 +235,7 @@ class LegendDialog(QDialog):
         layout.addRow("Número de Colunas:", self.ncol_spin)
 
         # Inverter ordem
-        self.reverse_check = QCheckBox("Inverter ordem dos itens")
+        self.reverse_check = QCheckBox(ptr("Inverter ordem dos itens"))
         self.reverse_check.setChecked(False)
         self.reverse_check.setToolTip(
             "Inverte a ordem em que os itens aparecem na legenda.\n"

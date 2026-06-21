@@ -17,13 +17,14 @@ from PySide6.QtCore import Qt, Slot
 from PySide6.QtGui import QIcon
 import pyqtgraph.opengl as gl
 import pyqtgraph as pg
+from matfinder.core.translator import ptr
 
 try:
     from pymatgen.core import Structure
     PYMATGEN_AVAILABLE = True
 except ImportError:
     PYMATGEN_AVAILABLE = False
-    logging.warning("pymatgen não disponível. Instale com: pip install pymatgen")
+    logging.warning(ptr("pymatgen não disponível. Instale com: pip install pymatgen"))
 
 # Importar biblioteca universal de distâncias de ligações
 try:
@@ -32,7 +33,7 @@ try:
     logging.info("✅ Biblioteca de ligações químicas carregada")
 except ImportError:
     BOND_LIBRARY_AVAILABLE = False
-    logging.warning("⚠️  Biblioteca de ligações não disponível - usando fallback genérico")
+    logging.warning(ptr("⚠️  Biblioteca de ligações não disponível - usando fallback genérico"))
 
 
 class StructureViewer3D(QWidget):
@@ -216,7 +217,7 @@ class StructureViewer3D(QWidget):
         control_layout.setContentsMargins(0, 0, 0, 0)
 
         # Label de informações (à esquerda) - clicável para expandir célula
-        self.info_label = QLabel("Nenhuma estrutura carregada")
+        self.info_label = QLabel(ptr("Nenhuma estrutura carregada"))
         self.info_label.setStyleSheet("color: gray; font-style: italic; font-size: 10pt;")
         self.info_label.setCursor(Qt.CursorShape.PointingHandCursor)  # Cursor de mão ao passar
         self.info_label.mouseDoubleClickEvent = self._open_supercell_dialog
@@ -227,7 +228,7 @@ class StructureViewer3D(QWidget):
         # Botão de reset da câmera
         reset_btn = QPushButton("↻")
         reset_btn.setFixedSize(28, 28)
-        reset_btn.setToolTip("Resetar visualização da câmera")
+        reset_btn.setToolTip(ptr("Resetar visualização da câmera"))
         reset_btn.clicked.connect(self._reset_camera)
         control_layout.addWidget(reset_btn)
 
@@ -648,7 +649,7 @@ class StructureViewer3D(QWidget):
         if not PYMATGEN_AVAILABLE:
             QMessageBox.warning(
                 self,
-                "Dependência Ausente",
+                ptr("Dependência Ausente"),
                 "A biblioteca 'pymatgen' não está instalada.\n\n"
                 "Para instalar, execute:\npip install pymatgen"
             )
@@ -697,8 +698,8 @@ class StructureViewer3D(QWidget):
         except Exception as e:
             error_msg = f"Erro ao carregar CIF: {str(e)}"
             logging.error(error_msg)
-            QMessageBox.critical(self, "Erro", error_msg)
-            self.info_label.setText("Erro ao carregar estrutura")
+            QMessageBox.critical(self, ptr("Erro"), error_msg)
+            self.info_label.setText(ptr("Erro ao carregar estrutura"))
             self.info_label.setStyleSheet("color: red;")
 
             # Limpar estrutura em caso de erro
@@ -744,7 +745,7 @@ class StructureViewer3D(QWidget):
 
             # Atualizar label de informações
             if hasattr(self, 'info_label'):
-                self.info_label.setText("Nenhuma estrutura carregada")
+                self.info_label.setText(ptr("Nenhuma estrutura carregada"))
                 self.info_label.setStyleSheet("color: gray; font-style: italic;")
 
             logging.info("✅ Estrutura completamente limpa")
@@ -763,7 +764,7 @@ class StructureViewer3D(QWidget):
                 logging.debug("⚠️ Renderização ignorada: view_widget invisível")
                 return
         except (RuntimeError, AttributeError):
-            logging.warning("⚠️ Renderização ignorada: view_widget destruído")
+            logging.warning(ptr("⚠️ Renderização ignorada: view_widget destruído"))
             return
 
         # Limpar elementos antigos ANTES de renderizar novos
@@ -1885,17 +1886,17 @@ class Viewer3DToolsDialog(QDialog):
     def __init__(self, viewer, parent=None):
         super().__init__(parent)
         self.viewer = viewer
-        self.setWindowTitle("Configurações de Visualização 3D")
+        self.setWindowTitle(ptr("Configurações de Visualização 3D"))
         self.setMinimumWidth(300)
 
         layout = QVBoxLayout(self)
 
         # Tamanho dos átomos
-        size_group = QGroupBox("Tamanho dos Átomos")
+        size_group = QGroupBox(ptr("Tamanho dos Átomos"))
         size_layout = QVBoxLayout(size_group)
 
         size_controls = QHBoxLayout()
-        size_controls.addWidget(QLabel("Escala:"))
+        size_controls.addWidget(QLabel(ptr("Escala:")))
 
         self.size_slider = QSlider(Qt.Orientation.Horizontal)
         self.size_slider.setRange(25, 200)
@@ -1912,21 +1913,21 @@ class Viewer3DToolsDialog(QDialog):
         layout.addWidget(size_group)
 
         # Visibilidade
-        visibility_group = QGroupBox("Visibilidade")
+        visibility_group = QGroupBox(ptr("Visibilidade"))
         visibility_layout = QVBoxLayout(visibility_group)
 
-        self.show_cell_check = QCheckBox("Mostrar Célula Unitária")
+        self.show_cell_check = QCheckBox(ptr("Mostrar Célula Unitária"))
         self.show_cell_check.setChecked(viewer._show_cell)
-        self.show_cell_check.setToolTip("Mostra/oculta as arestas da célula unitária")
+        self.show_cell_check.setToolTip(ptr("Mostra/oculta as arestas da célula unitária"))
         visibility_layout.addWidget(self.show_cell_check)
 
-        self.show_bonds_check = QCheckBox("Mostrar Ligações")
+        self.show_bonds_check = QCheckBox(ptr("Mostrar Ligações"))
         self.show_bonds_check.setChecked(viewer._show_bonds)
-        self.show_bonds_check.setToolTip("Mostra/oculta as ligações químicas entre átomos")
+        self.show_bonds_check.setToolTip(ptr("Mostra/oculta as ligações químicas entre átomos"))
         visibility_layout.addWidget(self.show_bonds_check)
 
         # NOVO: Mesclar células (mostrar apenas caixa externa da supercélula)
-        self.merge_cells_check = QCheckBox("Mesclar Células (Caixa Única)")
+        self.merge_cells_check = QCheckBox(ptr("Mesclar Células (Caixa Única)"))
         self.merge_cells_check.setChecked(getattr(viewer, '_merge_cells', False))
         self.merge_cells_check.setToolTip(
             "Mostra apenas uma caixa englobando toda a supercélula\n"
@@ -1938,11 +1939,11 @@ class Viewer3DToolsDialog(QDialog):
         layout.addWidget(visibility_group)
 
         # Espessura das Ligações
-        bonds_group = QGroupBox("Ligações")
+        bonds_group = QGroupBox(ptr("Ligações"))
         bonds_layout = QVBoxLayout(bonds_group)
 
         bonds_controls = QHBoxLayout()
-        bonds_controls.addWidget(QLabel("Espessura:"))
+        bonds_controls.addWidget(QLabel(ptr("Espessura:")))
 
         # Obter raio atual das ligações (padrão 0.15)
         current_radius = getattr(viewer, 'bond_radius', 0.15)
@@ -1987,8 +1988,8 @@ class Viewer3DToolsDialog(QDialog):
         if not saved_structure:
             QMessageBox.warning(
                 self,
-                "Nenhuma Estrutura",
-                "Não há estrutura carregada para aplicar configurações."
+                ptr("Nenhuma Estrutura"),
+                ptr("Não há estrutura carregada para aplicar configurações.")
             )
             return
 
@@ -2032,7 +2033,7 @@ class Viewer3DToolsDialog(QDialog):
             self.viewer.structure = saved_structure
             QMessageBox.critical(
                 self,
-                "Erro",
+                ptr("Erro"),
                 f"Erro ao aplicar configurações: {e}"
             )
 
@@ -2065,42 +2066,42 @@ class Viewer3DAnimationDialog(QDialog):
     def __init__(self, viewer, parent=None):
         super().__init__(parent)
         self.viewer = viewer
-        self.setWindowTitle("Animações 3D")
+        self.setWindowTitle(ptr("Animações 3D"))
         self.setMinimumWidth(280)
 
         layout = QVBoxLayout(self)
 
         # Rotação Contínua
-        rotation_group = QGroupBox("Rotação Contínua")
+        rotation_group = QGroupBox(ptr("Rotação Contínua"))
         rotation_layout = QVBoxLayout(rotation_group)
 
         # Velocidade de rotação
         speed_layout = QHBoxLayout()
-        speed_layout.addWidget(QLabel("Velocidade:"))
+        speed_layout.addWidget(QLabel(ptr("Velocidade:")))
 
         self.speed_combo = QComboBox()
-        self.speed_combo.addItem(" Lenta", 0.5)      # 0.5 graus/frame
-        self.speed_combo.addItem(" Normal", 1.0)     # 1.0 grau/frame
-        self.speed_combo.addItem(" Rápida", 2.0)     # 2.0 graus/frame
+        self.speed_combo.addItem(ptr(" Lenta"), 0.5)      # 0.5 graus/frame
+        self.speed_combo.addItem(ptr(" Normal"), 1.0)     # 1.0 grau/frame
+        self.speed_combo.addItem(ptr(" Rápida"), 2.0)     # 2.0 graus/frame
         self.speed_combo.setCurrentIndex(1)  # Normal como padrão
         speed_layout.addWidget(self.speed_combo)
 
         rotation_layout.addLayout(speed_layout)
 
-        rot_label = QLabel("Girar em torno do eixo:")
+        rot_label = QLabel(ptr("Girar em torno do eixo:"))
         rotation_layout.addWidget(rot_label)
 
         rot_buttons = QHBoxLayout()
 
-        btn_rot_x = QPushButton("Eixo X")
+        btn_rot_x = QPushButton(ptr("Eixo X"))
         btn_rot_x.clicked.connect(lambda: self._start_rotation('x'))
         rot_buttons.addWidget(btn_rot_x)
 
-        btn_rot_y = QPushButton("Eixo Y")
+        btn_rot_y = QPushButton(ptr("Eixo Y"))
         btn_rot_y.clicked.connect(lambda: self._start_rotation('y'))
         rot_buttons.addWidget(btn_rot_y)
 
-        btn_rot_z = QPushButton("Eixo Z")
+        btn_rot_z = QPushButton(ptr("Eixo Z"))
         btn_rot_z.clicked.connect(lambda: self._start_rotation('z'))
         rot_buttons.addWidget(btn_rot_z)
 
@@ -2108,18 +2109,18 @@ class Viewer3DAnimationDialog(QDialog):
         layout.addWidget(rotation_group)
 
         # Vibração
-        vibration_group = QGroupBox("Vibração Térmica")
+        vibration_group = QGroupBox(ptr("Vibração Térmica"))
         vibration_layout = QVBoxLayout(vibration_group)
 
         vib_controls = QHBoxLayout()
-        vib_controls.addWidget(QLabel("Amplitude:"))
+        vib_controls.addWidget(QLabel(ptr("Amplitude:")))
 
         self.vib_slider = QSlider(Qt.Orientation.Horizontal)
         self.vib_slider.setRange(1, 50)
         self.vib_slider.setValue(10)
         vib_controls.addWidget(self.vib_slider)
 
-        self.vib_label = QLabel("0.10 Å")
+        self.vib_label = QLabel(ptr("0.10 Å"))
         self.vib_label.setMinimumWidth(60)
         vib_controls.addWidget(self.vib_label)
 
@@ -2127,7 +2128,7 @@ class Viewer3DAnimationDialog(QDialog):
 
         vibration_layout.addLayout(vib_controls)
 
-        btn_vibrate = QPushButton("Iniciar Vibração")
+        btn_vibrate = QPushButton(ptr("Iniciar Vibração"))
         btn_vibrate.clicked.connect(self._start_vibration)
         vibration_layout.addWidget(btn_vibrate)
 
@@ -2136,7 +2137,7 @@ class Viewer3DAnimationDialog(QDialog):
         # Controle
         control_layout = QHBoxLayout()
 
-        self.stop_btn = QPushButton("⏹ Parar Animação")
+        self.stop_btn = QPushButton(ptr("⏹ Parar Animação"))
         self.stop_btn.clicked.connect(self._stop_animation)
         control_layout.addWidget(self.stop_btn)
 
@@ -2184,7 +2185,7 @@ class SupercellDialog(QDialog):
         self.current_expansion = list(current_expansion)  # [na, nb, nc]
         self.preview_expansion = list(current_expansion)  # Para preview
 
-        self.setWindowTitle("Expansão Estrutural (Supercélula)")
+        self.setWindowTitle(ptr("Expansão Estrutural (Supercélula)"))
         self.setFixedSize(420, 420)  # Tamanho fixo, não redimensionável
 
         # Configurar ícone
@@ -2213,7 +2214,7 @@ class SupercellDialog(QDialog):
         layout.setContentsMargins(10, 10, 10, 10)
 
         # Configuração atual (compacta)
-        current_group = QGroupBox("Configuração Atual")
+        current_group = QGroupBox(ptr("Configuração Atual"))
         current_layout = QVBoxLayout(current_group)
         current_layout.setContentsMargins(8, 8, 8, 8)
 
@@ -2224,7 +2225,7 @@ class SupercellDialog(QDialog):
         layout.addWidget(current_group)
 
         # Controles de expansão (minimalistas com cores)
-        controls_group = QGroupBox("Expansão Estrutural")
+        controls_group = QGroupBox(ptr("Expansão Estrutural"))
         controls_layout = QVBoxLayout(controls_group)
         controls_layout.setSpacing(5)
         controls_layout.setContentsMargins(8, 8, 8, 8)
@@ -2256,7 +2257,7 @@ class SupercellDialog(QDialog):
         layout.addWidget(controls_group)
 
         # Expansões predefinidas
-        presets_group = QGroupBox("Expansão Predefinida")
+        presets_group = QGroupBox(ptr("Expansão Predefinida"))
         presets_layout = QHBoxLayout(presets_group)
         presets_layout.setContentsMargins(8, 8, 8, 8)
 
@@ -2272,7 +2273,7 @@ class SupercellDialog(QDialog):
         preset_btn3.clicked.connect(lambda: self._apply_preset(3, 3, 3))
         presets_layout.addWidget(preset_btn3)
 
-        reset_btn = QPushButton("Resetar")
+        reset_btn = QPushButton(ptr("Resetar"))
         reset_btn.clicked.connect(self._reset_to_original)
         presets_layout.addWidget(reset_btn)
 

@@ -30,6 +30,7 @@ from .auto_fit import (
     get_real_reflections_from_structure,
     calc_d_spacing, two_theta_from_d
 )
+from matfinder.core.translator import ptr
 
 logger = logging.getLogger(__name__)
 
@@ -58,7 +59,7 @@ class AutoFitDialog(QDialog):
             parent: Widget pai
         """
         super().__init__(parent)
-        self.setWindowTitle("Auto-Ajuste de Parametros de Rede")
+        self.setWindowTitle(ptr("Auto-Ajuste de Parametros de Rede"))
         self.setMinimumSize(950, 700)
         self.setWindowFlags(self.windowFlags() & ~Qt.WindowType.WindowMaximizeButtonHint)
 
@@ -122,17 +123,17 @@ class AutoFitDialog(QDialog):
         controls_layout.setContentsMargins(5, 5, 5, 5)
 
         # --- Detecção ---
-        detect_group = QGroupBox("Detecao de Picos")
+        detect_group = QGroupBox(ptr("Detecao de Picos"))
         detect_layout = QVBoxLayout(detect_group)
 
         # Sensibilidade
         sens_layout = QHBoxLayout()
-        sens_layout.addWidget(QLabel("Sensibilidade:"))
+        sens_layout.addWidget(QLabel(ptr("Sensibilidade:")))
         self.sensitivity_slider = QSlider(Qt.Orientation.Horizontal)
         self.sensitivity_slider.setRange(1, 20)
         self.sensitivity_slider.setValue(5)
         self.sensitivity_slider.setToolTip(
-            "Baixo = menos picos (apenas os maiores)\nAlto = mais picos (inclui menores)")
+            ptr("Baixo = menos picos (apenas os maiores)\nAlto = mais picos (inclui menores)"))
         sens_layout.addWidget(self.sensitivity_slider)
         self.sensitivity_label = QLabel("5")
         self.sensitivity_label.setMinimumWidth(25)
@@ -141,7 +142,7 @@ class AutoFitDialog(QDialog):
 
         # Distância mínima entre picos
         dist_layout = QHBoxLayout()
-        dist_layout.addWidget(QLabel("Dist. min (°):"))
+        dist_layout.addWidget(QLabel(ptr("Dist. min (°):")))
         self.min_dist_spin = QDoubleSpinBox()
         self.min_dist_spin.setRange(0.05, 5.0)
         self.min_dist_spin.setValue(0.3)
@@ -152,30 +153,30 @@ class AutoFitDialog(QDialog):
 
         # Botões de detecção
         detect_btn_layout = QHBoxLayout()
-        self.redetect_btn = QPushButton("Detectar")
+        self.redetect_btn = QPushButton(ptr("Detectar"))
         self.redetect_btn.clicked.connect(self._detect_peaks)
         detect_btn_layout.addWidget(self.redetect_btn)
 
-        self.add_peak_btn = QPushButton("Adicionar")
+        self.add_peak_btn = QPushButton(ptr("Adicionar"))
         self.add_peak_btn.setCheckable(True)
-        self.add_peak_btn.setToolTip("Clique no grafico para adicionar um pico manualmente")
+        self.add_peak_btn.setToolTip(ptr("Clique no grafico para adicionar um pico manualmente"))
         self.add_peak_btn.toggled.connect(self._toggle_add_peak_mode)
         detect_btn_layout.addWidget(self.add_peak_btn)
 
-        self.remove_peak_btn = QPushButton("Remover")
-        self.remove_peak_btn.setToolTip("Remove os picos selecionados da tabela")
+        self.remove_peak_btn = QPushButton(ptr("Remover"))
+        self.remove_peak_btn.setToolTip(ptr("Remove os picos selecionados da tabela"))
         self.remove_peak_btn.clicked.connect(self._remove_selected_peaks)
         detect_btn_layout.addWidget(self.remove_peak_btn)
         detect_layout.addLayout(detect_btn_layout)
 
-        self.peaks_count_label = QLabel("0 picos detectados")
+        self.peaks_count_label = QLabel(ptr("0 picos detectados"))
         self.peaks_count_label.setStyleSheet("color: gray; font-style: italic;")
         detect_layout.addWidget(self.peaks_count_label)
 
         controls_layout.addWidget(detect_group)
 
         # --- Tabela de Picos ---
-        peaks_group = QGroupBox("Picos Selecionados")
+        peaks_group = QGroupBox(ptr("Picos Selecionados"))
         peaks_layout = QVBoxLayout(peaks_group)
         self.peaks_table = QTableWidget()
         self.peaks_table.setColumnCount(3)
@@ -190,11 +191,11 @@ class AutoFitDialog(QDialog):
         controls_layout.addWidget(peaks_group)
 
         # --- Configuração do Ajuste ---
-        fit_group = QGroupBox("Ajuste")
+        fit_group = QGroupBox(ptr("Ajuste"))
         fit_layout = QVBoxLayout(fit_group)
 
         var_layout = QHBoxLayout()
-        var_layout.addWidget(QLabel("Variacao max (%):"))
+        var_layout.addWidget(QLabel(ptr("Variacao max (%):")))
         self.max_var_spin = QDoubleSpinBox()
         self.max_var_spin.setRange(0.5, 20.0)
         self.max_var_spin.setValue(5.0)
@@ -207,7 +208,7 @@ class AutoFitDialog(QDialog):
         var_layout.addWidget(self.max_var_spin)
         fit_layout.addLayout(var_layout)
 
-        self.fit_btn = QPushButton("Ajustar")
+        self.fit_btn = QPushButton(ptr("Ajustar"))
         self.fit_btn.setStyleSheet(
             "QPushButton { background-color: #4CAF50; color: white; "
             "font-weight: bold; padding: 8px; border-radius: 4px; }"
@@ -218,7 +219,7 @@ class AutoFitDialog(QDialog):
         controls_layout.addWidget(fit_group)
 
         # --- Resultados ---
-        result_group = QGroupBox("Resultado")
+        result_group = QGroupBox(ptr("Resultado"))
         result_layout = QVBoxLayout(result_group)
 
         self.result_table = QTableWidget()
@@ -240,12 +241,12 @@ class AutoFitDialog(QDialog):
 
         # --- Botões finais ---
         btn_layout = QHBoxLayout()
-        self.accept_btn = QPushButton("Aceitar")
+        self.accept_btn = QPushButton(ptr("Aceitar"))
         self.accept_btn.setEnabled(False)
         self.accept_btn.clicked.connect(self._accept_result)
         btn_layout.addWidget(self.accept_btn)
 
-        self.cancel_btn = QPushButton("Cancelar")
+        self.cancel_btn = QPushButton(ptr("Cancelar"))
         self.cancel_btn.clicked.connect(self.reject)
         btn_layout.addWidget(self.cancel_btn)
         controls_layout.addLayout(btn_layout)
@@ -426,12 +427,12 @@ class AutoFitDialog(QDialog):
     def _run_fit(self):
         """Executa o auto-ajuste."""
         if not self.detected_peaks:
-            QMessageBox.warning(self, "Sem Picos",
-                                "Detecte ou adicione pelo menos 3 picos para o ajuste.")
+            QMessageBox.warning(self, ptr("Sem Picos"),
+                                ptr("Detecte ou adicione pelo menos 3 picos para o ajuste."))
             return
 
         if len(self.detected_peaks) < 3:
-            QMessageBox.warning(self, "Poucos Picos",
+            QMessageBox.warning(self, ptr("Poucos Picos"),
                                 "Recomenda-se pelo menos 3 picos para um ajuste confiavel.\n"
                                 "Adicione mais picos ou aumente a sensibilidade.")
             return
@@ -451,7 +452,7 @@ class AutoFitDialog(QDialog):
                 cif_handler=self.cif_handler
             )
         except Exception as e:
-            QMessageBox.critical(self, "Erro no Ajuste",
+            QMessageBox.critical(self, ptr("Erro no Ajuste"),
                                  f"Ocorreu um erro durante o ajuste:\n{e}")
             logger.error(f"Erro no auto-ajuste: {e}", exc_info=True)
             return

@@ -27,6 +27,7 @@ except ImportError:
 # --- Integração com Matplotlib para Gráficos ---
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
+from matfinder.core.translator import ptr
 
 # --- ALTERAÇÃO DE REATORAÇÃO: Importações de Módulos Locais ---
 # Os caminhos foram atualizados para refletir a nova estrutura de pacotes
@@ -318,7 +319,7 @@ class CalculadoraProporcaoMassaDialog(QDialog):
                 self, tr('dialogs.error.warning'), tr('calculators.mass_proportion.select_elements_first')
             )
             logging.warning(
-                "Tentativa de cálculo de proporção de massa sem elementos selecionados."
+                ptr("Tentativa de cálculo de proporção de massa sem elementos selecionados.")
             )
             return
 
@@ -370,7 +371,7 @@ class CalculadoraProporcaoMassaDialog(QDialog):
                 tr('calculators.mass_proportion.invalid_proportion'),
             )
             logging.warning(
-                "Erro de valor (ValueError) ao ler proporções na Calculadora de Proporção."
+                ptr("Erro de valor (ValueError) ao ler proporções na Calculadora de Proporção.")
             )
             return
         except Exception as e:
@@ -410,7 +411,7 @@ class CalculadoraProporcaoMassaDialog(QDialog):
                 self, tr('dialogs.error.input_error'), tr('calculators.mass_proportion.invalid_total_mass')
             )
             logging.warning(
-                "Valor numérico inválido (ValueError) para massa total na Calculadora de Proporção."
+                ptr("Valor numérico inválido (ValueError) para massa total na Calculadora de Proporção.")
             )
             return
 
@@ -481,7 +482,7 @@ class BackgroundCorrectionDialog(QDialog):
 
     def __init__(self, x_data, y_data, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("Remoção de Background - PhaseDRX")
+        self.setWindowTitle(ptr("Remoção de Background - PhaseDRX"))
         self.setMinimumSize(1000, 700)
 
         # Import do módulo de background
@@ -499,7 +500,7 @@ class BackgroundCorrectionDialog(QDialog):
                 self.bg_module = background_removal
         except Exception as e:
             logging.error(f"Erro ao importar background_removal: {e}")
-            QMessageBox.critical(self, "Erro",
+            QMessageBox.critical(self, ptr("Erro"),
                                f"Não foi possível carregar o módulo de remoção de background:\n{e}")
             self.bg_module = None
 
@@ -522,12 +523,12 @@ class BackgroundCorrectionDialog(QDialog):
         main_layout.addWidget(self.plot_canvas)
 
         # Controles
-        controls_group = QGroupBox("Configurações de Remoção de Background")
+        controls_group = QGroupBox(ptr("Configurações de Remoção de Background"))
         controls_layout = QVBoxLayout(controls_group)
 
         # Seleção de método
         method_layout = QHBoxLayout()
-        method_layout.addWidget(QLabel("<b>Método:</b>"))
+        method_layout.addWidget(QLabel(ptr("<b>Método:</b>")))
         self.method_combo = QComboBox()
         self.method_combo.addItems([
             "SNIP (Automático)",
@@ -553,9 +554,9 @@ class BackgroundCorrectionDialog(QDialog):
         self.snip_iterations_spin.setValue(40)
         snip_iter_widget = self._create_slider_spinbox(self.snip_iterations_slider, self.snip_iterations_spin)
         snip_layout.addRow("Iterações:", snip_iter_widget)
-        snip_layout.addRow(QLabel("<i>Mais iterações = background mais baixo (20-60 típico)</i>"))
+        snip_layout.addRow(QLabel(ptr("<i>Mais iterações = background mais baixo (20-60 típico)</i>")))
 
-        self.snip_smooth_check = QCheckBox("Aplicar suavização (recomendado para dados ruidosos)")
+        self.snip_smooth_check = QCheckBox(ptr("Aplicar suavização (recomendado para dados ruidosos)"))
         snip_layout.addRow(self.snip_smooth_check)
 
         self.params_stack.addWidget(snip_widget)
@@ -571,7 +572,7 @@ class BackgroundCorrectionDialog(QDialog):
         arpls_lam_widget = self._create_slider_label(self.arpls_lam_slider, self.arpls_lam_label,
                                                      lambda v: f"10^{v/10:.1f} = {10**(v/10):.1e}")
         arpls_layout.addRow("Suavidade (λ):", arpls_lam_widget)
-        arpls_layout.addRow(QLabel("<i>Valores maiores = background mais suave</i>"))
+        arpls_layout.addRow(QLabel(ptr("<i>Valores maiores = background mais suave</i>")))
 
         self.params_stack.addWidget(arpls_widget)
 
@@ -597,8 +598,8 @@ class BackgroundCorrectionDialog(QDialog):
         poly_layout.addWidget(poly_instructions)
 
         poly_buttons_layout = QHBoxLayout()
-        self.poly_clear_button = QPushButton("Limpar Pontos")
-        self.poly_points_label = QLabel("Pontos selecionados: 0")
+        self.poly_clear_button = QPushButton(ptr("Limpar Pontos"))
+        self.poly_points_label = QLabel(ptr("Pontos selecionados: 0"))
         poly_buttons_layout.addWidget(self.poly_clear_button)
         poly_buttons_layout.addWidget(self.poly_points_label)
         poly_buttons_layout.addStretch()
@@ -609,14 +610,14 @@ class BackgroundCorrectionDialog(QDialog):
         controls_layout.addWidget(self.params_stack)
 
         # Opções de visualização
-        viz_group = QGroupBox("Visualização")
+        viz_group = QGroupBox(ptr("Visualização"))
         viz_layout = QVBoxLayout(viz_group)
 
-        self.show_result_check = QCheckBox("Mostrar resultado da subtração (verde)")
+        self.show_result_check = QCheckBox(ptr("Mostrar resultado da subtração (verde)"))
         self.show_result_check.setChecked(True)
         viz_layout.addWidget(self.show_result_check)
 
-        self.show_background_check = QCheckBox("Mostrar background estimado (vermelho)")
+        self.show_background_check = QCheckBox(ptr("Mostrar background estimado (vermelho)"))
         self.show_background_check.setChecked(True)
         viz_layout.addWidget(self.show_background_check)
 
@@ -630,9 +631,9 @@ class BackgroundCorrectionDialog(QDialog):
             | QDialogButtonBox.StandardButton.Cancel
             | QDialogButtonBox.StandardButton.Apply
         )
-        self.button_box.button(QDialogButtonBox.StandardButton.Apply).setText("Aplicar")
-        self.button_box.button(QDialogButtonBox.StandardButton.Ok).setText("OK")
-        self.button_box.button(QDialogButtonBox.StandardButton.Cancel).setText("Cancelar")
+        self.button_box.button(QDialogButtonBox.StandardButton.Apply).setText(ptr("Aplicar"))
+        self.button_box.button(QDialogButtonBox.StandardButton.Ok).setText(ptr("OK"))
+        self.button_box.button(QDialogButtonBox.StandardButton.Cancel).setText(ptr("Cancelar"))
         main_layout.addWidget(self.button_box)
 
     def _create_slider_spinbox(self, slider, spinbox):
@@ -696,7 +697,7 @@ class BackgroundCorrectionDialog(QDialog):
 
         if method_idx == 2:  # Polynomial (manual)
             self.manual_points_x = []
-            self.poly_points_label.setText("Pontos selecionados: 0")
+            self.poly_points_label.setText(ptr("Pontos selecionados: 0"))
 
         self._update_plot()
 
@@ -717,7 +718,7 @@ class BackgroundCorrectionDialog(QDialog):
     def _clear_manual_points(self):
         """Limpa pontos manuais selecionados."""
         self.manual_points_x = []
-        self.poly_points_label.setText("Pontos selecionados: 0")
+        self.poly_points_label.setText(ptr("Pontos selecionados: 0"))
         self._update_plot()
 
     @Slot()
@@ -806,8 +807,8 @@ class BackgroundCorrectionDialog(QDialog):
             self.correction_applied.emit(corrected_y)
             logging.info("Background removido e dados corrigidos aplicados")
         else:
-            QMessageBox.warning(self, "Aviso",
-                              "Nenhum background foi calculado ainda.")
+            QMessageBox.warning(self, ptr("Aviso"),
+                              ptr("Nenhum background foi calculado ainda."))
 
     @Slot()
     def _handle_button_click(self, button):
@@ -831,7 +832,7 @@ class PhaseDRXProjectDialog(QDialog):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("Bem-vindo ao PhaseDRX")
+        self.setWindowTitle(ptr("Bem-vindo ao PhaseDRX"))
         self.setMinimumWidth(450)
         self.choice = self.ANONYMOUS_SESSION
         self.project_name = ""
@@ -841,31 +842,31 @@ class PhaseDRXProjectDialog(QDialog):
     def _init_ui(self):
         main_layout = QVBoxLayout(self)
         main_layout.setSpacing(15)
-        new_project_group = QGroupBox("Novo Projeto")
+        new_project_group = QGroupBox(ptr("Novo Projeto"))
         new_project_layout = QFormLayout(new_project_group)
         new_project_layout.setSpacing(10)
         self.project_name_edit = QLineEdit()
-        self.project_name_edit.setPlaceholderText("Ex: Analise_Amostra_X")
+        self.project_name_edit.setPlaceholderText(ptr("Ex: Analise_Amostra_X"))
         new_project_layout.addRow("Nome do Projeto:", self.project_name_edit)
         path_layout = QHBoxLayout()
         self.project_path_edit = QLineEdit()
         self.project_path_edit.setReadOnly(True)
         default_docs_path = QStandardPaths.writableLocation(QStandardPaths.StandardLocation.DocumentsLocation)
         self.project_path_edit.setText(default_docs_path)
-        browse_button = QPushButton("Procurar...")
+        browse_button = QPushButton(ptr("Procurar..."))
         browse_button.clicked.connect(self._browse_project_path)
         path_layout.addWidget(self.project_path_edit)
         path_layout.addWidget(browse_button)
         new_project_layout.addRow("Salvar em:", path_layout)
-        create_button = QPushButton("Criar Novo Projeto")
+        create_button = QPushButton(ptr("Criar Novo Projeto"))
         create_button.setStyleSheet("font-weight: bold; padding: 5px;")
         create_button.clicked.connect(self._on_create_clicked)
         new_project_layout.addRow(create_button)
         main_layout.addWidget(new_project_group)
         other_options_layout = QHBoxLayout()
-        open_button = QPushButton("Abrir Projeto Existente...")
+        open_button = QPushButton(ptr("Abrir Projeto Existente..."))
         open_button.clicked.connect(self._on_open_clicked)
-        anonymous_button = QPushButton("Continuar em Sessão Anônima")
+        anonymous_button = QPushButton(ptr("Continuar em Sessão Anônima"))
         anonymous_button.clicked.connect(self._on_anonymous_clicked)
         other_options_layout.addWidget(open_button)
         other_options_layout.addWidget(anonymous_button)
@@ -884,17 +885,17 @@ class PhaseDRXProjectDialog(QDialog):
         name = self.project_name_edit.text().strip()
         path = self.project_path_edit.text().strip()
         if not name:
-            QMessageBox.warning(self, "Nome Inválido", "Por favor, insira um nome para o projeto.")
+            QMessageBox.warning(self, ptr("Nome Inválido"), ptr("Por favor, insira um nome para o projeto."))
             return
         invalid_chars = r'[\\/:"*?<>|]'
         if any(c in invalid_chars for c in name):
-            QMessageBox.warning(self, "Nome Inválido",
+            QMessageBox.warning(self, ptr("Nome Inválido"),
                                 "O nome do projeto não pode conter os seguintes caracteres:\n"
                                 f'\\ / : * ? " < > |')
             return
         if not path or not os.path.isdir(path):
-            QMessageBox.warning(self, "Caminho Inválido",
-                                "Por favor, selecione uma pasta válida para salvar o projeto.")
+            QMessageBox.warning(self, ptr("Caminho Inválido"),
+                                ptr("Por favor, selecione uma pasta válida para salvar o projeto."))
             return
         self.choice = self.NEW_PROJECT
         self.project_name = name
@@ -913,7 +914,7 @@ class PhaseDRXProjectDialog(QDialog):
 class GplLicenseDialog(QDialog):
     def __init__(self, license_text: str, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("Licença - GNU GPL v3")
+        self.setWindowTitle(ptr("Licença - GNU GPL v3"))
         self.setWindowFlags(
             self.windowFlags()
             & ~Qt.WindowType.WindowMaximizeButtonHint

@@ -229,7 +229,49 @@ def main():
     sys.exit(app.exec())
 
 
+def _run_phasedrx():
+    """Abre o PhaseDRX como app separado (PhaseDRX Suite): MatFinder.exe --phasedrx.
+    Mesmo fluxo da ferramenta no MatFinder (diálogo Novo/Abrir), com splash da logo."""
+    from PySide6.QtGui import QIcon
+    app = QApplication(sys.argv)
+    icon_png = resource_path(os.path.join("matfinder", "assets", "logos", "PhaseDRX.png"))
+    if os.path.exists(icon_png):
+        app.setWindowIcon(QIcon(icon_png))
+
+    lock = QLockFile(os.path.join(tempfile.gettempdir(), "phasedrx_suite.lock"))
+    if not lock.tryLock(100):
+        QMessageBox.warning(None, "PhaseDRX Suite",
+                            "O PhaseDRX Suite já está em execução.")
+        return 0
+
+    splash = None
+    try:
+        if os.path.exists(icon_png):
+            pix = QPixmap(icon_png)
+            if not pix.isNull():
+                pix = pix.scaled(QSize(420, 300), Qt.AspectRatioMode.KeepAspectRatio,
+                                 Qt.TransformationMode.SmoothTransformation)
+                splash = QSplashScreen(pix, Qt.WindowType.WindowStaysOnTopHint)
+                splash.show()
+                app.processEvents()
+    except Exception as e:
+        logging.error(f"Falha no splash do PhaseDRX: {e}")
+
+    from matfinder.phasedrx_launcher import open_phasedrx
+    tool = open_phasedrx(parent=None)
+    if tool is None:
+        if splash:
+            splash.close()
+        return 0
+    tool.show()
+    if splash:
+        splash.finish(tool)
+    return app.exec()
+
+
 if __name__ == "__main__":
     if "--selftest" in sys.argv:
         sys.exit(_selftest())
+    if "--phasedrx" in sys.argv:
+        sys.exit(_run_phasedrx())
     main()

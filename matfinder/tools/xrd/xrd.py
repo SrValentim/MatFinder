@@ -20,7 +20,7 @@ try:
     PIL_AVAILABLE = True
 except ImportError:
     PIL_AVAILABLE = False
-    logging.warning("PIL/Pillow não disponível. Marca d'água pode não funcionar corretamente.")
+    logging.warning(ptr("PIL/Pillow não disponível. Marca d'água pode não funcionar corretamente."))
 from PySide6.QtWidgets import (
     QApplication, QMainWindow, QDialog, QVBoxLayout, QHBoxLayout, QPushButton,
     QTableWidget, QTableWidgetItem, QFileDialog, QMenu,
@@ -39,6 +39,7 @@ from matplotlib.ticker import MultipleLocator, MaxNLocator
 from matplotlib.widgets import RectangleSelector
 import matplotlib.cm as cm
 import matplotlib.image as mpimg
+from matfinder.core.translator import ptr
 
 # --- Importação para Exportar para Origin ---
 try:
@@ -46,7 +47,7 @@ try:
     OPENPYXL_AVAILABLE = True
 except ImportError:
     OPENPYXL_AVAILABLE = False
-    logging.warning("AVISO: Biblioteca 'openpyxl' não encontrada. A exportação para Origin (.xlsx) não funcionará.")
+    logging.warning(ptr("AVISO: Biblioteca 'openpyxl' não encontrada. A exportação para Origin (.xlsx) não funcionará."))
 
 
 # --- Dependências para Cálculo de DRX ---
@@ -57,7 +58,7 @@ try:
     PYMATGEN_AVAILABLE = True
 except ImportError:
     PYMATGEN_AVAILABLE = False
-    logging.warning("AVISO CRÍTICO: Biblioteca 'pymatgen' não encontrada. A simulação de DRX não funcionará.")
+    logging.warning(ptr("AVISO CRÍTICO: Biblioteca 'pymatgen' não encontrada. A simulação de DRX não funcionará."))
 
 try:
     import pyobjcryst
@@ -65,7 +66,7 @@ try:
     PYOBJCRYST_AVAILABLE = True
 except ImportError:
     PYOBJCRYST_AVAILABLE = False
-    logging.warning("AVISO: Biblioteca 'pyobjcryst' não encontrada. Usando 'pymatgen' como alternativa para simulação.")
+    logging.warning(ptr("AVISO: Biblioteca 'pyobjcryst' não encontrada. Usando 'pymatgen' como alternativa para simulação."))
 
 
 # --- ALTERAÇÃO DE REATORAÇÃO: Importação de Módulos Locais ---
@@ -335,7 +336,7 @@ class PhaseDRXTool(QMainWindow):
         }
 
     def _init_ui(self):
-        self.setWindowTitle("PhaseDRX")
+        self.setWindowTitle(ptr("PhaseDRX"))
         self._create_menu_bar()
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
@@ -356,11 +357,11 @@ class PhaseDRXTool(QMainWindow):
 
         self.exp_tab = QWidget()
         self._create_experimental_tab()
-        self.tab_widget.addTab(self.exp_tab, "Dados Experimentais")
+        self.tab_widget.addTab(self.exp_tab, ptr("Dados Experimentais"))
 
         self.sim_tab = QWidget()
         self._create_simulation_tab()
-        self.tab_widget.addTab(self.sim_tab, "Simulação Teórica (de CIF)")
+        self.tab_widget.addTab(self.sim_tab, ptr("Simulação Teórica (de CIF)"))
 
         self.main_splitter.addWidget(control_widget)
 
@@ -375,18 +376,18 @@ class PhaseDRXTool(QMainWindow):
         # Botão de toggle do splitter (expandir/recolher painel de controle)
         self.toggle_splitter_button = QPushButton("◀")
         self.toggle_splitter_button.setFixedSize(24, 24)
-        self.toggle_splitter_button.setToolTip("Expandir/Recolher painel de controle")
+        self.toggle_splitter_button.setToolTip(ptr("Expandir/Recolher painel de controle"))
         self.toggle_splitter_button.clicked.connect(self._toggle_splitter)
         action_button_layout.addWidget(self.toggle_splitter_button)
 
-        self.undo_button = QPushButton("◀ Desfazer")
-        self.redo_button = QPushButton("Refazer ▶")
+        self.undo_button = QPushButton(ptr("◀ Desfazer"))
+        self.redo_button = QPushButton(ptr("Refazer ▶"))
         action_button_layout.addWidget(self.undo_button)
         action_button_layout.addWidget(self.redo_button)
         action_button_layout.addStretch()
 
         self.edit_item_button = QPushButton("⚙️")
-        self.edit_item_button.setToolTip("Editar parâmetros do item selecionado")
+        self.edit_item_button.setToolTip(ptr("Editar parâmetros do item selecionado"))
         self.edit_item_button.setFixedSize(32, 32)
         self.edit_item_button.setEnabled(False)
         action_button_layout.addWidget(self.edit_item_button)
@@ -394,8 +395,8 @@ class PhaseDRXTool(QMainWindow):
         # Botão de detectar picos removido da interface (funcionalidade mantida no backend)
         # self.peak_detect_button = QPushButton("Detectar Picos")
         # Botão Smooth movido para "Controles dos Dados Experimentais"
-        self.save_plot_button = QPushButton("Salvar Gráfico...")
-        self.customize_plot_button = QPushButton("Personalizar Gráfico")
+        self.save_plot_button = QPushButton(ptr("Salvar Gráfico..."))
+        self.customize_plot_button = QPushButton(ptr("Personalizar Gráfico"))
         # action_button_layout.addWidget(self.peak_detect_button)
         action_button_layout.addWidget(self.save_plot_button)
         action_button_layout.addWidget(self.customize_plot_button)
@@ -410,7 +411,7 @@ class PhaseDRXTool(QMainWindow):
         plot_2d_layout.setContentsMargins(0, 0, 0, 0)
         self.plot_canvas = PlotCanvas(self, width=8, height=6)
         plot_2d_layout.addWidget(self.plot_canvas)
-        self.plot_tab_widget.addTab(plot_2d_widget, "Difratograma (2D)")
+        self.plot_tab_widget.addTab(plot_2d_widget, ptr("Difratograma (2D)"))
 
         # Aba do visualizador 3D
         try:
@@ -431,28 +432,28 @@ class PhaseDRXTool(QMainWindow):
             # Botão de Ferramentas (configurações de visualização)
             self._tools_3d_button = QPushButton("⚙️")
             self._tools_3d_button.setFixedSize(32, 28)
-            self._tools_3d_button.setToolTip("Configurações de visualização (tamanho dos átomos, célula unitária, etc.)")
+            self._tools_3d_button.setToolTip(ptr("Configurações de visualização (tamanho dos átomos, célula unitária, etc.)"))
             self._tools_3d_button.clicked.connect(self._open_3d_tools_dialog)
             render_button_layout.addWidget(self._tools_3d_button)
 
             # Botão Renderizar
-            self._render_3d_button = QPushButton("🔄 Renderizar")
+            self._render_3d_button = QPushButton(ptr("🔄 Renderizar"))
             self._render_3d_button.setMaximumWidth(120)
             self._render_3d_button.setEnabled(False)
-            self._render_3d_button.setToolTip("Atualizar visualização 3D com modificações")
+            self._render_3d_button.setToolTip(ptr("Atualizar visualização 3D com modificações"))
             self._render_3d_button.clicked.connect(self._render_3d_structure)
             render_button_layout.addWidget(self._render_3d_button)
 
             # Botão de Animação
             self._animate_3d_button = QPushButton("▶️")
             self._animate_3d_button.setFixedSize(32, 28)
-            self._animate_3d_button.setToolTip("Animações (rotação 360°, vibração)")
+            self._animate_3d_button.setToolTip(ptr("Animações (rotação 360°, vibração)"))
             self._animate_3d_button.clicked.connect(self._open_animation_dialog)
             render_button_layout.addWidget(self._animate_3d_button)
 
             viewer_3d_layout.addLayout(render_button_layout)
 
-            self.plot_tab_widget.addTab(viewer_3d_widget, "Estrutura Cristalina (3D)")
+            self.plot_tab_widget.addTab(viewer_3d_widget, ptr("Estrutura Cristalina (3D)"))
             logging.info("Visualizador 3D criado com sucesso!")
         except ImportError as e:
             logging.error(f"Erro de importação ao criar visualizador 3D: {e}")
@@ -481,19 +482,19 @@ class PhaseDRXTool(QMainWindow):
     def _create_menu_bar(self):
         menubar = self.menuBar()
         file_menu = menubar.addMenu("&Arquivo")
-        new_action = QAction("&Novo Projeto...", self, triggered=self.new_project)
-        open_action = QAction("&Abrir Projeto...", self, triggered=self.open_project)
-        save_action = QAction("&Salvar Projeto", self, triggered=self.save_project)
-        save_as_action = QAction("Salvar Projeto &Como...", self, triggered=lambda: self.save_project(save_as=True))
+        new_action = QAction(ptr("&Novo Projeto..."), self, triggered=self.new_project)
+        open_action = QAction(ptr("&Abrir Projeto..."), self, triggered=self.open_project)
+        save_action = QAction(ptr("&Salvar Projeto"), self, triggered=self.save_project)
+        save_as_action = QAction(ptr("Salvar Projeto &Como..."), self, triggered=lambda: self.save_project(save_as=True))
         
         # --- ALTERAÇÃO DE FUNCIONALIDADE: Adicionar Exportar para Origin ---
-        export_origin_action = QAction("Exportar (.xlsx)...", self, triggered=self.export_to_xlsx_for_origin)
+        export_origin_action = QAction(ptr("Exportar (.xlsx)..."), self, triggered=self.export_to_xlsx_for_origin)
         if not OPENPYXL_AVAILABLE:
             export_origin_action.setEnabled(False)
-            export_origin_action.setToolTip("Instale 'openpyxl' para usar esta função")
+            export_origin_action.setToolTip(ptr("Instale 'openpyxl' para usar esta função"))
         # --- FIM DA ALTERAÇÃO ---
 
-        exit_action = QAction("&Sair", self, triggered=self.close)
+        exit_action = QAction(ptr("&Sair"), self, triggered=self.close)
         
         file_menu.addActions([new_action, open_action, save_action, save_as_action])
         file_menu.addSeparator()
@@ -507,11 +508,11 @@ class PhaseDRXTool(QMainWindow):
 
     def _create_experimental_tab(self):
         layout = QVBoxLayout(self.exp_tab)
-        load_group = QGroupBox("Controles dos Dados Experimentais")
+        load_group = QGroupBox(ptr("Controles dos Dados Experimentais"))
         load_layout = QVBoxLayout(load_group)
-        self.load_button = QPushButton("Carregar Arquivo(s) Exp...")
-        self.normalize_button = QPushButton("Normalização...")
-        self.smooth_plot_button = QPushButton("Smooth")
+        self.load_button = QPushButton(ptr("Carregar Arquivo(s) Exp..."))
+        self.normalize_button = QPushButton(ptr("Normalização..."))
+        self.smooth_plot_button = QPushButton(ptr("Smooth"))
 
         load_controls_layout = QHBoxLayout()
         load_controls_layout.addWidget(self.load_button)
@@ -520,13 +521,13 @@ class PhaseDRXTool(QMainWindow):
         load_layout.addLayout(load_controls_layout)
 
         analysis_buttons_layout = QHBoxLayout()
-        self.remove_background_button = QPushButton("Remover Fundo...")
+        self.remove_background_button = QPushButton(ptr("Remover Fundo..."))
 
         # --- NOVO BOTÃO WAVELET ---
-        self.denoise_wavelet_button = QPushButton("Redução de Ruído (Wavelet)")
+        self.denoise_wavelet_button = QPushButton(ptr("Redução de Ruído (Wavelet)"))
         if not PYWAVELETS_AVAILABLE:
             self.denoise_wavelet_button.setEnabled(False)
-            self.denoise_wavelet_button.setToolTip("Instale a biblioteca 'PyWavelets' para usar esta função.")
+            self.denoise_wavelet_button.setToolTip(ptr("Instale a biblioteca 'PyWavelets' para usar esta função."))
 
         analysis_buttons_layout.addStretch()
         analysis_buttons_layout.addWidget(self.remove_background_button)
@@ -536,7 +537,7 @@ class PhaseDRXTool(QMainWindow):
 
         layout.addWidget(load_group)
         exp_splitter = QSplitter(Qt.Orientation.Vertical)
-        exp_list_group = QGroupBox("Arquivos Experimentais Carregados")
+        exp_list_group = QGroupBox(ptr("Arquivos Experimentais Carregados"))
         exp_list_layout = QVBoxLayout(exp_list_group)
         self.exp_list_widget = QListWidget()
         self.exp_list_widget.setDragDropMode(QAbstractItemView.DragDropMode.InternalMove)
@@ -544,10 +545,10 @@ class PhaseDRXTool(QMainWindow):
         self.exp_list_widget.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
         exp_list_layout.addWidget(self.exp_list_widget)
         exp_splitter.addWidget(exp_list_group)
-        group_config_group = QGroupBox("Configuração de Grupos")
+        group_config_group = QGroupBox(ptr("Configuração de Grupos"))
         group_config_layout = QVBoxLayout(group_config_group)
         group_count_layout = QHBoxLayout()
-        group_count_layout.addWidget(QLabel("Número de Grupos:"))
+        group_count_layout.addWidget(QLabel(ptr("Número de Grupos:")))
         self.num_groups_spin = QSpinBox()
         self.num_groups_spin.setRange(1, 20)
         self.num_groups_spin.setValue(1)
@@ -568,7 +569,7 @@ class PhaseDRXTool(QMainWindow):
 
     def _create_simulation_tab(self):
         layout = QHBoxLayout(self.sim_tab)
-        cif_list_group = QGroupBox("Arquivos CIF Carregados")
+        cif_list_group = QGroupBox(ptr("Arquivos CIF Carregados"))
         cif_list_layout = QVBoxLayout(cif_list_group)
         self.cif_list_widget = QListWidget()
         self.cif_list_widget.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
@@ -576,10 +577,10 @@ class PhaseDRXTool(QMainWindow):
         self.cif_list_widget.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
         cif_list_layout.addWidget(self.cif_list_widget)
         layout.addWidget(cif_list_group, 1)
-        params_group = QGroupBox("Parâmetros da Simulação")
+        params_group = QGroupBox(ptr("Parâmetros da Simulação"))
         params_layout = QVBoxLayout(params_group)
         form_layout = QFormLayout()
-        self.cif_load_button = QPushButton("Carregar Arquivo(s) CIF...")
+        self.cif_load_button = QPushButton(ptr("Carregar Arquivo(s) CIF..."))
         form_layout.addRow(self.cif_load_button)
         self.wavelength_combo = QComboBox()
         self.wavelength_combo.addItems(
@@ -601,7 +602,7 @@ class PhaseDRXTool(QMainWindow):
         self.peak_width_spin.setDecimals(3);
         self.peak_width_spin.setValue(0.120)
         self.peak_width_spin.setSuffix(" °")
-        self.peak_width_label = QLabel("Largura do Pico (FWHM):")
+        self.peak_width_label = QLabel(ptr("Largura do Pico (FWHM):"))
         form_layout.addRow(self.peak_width_label, self.peak_width_spin)
         if self.simulation_engine != "pyobjcryst":
             self.peak_width_label.setVisible(False)
@@ -610,10 +611,10 @@ class PhaseDRXTool(QMainWindow):
         params_layout.addStretch()
 
         action_buttons_layout = QHBoxLayout()
-        self.combine_phases_button = QPushButton("Combinação Multifásica")
+        self.combine_phases_button = QPushButton(ptr("Combinação Multifásica"))
         action_buttons_layout.addWidget(self.combine_phases_button)
         action_buttons_layout.addStretch()
-        self.calculate_sim_button = QPushButton("Calcular Selecionado(s)")
+        self.calculate_sim_button = QPushButton(ptr("Calcular Selecionado(s)"))
         action_buttons_layout.addWidget(self.calculate_sim_button)
         params_layout.addLayout(action_buttons_layout)
 
@@ -661,8 +662,8 @@ class PhaseDRXTool(QMainWindow):
         """Abre o diálogo de redução de ruído por wavelet para o item selecionado."""
         selected_items = self.exp_list_widget.selectedItems()
         if len(selected_items) != 1:
-            QMessageBox.warning(self, "Seleção Inválida",
-                                "Por favor, selecione um único arquivo experimental para a redução de ruído.")
+            QMessageBox.warning(self, ptr("Seleção Inválida"),
+                                ptr("Por favor, selecione um único arquivo experimental para a redução de ruído."))
             return
 
         list_item = selected_items[0]
@@ -670,7 +671,7 @@ class PhaseDRXTool(QMainWindow):
         plot_item = self._find_plot_item_by_id(item_id)
 
         if not plot_item or plot_item.get("data") is None:
-            QMessageBox.critical(self, "Erro de Dados", "O item selecionado não contém dados válidos.")
+            QMessageBox.critical(self, ptr("Erro de Dados"), ptr("O item selecionado não contém dados válidos."))
             return
 
         x_data, y_data = plot_item["data"]
@@ -709,8 +710,8 @@ class PhaseDRXTool(QMainWindow):
         """Abre o diálogo de remoção de fundo para o item experimental selecionado."""
         selected_items = self.exp_list_widget.selectedItems()
         if len(selected_items) != 1:
-            QMessageBox.warning(self, "Seleção Inválida",
-                                "Por favor, selecione um único arquivo experimental para remover o fundo.")
+            QMessageBox.warning(self, ptr("Seleção Inválida"),
+                                ptr("Por favor, selecione um único arquivo experimental para remover o fundo."))
             return
 
         list_item = selected_items[0]
@@ -718,11 +719,11 @@ class PhaseDRXTool(QMainWindow):
         plot_item = self._find_plot_item_by_id(item_id)
 
         if not plot_item or plot_item.get("data") is None:
-            QMessageBox.critical(self, "Erro de Dados", "O item selecionado não contém dados válidos.")
+            QMessageBox.critical(self, ptr("Erro de Dados"), ptr("O item selecionado não contém dados válidos."))
             return
 
         if plot_item.get("background_corrected", False):
-            reply = QMessageBox.question(self, "Refazer Correção",
+            reply = QMessageBox.question(self, ptr("Refazer Correção"),
                                          "O fundo deste item já foi corrigido. Deseja refazer a operação?\n"
                                          "(Isto usará os dados originais novamente)",
                                          QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
@@ -768,7 +769,7 @@ class PhaseDRXTool(QMainWindow):
     def open_item_editor(self):
         selected_items = self.cif_list_widget.selectedItems()
         if len(selected_items) != 1:
-            QMessageBox.warning(self, "Seleção Inválida", "Por favor, selecione um único item para editar.")
+            QMessageBox.warning(self, ptr("Seleção Inválida"), ptr("Por favor, selecione um único item para editar."))
             return
 
         item_id = selected_items[0].data(Qt.ItemDataRole.UserRole)
@@ -787,7 +788,7 @@ class PhaseDRXTool(QMainWindow):
             pattern = calculator.get_pattern(structure, two_theta_range=(0, self.max_2theta_spin.value()))
             initial_peaks = pattern.x
         except Exception as e:
-            QMessageBox.critical(self, "Erro ao Analisar CIF",
+            QMessageBox.critical(self, ptr("Erro ao Analisar CIF"),
                                  f"Não foi possível detectar os picos do CIF inicial:\n{e}")
             initial_peaks = []
 
@@ -890,17 +891,17 @@ class PhaseDRXTool(QMainWindow):
                           for it in self.cif_list_widget.selectedItems()]
 
         if len(selected_items) < 2:
-            QMessageBox.warning(self, "Seleção Insuficiente",
-                                "Selecione pelo menos dois CIFs para criar uma combinação.")
+            QMessageBox.warning(self, ptr("Seleção Insuficiente"),
+                                ptr("Selecione pelo menos dois CIFs para criar uma combinação."))
             return
 
         for item in selected_items:
             if item.get("type") != "cif":
-                QMessageBox.critical(self, "Seleção Inválida",
+                QMessageBox.critical(self, ptr("Seleção Inválida"),
                                      f"O item '{item['label']}' não é um CIF e não pode ser combinado.")
                 return
             if item.get("data") is None:
-                QMessageBox.critical(self, "Simulação Necessária",
+                QMessageBox.critical(self, ptr("Simulação Necessária"),
                                      f"O CIF '{item['label']}' ainda não foi simulado.\n"
                                      "Por favor, calcule todos os CIFs selecionados antes de combinar.")
                 return
@@ -1002,7 +1003,7 @@ class PhaseDRXTool(QMainWindow):
         visibility_button = QPushButton("👁️" if item_data.get("visible", True) else "⚪")
         visibility_button.setFlat(True)
         visibility_button.setFixedSize(24, 24)
-        visibility_button.setToolTip("Ocultar/Mostrar no gráfico")
+        visibility_button.setToolTip(ptr("Ocultar/Mostrar no gráfico"))
         visibility_button.clicked.connect(lambda: self._toggle_item_visibility(item_data["id"]))
 
         label_text = item_data["label"]
@@ -1142,7 +1143,7 @@ class PhaseDRXTool(QMainWindow):
             # Expandir - voltar ao tamanho original
             self.main_splitter.setSizes(self._splitter_original_sizes)
             self.toggle_splitter_button.setText("◀")
-            self.toggle_splitter_button.setToolTip("Recolher painel de controle")
+            self.toggle_splitter_button.setToolTip(ptr("Recolher painel de controle"))
             self._splitter_collapsed = False
         else:
             # Recolher - salvar tamanho atual e colapsar
@@ -1151,7 +1152,7 @@ class PhaseDRXTool(QMainWindow):
             total_width = sum(self._splitter_original_sizes)
             self.main_splitter.setSizes([0, total_width])
             self.toggle_splitter_button.setText("▶")
-            self.toggle_splitter_button.setToolTip("Expandir painel de controle")
+            self.toggle_splitter_button.setToolTip(ptr("Expandir painel de controle"))
             self._splitter_collapsed = True
 
     def _on_zoom_press(self, event):
@@ -1598,7 +1599,7 @@ class PhaseDRXTool(QMainWindow):
 
             if os.path.exists(project_dir):
                 reply = QMessageBox.question(
-                    self, "Pasta Existente",
+                    self, ptr("Pasta Existente"),
                     f"A pasta '{project_dir}' já existe.\n"
                     "Deseja abri-la como um projeto existente?",
                     QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
@@ -1608,7 +1609,7 @@ class PhaseDRXTool(QMainWindow):
                     return
                 if not os.path.exists(project_file):
                     QMessageBox.warning(
-                        self, "Arquivo de Projeto Não Encontrado",
+                        self, ptr("Arquivo de Projeto Não Encontrado"),
                         f"A pasta existe, mas o arquivo de projeto '{project_file}' não foi encontrado."
                     )
                     return
@@ -1623,7 +1624,7 @@ class PhaseDRXTool(QMainWindow):
                     logging.info(f"Nova estrutura de projeto criada em: {project_dir}")
                 except OSError as e:
                     QMessageBox.critical(
-                        self, "Erro ao Criar Projeto",
+                        self, ptr("Erro ao Criar Projeto"),
                         f"Não foi possível criar a estrutura de pastas do projeto:\n{e}"
                     )
                     return
@@ -1751,7 +1752,7 @@ class PhaseDRXTool(QMainWindow):
                 self.project_directory = os.path.dirname(path)
                 self.set_dirty(False)
             except Exception as e:
-                QMessageBox.critical(self, "Erro ao Abrir", f"Não foi possível carregar o arquivo de projeto:\n{e}")
+                QMessageBox.critical(self, ptr("Erro ao Abrir"), f"Não foi possível carregar o arquivo de projeto:\n{e}")
                 logging.exception("Erro crítico ao abrir projeto:")
 
     def save_project(self, save_as=False):
@@ -1833,16 +1834,16 @@ class PhaseDRXTool(QMainWindow):
 
             self.current_project_path = path
             self.set_dirty(False)
-            QMessageBox.information(self, "Projeto Salvo", f"Projeto salvo com sucesso em:\n{path}")
+            QMessageBox.information(self, ptr("Projeto Salvo"), f"Projeto salvo com sucesso em:\n{path}")
             return True
         except Exception as e:
-            QMessageBox.critical(self, "Erro ao Salvar", f"Não foi possível salvar o arquivo de projeto:\n{e}")
+            QMessageBox.critical(self, ptr("Erro ao Salvar"), f"Não foi possível salvar o arquivo de projeto:\n{e}")
             logging.exception("Erro crítico ao salvar projeto:")
             return False
 
     def maybe_save(self):
         if not self.is_dirty: return True
-        ret = QMessageBox.warning(self, "PhaseDRX", "Deseja salvar as suas alterações no projeto?",
+        ret = QMessageBox.warning(self, ptr("PhaseDRX"), ptr("Deseja salvar as suas alterações no projeto?"),
                                   QMessageBox.StandardButton.Save | QMessageBox.StandardButton.Discard | QMessageBox.StandardButton.Cancel)
         if ret == QMessageBox.StandardButton.Save:
             return self.save_project()
@@ -1956,7 +1957,7 @@ class PhaseDRXTool(QMainWindow):
                 }
                 self.plot_items.append(new_item)
             except Exception as e:
-                QMessageBox.critical(self, "Erro ao Ler Arquivo",
+                QMessageBox.critical(self, ptr("Erro ao Ler Arquivo"),
                                      f"Não foi possível processar o arquivo {os.path.basename(path)}:\n{e}")
 
         self._repopulate_all_lists()
@@ -2001,7 +2002,7 @@ class PhaseDRXTool(QMainWindow):
                 }
                 self.plot_items.append(new_item)
             except Exception as e:
-                QMessageBox.critical(self, "Erro ao Carregar CIF",
+                QMessageBox.critical(self, ptr("Erro ao Carregar CIF"),
                                      f"Não foi possível carregar ou processar o arquivo '{os.path.basename(path)}'.\n\nErro: {e}")
 
         self._repopulate_all_lists()
@@ -2009,12 +2010,12 @@ class PhaseDRXTool(QMainWindow):
 
     def load_cif_from_data(self, cif_content: str, filename: str):
         if not PYMATGEN_AVAILABLE:
-            QMessageBox.critical(self, "Dependência Faltando",
-                                 "A biblioteca 'pymatgen' é necessária para processar arquivos CIF.")
+            QMessageBox.critical(self, ptr("Dependência Faltando"),
+                                 ptr("A biblioteca 'pymatgen' é necessária para processar arquivos CIF."))
             return
 
         if any(c["label"] == filename for c in self.plot_items):
-            QMessageBox.information(self, "CIF Já Carregado", f"O arquivo CIF '{filename}' já está na lista.")
+            QMessageBox.information(self, ptr("CIF Já Carregado"), f"O arquivo CIF '{filename}' já está na lista.")
             return
 
         self._add_state_to_history()
@@ -2046,7 +2047,7 @@ class PhaseDRXTool(QMainWindow):
             self.raise_()
             self.set_dirty()
         except Exception as e:
-            QMessageBox.critical(self, "Erro no CIF",
+            QMessageBox.critical(self, ptr("Erro no CIF"),
                                  f"O conteúdo do CIF recebido para '{filename}' é inválido.\n\nErro: {e}")
 
     def _parse_data_file(self, file_path):
@@ -2069,8 +2070,8 @@ class PhaseDRXTool(QMainWindow):
         """Abre o diálogo de normalização e aplica o método selecionado aos dados experimentais."""
         selected_items = self.exp_list_widget.selectedItems()
         if not selected_items:
-            QMessageBox.warning(self, "Nenhuma Seleção",
-                              "Selecione um ou mais arquivos experimentais da lista para normalizar.")
+            QMessageBox.warning(self, ptr("Nenhuma Seleção"),
+                              ptr("Selecione um ou mais arquivos experimentais da lista para normalizar."))
             return
 
         # Abrir diálogo de seleção do método
@@ -2100,7 +2101,7 @@ class PhaseDRXTool(QMainWindow):
                 success_count += 1
             except Exception as e:
                 error_count += 1
-                QMessageBox.critical(self, "Erro de Normalização",
+                QMessageBox.critical(self, ptr("Erro de Normalização"),
                                    f"Não foi possível normalizar '{plot_item['label']}':\n{e}")
 
         # Redesenhar gráfico e atualizar estado
@@ -2110,17 +2111,17 @@ class PhaseDRXTool(QMainWindow):
 
             # Mostrar mensagem de sucesso
             if error_count == 0:
-                QMessageBox.information(self, "Normalização Concluída",
+                QMessageBox.information(self, ptr("Normalização Concluída"),
                                       f"{success_count} arquivo(s) normalizado(s) com sucesso usando:\n{method_name}")
             else:
-                QMessageBox.warning(self, "Normalização Parcial",
+                QMessageBox.warning(self, ptr("Normalização Parcial"),
                                   f"{success_count} arquivo(s) normalizado(s), {error_count} com erro.")
         self.set_dirty()
 
     def run_simulation_for_selected(self):
         selected_list_items = self.cif_list_widget.selectedItems()
         if not selected_list_items:
-            QMessageBox.warning(self, "Nenhuma Seleção", "Selecione um ou mais arquivos CIF da lista para calcular.")
+            QMessageBox.warning(self, ptr("Nenhuma Seleção"), ptr("Selecione um ou mais arquivos CIF da lista para calcular."))
             return
 
         self._add_state_to_history()
@@ -2138,7 +2139,7 @@ class PhaseDRXTool(QMainWindow):
                 wl_text.split('(')[1].split(' ')[0])
             max_2theta, peak_width = self.max_2theta_spin.value(), self.peak_width_spin.value()
         except (ValueError, IndexError) as e:
-            QMessageBox.critical(self, "Erro de Parâmetro", f"Valor inválido: {e}")
+            QMessageBox.critical(self, ptr("Erro de Parâmetro"), f"Valor inválido: {e}")
             return
 
         try:
@@ -2155,7 +2156,7 @@ class PhaseDRXTool(QMainWindow):
             # O usuário deve clicar explicitamente em "Visualizar Estrutura"
             logging.debug(f"CIF calculado: {plot_item['label']} - estrutura 3D NÃO renderizada automaticamente")
         except Exception as e:
-            QMessageBox.critical(self, "Erro na Simulação",
+            QMessageBox.critical(self, ptr("Erro na Simulação"),
                                  f"Ocorreu um erro ao calcular para {plot_item['label']}:\n{e}")
 
     def _calculate_with_pymatgen(self, cif_info, wavelength, max_2theta_deg):
@@ -2864,8 +2865,8 @@ class PhaseDRXTool(QMainWindow):
         """Abre o diálogo de reflexões para o item CIF selecionado."""
         plot_item = self._find_plot_item_by_id(item_id)
         if not plot_item or plot_item.get("type") != "cif":
-            QMessageBox.warning(self, "Seleção Inválida",
-                              "Por favor, selecione um item CIF válido.")
+            QMessageBox.warning(self, ptr("Seleção Inválida"),
+                              ptr("Por favor, selecione um item CIF válido."))
             return
 
         # Obter comprimento de onda
@@ -2876,8 +2877,8 @@ class PhaseDRXTool(QMainWindow):
             else:
                 wavelength = float(wl_text.split('(')[1].split(' ')[0])
         except (ValueError, IndexError):
-            QMessageBox.critical(self, "Erro",
-                               "Comprimento de onda inválido.")
+            QMessageBox.critical(self, ptr("Erro"),
+                               ptr("Comprimento de onda inválido."))
             return
 
         # Obter 2θ máximo
@@ -2897,12 +2898,12 @@ class PhaseDRXTool(QMainWindow):
         """Visualiza a estrutura cristalina 3D do CIF selecionado."""
         plot_item = self._find_plot_item_by_id(item_id)
         if not plot_item or plot_item.get("type") != "cif":
-            QMessageBox.warning(self, "Seleção Inválida",
-                              "Por favor, selecione um item CIF válido.")
+            QMessageBox.warning(self, ptr("Seleção Inválida"),
+                              ptr("Por favor, selecione um item CIF válido."))
             return
 
         if not hasattr(self, 'structure_viewer') or self.structure_viewer is None:
-            QMessageBox.warning(self, "Visualizador Indisponível",
+            QMessageBox.warning(self, ptr("Visualizador Indisponível"),
                               "O visualizador 3D não está disponível.\n"
                               "Certifique-se de que 'pyqtgraph' e 'PyOpenGL' estão instalados.")
             return
@@ -2931,7 +2932,7 @@ class PhaseDRXTool(QMainWindow):
         except Exception as e:
             error_msg = f"Erro ao visualizar estrutura 3D: {str(e)}"
             logging.error(error_msg)
-            QMessageBox.critical(self, "Erro", error_msg)
+            QMessageBox.critical(self, ptr("Erro"), error_msg)
 
     def _on_cif_selection_changed(self):
         """Callback quando a seleção de CIF muda - marca para atualizar visualizador 3D."""
@@ -2978,7 +2979,7 @@ class PhaseDRXTool(QMainWindow):
                         self._warned_uncalculated_cifs.add(item_id)
                         QMessageBox.information(
                             self,
-                            "CIF não calculado",
+                            ptr("CIF não calculado"),
                             f"O CIF '{plot_item['label']}' ainda não foi calculado.\n\n"
                             "Clique em 'Calcular Selecionado(s)' para gerar o difratograma e "
                             "habilitar a visualização 3D."
@@ -3117,7 +3118,7 @@ class PhaseDRXTool(QMainWindow):
                     self._warned_uncalculated_cifs.add(self._pending_3d_cif_id)
                     QMessageBox.information(
                         self,
-                        "CIF não calculado",
+                        ptr("CIF não calculado"),
                         f"O CIF '{plot_item['label']}' ainda não foi calculado.\n\n"
                         "Clique em 'Calcular Selecionado(s)' para gerar o difratograma e "
                         "habilitar a visualização 3D."
@@ -3145,8 +3146,8 @@ class PhaseDRXTool(QMainWindow):
         if not self.structure_viewer.structure:
             QMessageBox.information(
                 self,
-                "Sem Estrutura",
-                "Carregue uma estrutura CIF primeiro para usar as animações."
+                ptr("Sem Estrutura"),
+                ptr("Carregue uma estrutura CIF primeiro para usar as animações.")
             )
             return
 
@@ -3161,7 +3162,7 @@ class PhaseDRXTool(QMainWindow):
 
         cif_content = plot_item.get("cif_content", "")
         if not cif_content:
-            QMessageBox.warning(self, "Erro", "Não há conteúdo CIF para salvar.")
+            QMessageBox.warning(self, ptr("Erro"), ptr("Não há conteúdo CIF para salvar."))
             return
 
         # Nome padrão: nome original + _PDRX-m
@@ -3182,17 +3183,17 @@ class PhaseDRXTool(QMainWindow):
             with open(file_path, 'w', encoding='utf-8') as f:
                 f.write(cif_content)
             logging.info(f"CIF modificado salvo em: {file_path}")
-            QMessageBox.information(self, "Salvo", f"CIF modificado salvo com sucesso em:\n{file_path}")
+            QMessageBox.information(self, ptr("Salvo"), f"CIF modificado salvo com sucesso em:\n{file_path}")
         except Exception as e:
             logging.error(f"Erro ao salvar CIF modificado: {e}")
-            QMessageBox.critical(self, "Erro", f"Não foi possível salvar o arquivo:\n{e}")
+            QMessageBox.critical(self, ptr("Erro"), f"Não foi possível salvar o arquivo:\n{e}")
 
     def reset_cif_to_original(self, item_id):
         plot_item = self._find_plot_item_by_id(item_id)
         if not plot_item or not plot_item.get("is_modified"):
             return
 
-        reply = QMessageBox.question(self, "Resetar CIF",
+        reply = QMessageBox.question(self, ptr("Resetar CIF"),
                                      f"Tem certeza que deseja resetar '{plot_item['label']}' para o seu estado original?\n"
                                      "Todas as modificações de rede e parâmetros de simulação serão perdidos.",
                                      QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
@@ -3209,7 +3210,7 @@ class PhaseDRXTool(QMainWindow):
                     os.remove(path_to_delete)
                     logging.info(f"Arquivo CIF modificado '{path_to_delete}' removido.")
                 except OSError as e:
-                    QMessageBox.warning(self, "Erro ao Apagar", f"Não foi possível apagar o arquivo modificado:\n{e}")
+                    QMessageBox.warning(self, ptr("Erro ao Apagar"), f"Não foi possível apagar o arquivo modificado:\n{e}")
                     logging.error(f"Erro ao apagar arquivo modificado '{path_to_delete}': {e}")
 
         plot_item['cif_content'] = plot_item.get('original_cif_content', '')
@@ -3220,7 +3221,7 @@ class PhaseDRXTool(QMainWindow):
         self.run_simulation_for_item(plot_item)
         self._repopulate_all_lists()
         self.set_dirty()
-        QMessageBox.information(self, "Resetado", f"'{plot_item['label']}' foi resetado para o original.")
+        QMessageBox.information(self, ptr("Resetado"), f"'{plot_item['label']}' foi resetado para o original.")
 
     def remove_plot_item(self, item_id_to_remove):
         logging.info(f"🗑 Removendo item: {item_id_to_remove}")
@@ -3244,7 +3245,7 @@ class PhaseDRXTool(QMainWindow):
 
                     # Atualizar label de informações
                     if hasattr(self.structure_viewer, 'info_label'):
-                        self.structure_viewer.info_label.setText("Nenhuma estrutura carregada")
+                        self.structure_viewer.info_label.setText(ptr("Nenhuma estrutura carregada"))
                         self.structure_viewer.info_label.setStyleSheet("color: gray; font-style: italic;")
 
                     # Limpar legenda de elementos
@@ -3296,11 +3297,11 @@ class PhaseDRXTool(QMainWindow):
     def open_smooth_dialog(self):
         selected_items = self.exp_list_widget.selectedItems()
         if not selected_items:
-            QMessageBox.warning(self, "Sem Dados",
-                                "Selecione um ou mais arquivos experimentais da lista para suavizar.")
+            QMessageBox.warning(self, ptr("Sem Dados"),
+                                ptr("Selecione um ou mais arquivos experimentais da lista para suavizar."))
             return
         if not SCIPY_AVAILABLE:
-            QMessageBox.critical(self, "Dependência Faltando", "A biblioteca 'scipy' é necessária para a suavização.")
+            QMessageBox.critical(self, ptr("Dependência Faltando"), ptr("A biblioteca 'scipy' é necessária para a suavização."))
             return
 
         dialog = SmoothDialog(self)
@@ -3324,17 +3325,17 @@ class PhaseDRXTool(QMainWindow):
             self._redraw_all_plots()
             self.set_dirty()
         except Exception as e:
-            QMessageBox.critical(self, "Erro na Suavização", f"Ocorreu um erro: {e}")
+            QMessageBox.critical(self, ptr("Erro na Suavização"), f"Ocorreu um erro: {e}")
 
     def open_peak_detect_dialog(self):
         selected_items = self.exp_list_widget.selectedItems()
         if not selected_items:
-            QMessageBox.warning(self, "Sem Dados",
-                                "Selecione um ou mais arquivos experimentais da lista para detectar picos.")
+            QMessageBox.warning(self, ptr("Sem Dados"),
+                                ptr("Selecione um ou mais arquivos experimentais da lista para detectar picos."))
             return
         if not SCIPY_AVAILABLE:
-            QMessageBox.critical(self, "Dependência Faltando",
-                                 "A biblioteca 'scipy' é necessária para a detecção de picos.")
+            QMessageBox.critical(self, ptr("Dependência Faltando"),
+                                 ptr("A biblioteca 'scipy' é necessária para a detecção de picos."))
             return
 
         dialog = PeakDetectDialog(self)
@@ -3357,7 +3358,7 @@ class PhaseDRXTool(QMainWindow):
             self._redraw_all_plots()
             self.set_dirty()
         except Exception as e:
-            QMessageBox.critical(self, "Erro na Detecção de Picos", f"Ocorreu um erro: {e}")
+            QMessageBox.critical(self, ptr("Erro na Detecção de Picos"), f"Ocorreu um erro: {e}")
 
     def open_save_plot_dialog(self):
         default_path = self.project_directory if self.project_directory else ""
@@ -3385,9 +3386,9 @@ class PhaseDRXTool(QMainWindow):
                         bbox_inches='tight'
                     )
 
-                QMessageBox.information(self, "Sucesso", f"Gráfico salvo em:\n{settings['path']}")
+                QMessageBox.information(self, ptr("Sucesso"), f"Gráfico salvo em:\n{settings['path']}")
             except Exception as e:
-                QMessageBox.critical(self, "Erro ao Salvar", f"Não foi possível salvar o gráfico:\n{e}")
+                QMessageBox.critical(self, ptr("Erro ao Salvar"), f"Não foi possível salvar o gráfico:\n{e}")
 
     # --- ALTERAÇÃO DE FUNCIONALIDADE: Adicionar Função Exportar para Origin ---
     def export_to_xlsx_for_origin(self):
@@ -3398,15 +3399,15 @@ class PhaseDRXTool(QMainWindow):
         
         # 1. Verifica se a biblioteca está disponível
         if not OPENPYXL_AVAILABLE:
-            QMessageBox.critical(self, "Dependência Faltando",
+            QMessageBox.critical(self, ptr("Dependência Faltando"),
                                  "A biblioteca 'openpyxl' é necessária para exportar para Excel.\n"
                                  "Por favor, instale-a com: pip install openpyxl")
             return
             
         # 2. Verifica se há dados
         if not self.plot_items:
-            QMessageBox.warning(self,"Exportar para Excel",
-                                "Não há dados carregados para exportar.")
+            QMessageBox.warning(self,ptr("Exportar para Excel"),
+                                ptr("Não há dados carregados para exportar."))
             return
             
         # 3. Pergunta ao utilizador onde salvar
@@ -3432,7 +3433,7 @@ class PhaseDRXTool(QMainWindow):
             items_to_export = [item for item in self.plot_items if item.get("data") is not None]
 
             if not items_to_export:
-                QMessageBox.warning(self, "Sem Dados", "Nenhum dos itens carregados possui dados simulados ou lidos.")
+                QMessageBox.warning(self, ptr("Sem Dados"), ptr("Nenhum dos itens carregados possui dados simulados ou lidos."))
                 return
 
             for item in items_to_export:
@@ -3458,12 +3459,12 @@ class PhaseDRXTool(QMainWindow):
             
             # 8. Salva o ficheiro
             wb.save(filepath)
-            QMessageBox.information(self, "Exportação Concluída",
+            QMessageBox.information(self, ptr("Exportação Concluída"),
                                     f"Dados exportados com sucesso para:\n{filepath}\n\n"
                                     "Arraste este ficheiro para o Origin para importar.")
 
         except Exception as e:
-            QMessageBox.critical(self, "Erro na Exportação",
+            QMessageBox.critical(self, ptr("Erro na Exportação"),
                                  f"Ocorreu um erro ao exportar para .xlsx:\n{e}")
             logging.exception("Erro ao exportar para XLSX:")
     # --- FIM DA ALTERAÇÃO ---
@@ -3520,7 +3521,7 @@ class PhaseDRXTool(QMainWindow):
         """Inicia o modo de seleção de pico para normalização."""
         plot_item = self._find_plot_item_by_id(item_id)
         if not plot_item or plot_item.get("data") is None:
-            QMessageBox.warning(self, "Erro", "Não foi possível encontrar os dados do arquivo selecionado.")
+            QMessageBox.warning(self, ptr("Erro"), ptr("Não foi possível encontrar os dados do arquivo selecionado."))
             return
 
         # Ativar modo de seleção
@@ -3538,7 +3539,7 @@ class PhaseDRXTool(QMainWindow):
         # Mostrar mensagem de instrução
         QMessageBox.information(
             self,
-            "Seleção de Pico",
+            ptr("Seleção de Pico"),
             f"Modo de seleção de pico ativado para: {plot_item['label']}\n\n"
             "Clique no gráfico na posição do pico de interesse.\n"
             "O programa irá buscar o máximo na região próxima ao clique.\n\n"
@@ -3559,7 +3560,7 @@ class PhaseDRXTool(QMainWindow):
         # Buscar o item selecionado
         plot_item = self._find_plot_item_by_id(self._peak_selection_item_id)
         if not plot_item or plot_item.get("data") is None:
-            QMessageBox.critical(self, "Erro", "Dados não encontrados.")
+            QMessageBox.critical(self, ptr("Erro"), ptr("Dados não encontrados."))
             return
 
         x_data, y_data = plot_item["data"]
@@ -3605,7 +3606,7 @@ class PhaseDRXTool(QMainWindow):
                     except Exception as e:
                         QMessageBox.warning(
                             self,
-                            "Aviso",
+                            ptr("Aviso"),
                             f"Não foi possível normalizar '{other_item['label']}':\n{e}"
                         )
 
@@ -3616,7 +3617,7 @@ class PhaseDRXTool(QMainWindow):
             # Mensagem de sucesso
             QMessageBox.information(
                 self,
-                "Normalização Concluída",
+                ptr("Normalização Concluída"),
                 f"{success_count} arquivo(s) normalizado(s) com sucesso!\n\n"
                 f"Pico de referência: 2θ = {peak_x:.3f}°\n"
                 f"Intensidade do pico: {peak_intensity:.2f}"
@@ -3625,7 +3626,7 @@ class PhaseDRXTool(QMainWindow):
         except Exception as e:
             QMessageBox.critical(
                 self,
-                "Erro na Normalização",
+                ptr("Erro na Normalização"),
                 f"Não foi possível normalizar pelo pico:\n{e}"
             )
 
@@ -3649,7 +3650,7 @@ class PlotCustomizationDialog(QDialog):
 
     def __init__(self, axes, current_settings, plot_data, group_settings, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("Personalizar Gráfico")
+        self.setWindowTitle(ptr("Personalizar Gráfico"))
         self.setFixedWidth(520)
         self.resize(520, 700)
         set_polvo_icon(self)
@@ -3669,7 +3670,7 @@ class PlotCustomizationDialog(QDialog):
         layout.addWidget(tabs)
 
         scale_tab = QWidget()
-        tabs.addTab(scale_tab, "Escala e Rótulos")
+        tabs.addTab(scale_tab, ptr("Escala e Rótulos"))
         main_scale_layout = QVBoxLayout(scale_tab)
 
         scroll_area_scale = QScrollArea()
@@ -3677,14 +3678,14 @@ class PlotCustomizationDialog(QDialog):
         scroll_content_scale = QWidget()
         scale_layout = QVBoxLayout(scroll_content_scale)
 
-        labels_group = QGroupBox("Rótulos dos Eixos");
+        labels_group = QGroupBox(ptr("Rótulos dos Eixos"));
         labels_form = QFormLayout(labels_group)
         self.x_label_edit = QLineEdit();
         self.y_label_edit = QLineEdit()
         labels_form.addRow("Eixo X:", self.x_label_edit);
         labels_form.addRow("Eixo Y:", self.y_label_edit)
         scale_layout.addWidget(labels_group)
-        x_group = QGroupBox("Eixo X");
+        x_group = QGroupBox(ptr("Eixo X"));
         x_form = QFormLayout(x_group)
         self.x_from = CustomDoubleSpinBox(wheel_step=0.1);
         self.x_from.setDecimals(4)
@@ -3703,9 +3704,9 @@ class PlotCustomizationDialog(QDialog):
             "Valores muito pequenos (< 0.1) podem causar problemas."
         )
         self.x_label_size = QSpinBox();
-        self.x_label_bold = QCheckBox("Negrito");
-        self.x_label_italic = QCheckBox("Itálico")
-        self.x_visible = QCheckBox("Mostrar Eixo X")
+        self.x_label_bold = QCheckBox(ptr("Negrito"));
+        self.x_label_italic = QCheckBox(ptr("Itálico"))
+        self.x_visible = QCheckBox(ptr("Mostrar Eixo X"))
         x_form.addRow("De:", self.x_from);
         x_form.addRow("Para:", self.x_to);
         x_form.addRow("Major Ticks:", self.x_ticks)
@@ -3716,7 +3717,7 @@ class PlotCustomizationDialog(QDialog):
         x_form.addRow("Fonte do Rótulo:", x_font_layout);
         x_form.addRow(self.x_visible)
         scale_layout.addWidget(x_group)
-        y_group = QGroupBox("Eixo Y");
+        y_group = QGroupBox(ptr("Eixo Y"));
         y_form = QFormLayout(y_group)
         self.y_from = CustomDoubleSpinBox(wheel_step=0.1);
         self.y_from.setDecimals(4)
@@ -3735,9 +3736,9 @@ class PlotCustomizationDialog(QDialog):
             "Valores muito pequenos (< 0.1) podem causar problemas."
         )
         self.y_label_size = QSpinBox();
-        self.y_label_bold = QCheckBox("Negrito");
-        self.y_label_italic = QCheckBox("Itálico")
-        self.y_visible = QCheckBox("Mostrar Eixo Y")
+        self.y_label_bold = QCheckBox(ptr("Negrito"));
+        self.y_label_italic = QCheckBox(ptr("Itálico"))
+        self.y_visible = QCheckBox(ptr("Mostrar Eixo Y"))
         y_form.addRow("De:", self.y_from);
         y_form.addRow("Para:", self.y_to);
         y_form.addRow("Major Ticks:", self.y_ticks)
@@ -3748,10 +3749,10 @@ class PlotCustomizationDialog(QDialog):
         y_form.addRow("Fonte do Rótulo:", y_font_layout);
         y_form.addRow(self.y_visible)
         scale_layout.addWidget(y_group)
-        self.grid_visible = QCheckBox("Mostrar Grade");
+        self.grid_visible = QCheckBox(ptr("Mostrar Grade"));
         scale_layout.addWidget(self.grid_visible)
 
-        stack_group = QGroupBox("Empilhamento de Gráficos")
+        stack_group = QGroupBox(ptr("Empilhamento de Gráficos"))
         stack_form = QFormLayout(stack_group)
         self.global_offset_spin = CustomDoubleSpinBox(wheel_step=0.05)
         self.global_offset_spin.setDecimals(3)
@@ -3782,18 +3783,18 @@ class PlotCustomizationDialog(QDialog):
         main_scale_layout.addWidget(scroll_area_scale)
 
         lines_tab = QWidget()
-        tabs.addTab(lines_tab, "Linhas e Legendas")
+        tabs.addTab(lines_tab, ptr("Linhas e Legendas"))
         lines_layout = QVBoxLayout(lines_tab)
 
-        palette_group = QGroupBox("Esquemas de Cores (Paletas)")
+        palette_group = QGroupBox(ptr("Esquemas de Cores (Paletas)"))
         palette_layout = QHBoxLayout(palette_group)
-        palette_layout.addWidget(QLabel("Aplicar paleta:"))
+        palette_layout.addWidget(QLabel(ptr("Aplicar paleta:")))
         self.palette_combo = QComboBox()
         self.palette_combo.addItems([
             "Padrão MatFinder", "Viridis (Perceptual)", "Plasma (Perceptual)",
             "Tab10 (Qualitativa)", "Set1 (Qualitativa)", "Paired (Qualitativa)"
         ])
-        self.apply_palette_button = QPushButton("Aplicar Paleta")
+        self.apply_palette_button = QPushButton(ptr("Aplicar Paleta"))
         palette_layout.addWidget(self.palette_combo)
         palette_layout.addWidget(self.apply_palette_button)
         lines_layout.addWidget(palette_group)
@@ -3804,7 +3805,7 @@ class PlotCustomizationDialog(QDialog):
         lines_layout.addWidget(self.lines_table)
 
         axes_tab = QWidget()
-        tabs.addTab(axes_tab, "Aparência dos Eixos")
+        tabs.addTab(axes_tab, ptr("Aparência dos Eixos"))
         main_axes_layout = QVBoxLayout(axes_tab)
 
         scroll_area_axes = QScrollArea()
@@ -3812,7 +3813,7 @@ class PlotCustomizationDialog(QDialog):
         scroll_content_axes = QWidget()
         axes_layout = QVBoxLayout(scroll_content_axes)
 
-        axes_appearance_group = QGroupBox("Aparência Geral dos Eixos")
+        axes_appearance_group = QGroupBox(ptr("Aparência Geral dos Eixos"))
         axes_appearance_form = QFormLayout(axes_appearance_group)
         self.axes_linewidth_spin = QDoubleSpinBox()
         self.axes_linewidth_spin.setRange(0.5, 5.0)
@@ -3821,7 +3822,7 @@ class PlotCustomizationDialog(QDialog):
         axes_appearance_form.addRow("Espessura das Linhas dos Eixos:", self.axes_linewidth_spin)
         axes_layout.addWidget(axes_appearance_group)
 
-        xticks_group = QGroupBox("Marcadores do Eixo X (Ticks)")
+        xticks_group = QGroupBox(ptr("Marcadores do Eixo X (Ticks)"))
         xticks_form = QFormLayout(xticks_group)
         self.xtick_direction_combo = QComboBox()
         self.xtick_direction_combo.addItems(["Para Dentro", "Para Fora", "Sem Ticks"])
@@ -3830,8 +3831,8 @@ class PlotCustomizationDialog(QDialog):
         self.xtick_width_spin = QDoubleSpinBox()
         self.xtick_width_spin.setRange(0.5, 5.0)
         self.xtick_width_spin.setSingleStep(0.1)
-        self.xtick_visible_check = QCheckBox("Mostrar Marcadores (ticks)")
-        self.xtick_label_visible_check = QCheckBox("Mostrar Números")
+        self.xtick_visible_check = QCheckBox(ptr("Mostrar Marcadores (ticks)"))
+        self.xtick_label_visible_check = QCheckBox(ptr("Mostrar Números"))
         xticks_form.addRow("Direção:", self.xtick_direction_combo)
         xticks_form.addRow("Espessura:", self.xtick_width_spin)
         xticks_form.addRow("Tamanho da Fonte:", self.xtick_labelsize_spin)
@@ -3839,7 +3840,7 @@ class PlotCustomizationDialog(QDialog):
         xticks_form.addRow(self.xtick_label_visible_check)
         axes_layout.addWidget(xticks_group)
 
-        yticks_group = QGroupBox("Marcadores do Eixo Y (Ticks)")
+        yticks_group = QGroupBox(ptr("Marcadores do Eixo Y (Ticks)"))
         yticks_form = QFormLayout(yticks_group)
         self.ytick_direction_combo = QComboBox()
         self.ytick_direction_combo.addItems(["Para Dentro", "Para Fora", "Sem Ticks"])
@@ -3848,8 +3849,8 @@ class PlotCustomizationDialog(QDialog):
         self.ytick_width_spin = QDoubleSpinBox()
         self.ytick_width_spin.setRange(0.5, 5.0)
         self.ytick_width_spin.setSingleStep(0.1)
-        self.ytick_visible_check = QCheckBox("Mostrar Marcadores (ticks)")
-        self.ytick_label_visible_check = QCheckBox("Mostrar Números")
+        self.ytick_visible_check = QCheckBox(ptr("Mostrar Marcadores (ticks)"))
+        self.ytick_label_visible_check = QCheckBox(ptr("Mostrar Números"))
         yticks_form.addRow("Direção:", self.ytick_direction_combo)
         yticks_form.addRow("Espessura:", self.ytick_width_spin)
         yticks_form.addRow("Tamanho da Fonte:", self.ytick_labelsize_spin)
@@ -3952,7 +3953,7 @@ class PlotCustomizationDialog(QDialog):
             x_ticks_value = None
             QMessageBox.warning(
                 self,
-                "Valor Inválido",
+                ptr("Valor Inválido"),
                 "O valor de X Ticks é muito pequeno (< 0.1) e foi definido como automático.\n"
                 "Valores muito pequenos causam geração excessiva de marcações no eixo."
             )
@@ -3961,7 +3962,7 @@ class PlotCustomizationDialog(QDialog):
             y_ticks_value = None
             QMessageBox.warning(
                 self,
-                "Valor Inválido",
+                ptr("Valor Inválido"),
                 "O valor de Y Ticks é muito pequeno (< 0.1) e foi definido como automático.\n"
                 "Valores muito pequenos causam geração excessiva de marcações no eixo."
             )
@@ -4048,7 +4049,7 @@ class PlotCustomizationDialog(QDialog):
                 colors = ['#%02x%02x%02x' % (int(r * 255), int(g * 255), int(b * 255)) for r, g, b, a in
                           colormap.colors]
             except Exception as e:
-                QMessageBox.critical(self, "Erro de Paleta",
+                QMessageBox.critical(self, ptr("Erro de Paleta"),
                                      f"Não foi possível carregar a paleta '{palette_name}':\n{e}")
                 return
 
@@ -4061,7 +4062,7 @@ class PlotCustomizationDialog(QDialog):
 class SavePlotDialog(QDialog):
     def __init__(self, default_path="", parent=None):
         super().__init__(parent)
-        self.setWindowTitle("Salvar gráfico")
+        self.setWindowTitle(ptr("Salvar gráfico"))
         set_polvo_icon(self)
         self.default_path = default_path
         layout = QVBoxLayout(self)
@@ -4069,24 +4070,24 @@ class SavePlotDialog(QDialog):
         self.width_spin = QSpinBox();
         self.width_spin.setRange(100, 8000);
         self.width_spin.setValue(1200);
-        self.width_spin.setSuffix(" px")
+        self.width_spin.setSuffix(ptr(" px"))
         form_layout.addRow("Largura:", self.width_spin)
         self.height_spin = QSpinBox();
         self.height_spin.setRange(100, 8000);
         self.height_spin.setValue(800);
-        self.height_spin.setSuffix(" px")
+        self.height_spin.setSuffix(ptr(" px"))
         form_layout.addRow("Altura:", self.height_spin)
         self.dpi_spin = QSpinBox();
         self.dpi_spin.setRange(50, 600);
         self.dpi_spin.setValue(600);
-        self.dpi_spin.setSuffix(" DPI")
+        self.dpi_spin.setSuffix(ptr(" DPI"))
         form_layout.addRow("Qualidade (DPI):", self.dpi_spin)
         self.format_combo = QComboBox();
         self.format_combo.addItems(["png", "jpg", "svg", "pdf", "tiff"])
         form_layout.addRow("Formato:", self.format_combo)
         self.path_edit = QLineEdit();
         self.path_edit.setReadOnly(True)
-        browse_button = QPushButton("Procurar...");
+        browse_button = QPushButton(ptr("Procurar..."));
         browse_button.clicked.connect(self.browse_path)
         path_layout = QHBoxLayout();
         path_layout.addWidget(self.path_edit);
@@ -4110,7 +4111,7 @@ class SavePlotDialog(QDialog):
 
     def accept(self):
         if not self.path_edit.text():
-            QMessageBox.warning(self, "Caminho Inválido", "Por favor, escolha um local para salvar o arquivo.")
+            QMessageBox.warning(self, ptr("Caminho Inválido"), ptr("Por favor, escolha um local para salvar o arquivo."))
             return
         super().accept()
 
@@ -4118,7 +4119,7 @@ class SavePlotDialog(QDialog):
 class SmoothDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("Parâmetros de Suavização")
+        self.setWindowTitle(ptr("Parâmetros de Suavização"))
         set_polvo_icon(self)
         layout = QVBoxLayout(self)
         form_layout = QFormLayout()
@@ -4141,8 +4142,8 @@ class SmoothDialog(QDialog):
 
     def accept(self):
         if self.order_spin.value() >= self.window_spin.value():
-            QMessageBox.warning(self, "Parâmetros Inválidos",
-                                "A 'Ordem do Polinômio' deve ser menor que o 'Tamanho da Janela'.")
+            QMessageBox.warning(self, ptr("Parâmetros Inválidos"),
+                                ptr("A 'Ordem do Polinômio' deve ser menor que o 'Tamanho da Janela'."))
             return
         super().accept()
 
@@ -4150,7 +4151,7 @@ class SmoothDialog(QDialog):
 class PeakDetectDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("Parâmetros de Detecção de Picos")
+        self.setWindowTitle(ptr("Parâmetros de Detecção de Picos"))
         set_polvo_icon(self)
         layout = QVBoxLayout(self)
         form_layout = QFormLayout()
@@ -4179,7 +4180,7 @@ class WaveletDenoiseDialog(QDialog):
 
     def __init__(self, x_data, y_data, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("Redução de Ruído com Transformada Wavelet")
+        self.setWindowTitle(ptr("Redução de Ruído com Transformada Wavelet"))
         self.setMinimumSize(800, 600)
         set_polvo_icon(self)
 
@@ -4197,7 +4198,7 @@ class WaveletDenoiseDialog(QDialog):
         self.axes = self.plot_canvas.figure.add_subplot(111)
         main_layout.addWidget(self.plot_canvas)
 
-        controls_group = QGroupBox("Controles")
+        controls_group = QGroupBox(ptr("Controles"))
         controls_layout = QFormLayout(controls_group)
 
         self.wavelet_combo = QComboBox()

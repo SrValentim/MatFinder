@@ -1,0 +1,1126 @@
+{
+ "PIL/Pillow não disponível. Marca d'água pode não funcionar corretamente.": {
+  "en_US": "PIL/Pillow not available. Watermark may not work correctly.",
+  "de_DE": "PIL/Pillow nicht verfügbar. Das Wasserzeichen funktioniert möglicherweise nicht korrekt."
+ },
+ "AVISO: Biblioteca 'openpyxl' não encontrada. A exportação para Origin (.xlsx) não funcionará.": {
+  "en_US": "WARNING: 'openpyxl' library not found. Export to Origin (.xlsx) will not work.",
+  "de_DE": "WARNUNG: Bibliothek 'openpyxl' nicht gefunden. Der Export nach Origin (.xlsx) funktioniert nicht."
+ },
+ "AVISO CRÍTICO: Biblioteca 'pymatgen' não encontrada. A simulação de DRX não funcionará.": {
+  "en_US": "CRITICAL WARNING: 'pymatgen' library not found. XRD simulation will not work.",
+  "de_DE": "KRITISCHE WARNUNG: Bibliothek 'pymatgen' nicht gefunden. Die XRD-Simulation funktioniert nicht."
+ },
+ "AVISO: Biblioteca 'pyobjcryst' não encontrada. Usando 'pymatgen' como alternativa para simulação.": {
+  "en_US": "WARNING: 'pyobjcryst' library not found. Using 'pymatgen' as an alternative for simulation.",
+  "de_DE": "WARNUNG: Bibliothek 'pyobjcryst' nicht gefunden. 'pymatgen' wird als Alternative für die Simulation verwendet."
+ },
+ "PhaseDRX": {
+  "en_US": "PhaseDRX",
+  "de_DE": "PhaseDRX"
+ },
+ "Dados Experimentais": {
+  "en_US": "Experimental Data",
+  "de_DE": "Experimentelle Daten"
+ },
+ "Simulação Teórica (de CIF)": {
+  "en_US": "Theoretical Simulation (from CIF)",
+  "de_DE": "Theoretische Simulation (aus CIF)"
+ },
+ "Expandir/Recolher painel de controle": {
+  "en_US": "Expand/Collapse control panel",
+  "de_DE": "Bedienfeld ein-/ausklappen"
+ },
+ "◀ Desfazer": {
+  "en_US": "◀ Undo",
+  "de_DE": "◀ Rückgängig"
+ },
+ "Refazer ▶": {
+  "en_US": "Redo ▶",
+  "de_DE": "Wiederholen ▶"
+ },
+ "Editar parâmetros do item selecionado": {
+  "en_US": "Edit parameters of the selected item",
+  "de_DE": "Parameter des ausgewählten Elements bearbeiten"
+ },
+ "Salvar Gráfico...": {
+  "en_US": "Save Plot...",
+  "de_DE": "Diagramm speichern..."
+ },
+ "Personalizar Gráfico": {
+  "en_US": "Customize Plot",
+  "de_DE": "Diagramm anpassen"
+ },
+ "Difratograma (2D)": {
+  "en_US": "Diffractogram (2D)",
+  "de_DE": "Diffraktogramm (2D)"
+ },
+ "&Novo Projeto...": {
+  "en_US": "&New Project...",
+  "de_DE": "&Neues Projekt..."
+ },
+ "&Abrir Projeto...": {
+  "en_US": "&Open Project...",
+  "de_DE": "Projekt &öffnen..."
+ },
+ "&Salvar Projeto": {
+  "en_US": "&Save Project",
+  "de_DE": "Projekt &speichern"
+ },
+ "Salvar Projeto &Como...": {
+  "en_US": "Save Project &As...",
+  "de_DE": "Projekt speichern &unter..."
+ },
+ "Exportar (.xlsx)...": {
+  "en_US": "Export (.xlsx)...",
+  "de_DE": "Exportieren (.xlsx)..."
+ },
+ "&Sair": {
+  "en_US": "&Quit",
+  "de_DE": "&Beenden"
+ },
+ "Controles dos Dados Experimentais": {
+  "en_US": "Experimental Data Controls",
+  "de_DE": "Steuerung der experimentellen Daten"
+ },
+ "Carregar Arquivo(s) Exp...": {
+  "en_US": "Load Exp. File(s)...",
+  "de_DE": "Exp.-Datei(en) laden..."
+ },
+ "Normalização...": {
+  "en_US": "Normalization...",
+  "de_DE": "Normalisierung..."
+ },
+ "Smooth": {
+  "en_US": "Smooth",
+  "de_DE": "Glätten"
+ },
+ "Remover Fundo...": {
+  "en_US": "Remove Background...",
+  "de_DE": "Untergrund entfernen..."
+ },
+ "Redução de Ruído (Wavelet)": {
+  "en_US": "Noise Reduction (Wavelet)",
+  "de_DE": "Rauschunterdrückung (Wavelet)"
+ },
+ "Arquivos Experimentais Carregados": {
+  "en_US": "Loaded Experimental Files",
+  "de_DE": "Geladene experimentelle Dateien"
+ },
+ "Configuração de Grupos": {
+  "en_US": "Group Configuration",
+  "de_DE": "Gruppenkonfiguration"
+ },
+ "Arquivos CIF Carregados": {
+  "en_US": "Loaded CIF Files",
+  "de_DE": "Geladene CIF-Dateien"
+ },
+ "Parâmetros da Simulação": {
+  "en_US": "Simulation Parameters",
+  "de_DE": "Simulationsparameter"
+ },
+ "Carregar Arquivo(s) CIF...": {
+  "en_US": "Load CIF File(s)...",
+  "de_DE": "CIF-Datei(en) laden..."
+ },
+ "Largura do Pico (FWHM):": {
+  "en_US": "Peak Width (FWHM):",
+  "de_DE": "Peakbreite (FWHM):"
+ },
+ "Combinação Multifásica": {
+  "en_US": "Multiphase Combination",
+  "de_DE": "Mehrphasen-Kombination"
+ },
+ "Calcular Selecionado(s)": {
+  "en_US": "Calculate Selected",
+  "de_DE": "Ausgewählte berechnen"
+ },
+ "Ocultar/Mostrar no gráfico": {
+  "en_US": "Hide/Show on the plot",
+  "de_DE": "Im Diagramm aus-/einblenden"
+ },
+ "Deseja salvar as suas alterações no projeto?": {
+  "en_US": "Do you want to save your changes to the project?",
+  "de_DE": "Möchten Sie Ihre Änderungen am Projekt speichern?"
+ },
+ "Resetar CIF": {
+  "en_US": "Reset CIF",
+  "de_DE": "CIF zurücksetzen"
+ },
+ "Resetado": {
+  "en_US": "Reset",
+  "de_DE": "Zurückgesetzt"
+ },
+ "Seleção de Pico": {
+  "en_US": "Peak Selection",
+  "de_DE": "Peak-Auswahl"
+ },
+ "Escala e Rótulos": {
+  "en_US": "Scale and Labels",
+  "de_DE": "Skala und Beschriftungen"
+ },
+ "Rótulos dos Eixos": {
+  "en_US": "Axis Labels",
+  "de_DE": "Achsenbeschriftungen"
+ },
+ "Eixo X": {
+  "en_US": "X Axis",
+  "de_DE": "X-Achse"
+ },
+ "Intervalo entre marcações principais no eixo X.\n0 = Automático (recomendado para 2θ)\nValores muito pequenos (< 0.1) podem causar problemas.": {
+  "en_US": "Interval between major ticks on the X axis. 0 = Automatic (recommended for 2θ). Very small values (< 0.1) may cause problems.",
+  "de_DE": "Abstand zwischen Hauptmarkierungen auf der X-Achse. 0 = Automatisch (empfohlen für 2θ). Sehr kleine Werte (< 0,1) können Probleme verursachen."
+ },
+ "Negrito": {
+  "en_US": "Bold",
+  "de_DE": "Fett"
+ },
+ "Itálico": {
+  "en_US": "Italic",
+  "de_DE": "Kursiv"
+ },
+ "Mostrar Eixo X": {
+  "en_US": "Show X Axis",
+  "de_DE": "X-Achse anzeigen"
+ },
+ "Eixo Y": {
+  "en_US": "Y Axis",
+  "de_DE": "Y-Achse"
+ },
+ "Intervalo entre marcações principais no eixo Y.\n0 = Automático (recomendado)\nValores muito pequenos (< 0.1) podem causar problemas.": {
+  "en_US": "Interval between major ticks on the Y axis. 0 = Automatic (recommended). Very small values (< 0.1) may cause problems.",
+  "de_DE": "Abstand zwischen Hauptmarkierungen auf der Y-Achse. 0 = Automatisch (empfohlen). Sehr kleine Werte (< 0,1) können Probleme verursachen."
+ },
+ "Mostrar Eixo Y": {
+  "en_US": "Show Y Axis",
+  "de_DE": "Y-Achse anzeigen"
+ },
+ "Mostrar Grade": {
+  "en_US": "Show Grid",
+  "de_DE": "Gitter anzeigen"
+ },
+ "Empilhamento de Gráficos": {
+  "en_US": "Plot Stacking",
+  "de_DE": "Diagramm-Stapelung"
+ },
+ "Linhas e Legendas": {
+  "en_US": "Lines and Legends",
+  "de_DE": "Linien und Legenden"
+ },
+ "Esquemas de Cores (Paletas)": {
+  "en_US": "Color Schemes (Palettes)",
+  "de_DE": "Farbschemata (Paletten)"
+ },
+ "Aplicar Paleta": {
+  "en_US": "Apply Palette",
+  "de_DE": "Palette anwenden"
+ },
+ "Aparência dos Eixos": {
+  "en_US": "Axes Appearance",
+  "de_DE": "Achsen-Aussehen"
+ },
+ "Aparência Geral dos Eixos": {
+  "en_US": "General Axes Appearance",
+  "de_DE": "Allgemeines Achsen-Aussehen"
+ },
+ "Marcadores do Eixo X (Ticks)": {
+  "en_US": "X Axis Markers (Ticks)",
+  "de_DE": "X-Achsen-Markierungen (Ticks)"
+ },
+ "Mostrar Marcadores (ticks)": {
+  "en_US": "Show Markers (ticks)",
+  "de_DE": "Markierungen anzeigen (Ticks)"
+ },
+ "Mostrar Números": {
+  "en_US": "Show Numbers",
+  "de_DE": "Zahlen anzeigen"
+ },
+ "Marcadores do Eixo Y (Ticks)": {
+  "en_US": "Y Axis Markers (Ticks)",
+  "de_DE": "Y-Achsen-Markierungen (Ticks)"
+ },
+ "Salvar gráfico": {
+  "en_US": "Save plot",
+  "de_DE": "Diagramm speichern"
+ },
+ " px": {
+  "en_US": "px",
+  "de_DE": "px"
+ },
+ " DPI": {
+  "en_US": "DPI",
+  "de_DE": "DPI"
+ },
+ "Procurar...": {
+  "en_US": "Browse...",
+  "de_DE": "Durchsuchen..."
+ },
+ "Parâmetros de Suavização": {
+  "en_US": "Smoothing Parameters",
+  "de_DE": "Glättungsparameter"
+ },
+ "Parâmetros de Detecção de Picos": {
+  "en_US": "Peak Detection Parameters",
+  "de_DE": "Parameter der Peak-Erkennung"
+ },
+ "Redução de Ruído com Transformada Wavelet": {
+  "en_US": "Noise Reduction with Wavelet Transform",
+  "de_DE": "Rauschunterdrückung mit Wavelet-Transformation"
+ },
+ "Controles": {
+  "en_US": "Controls",
+  "de_DE": "Steuerung"
+ },
+ "Configurações de visualização (tamanho dos átomos, célula unitária, etc.)": {
+  "en_US": "View settings (atom size, unit cell, etc.)",
+  "de_DE": "Ansichtseinstellungen (Atomgröße, Elementarzelle usw.)"
+ },
+ "🔄 Renderizar": {
+  "en_US": "🔄 Render",
+  "de_DE": "🔄 Rendern"
+ },
+ "Atualizar visualização 3D com modificações": {
+  "en_US": "Update 3D view with modifications",
+  "de_DE": "3D-Ansicht mit Änderungen aktualisieren"
+ },
+ "Animações (rotação 360°, vibração)": {
+  "en_US": "Animations (360° rotation, vibration)",
+  "de_DE": "Animationen (360°-Rotation, Vibration)"
+ },
+ "Estrutura Cristalina (3D)": {
+  "en_US": "Crystal Structure (3D)",
+  "de_DE": "Kristallstruktur (3D)"
+ },
+ "Instale 'openpyxl' para usar esta função": {
+  "en_US": "Install 'openpyxl' to use this function",
+  "de_DE": "Installieren Sie 'openpyxl', um diese Funktion zu nutzen"
+ },
+ "Instale a biblioteca 'PyWavelets' para usar esta função.": {
+  "en_US": "Install the 'PyWavelets' library to use this function.",
+  "de_DE": "Installieren Sie die Bibliothek 'PyWavelets', um diese Funktion zu nutzen."
+ },
+ "Número de Grupos:": {
+  "en_US": "Number of Groups:",
+  "de_DE": "Anzahl der Gruppen:"
+ },
+ "Seleção Inválida": {
+  "en_US": "Invalid Selection",
+  "de_DE": "Ungültige Auswahl"
+ },
+ "Por favor, selecione um único arquivo experimental para a redução de ruído.": {
+  "en_US": "Please select a single experimental file for noise reduction.",
+  "de_DE": "Bitte wählen Sie eine einzelne experimentelle Datei für die Rauschunterdrückung."
+ },
+ "Erro de Dados": {
+  "en_US": "Data Error",
+  "de_DE": "Datenfehler"
+ },
+ "O item selecionado não contém dados válidos.": {
+  "en_US": "The selected item does not contain valid data.",
+  "de_DE": "Das ausgewählte Element enthält keine gültigen Daten."
+ },
+ "Por favor, selecione um único arquivo experimental para remover o fundo.": {
+  "en_US": "Please select a single experimental file to remove the background.",
+  "de_DE": "Bitte wählen Sie eine einzelne experimentelle Datei, um den Untergrund zu entfernen."
+ },
+ "Refazer Correção": {
+  "en_US": "Redo Correction",
+  "de_DE": "Korrektur wiederholen"
+ },
+ "O fundo deste item já foi corrigido. Deseja refazer a operação?\n(Isto usará os dados originais novamente)": {
+  "en_US": "The background of this item has already been corrected. Do you want to redo the operation? (This will use the original data again)",
+  "de_DE": "Der Untergrund dieses Elements wurde bereits korrigiert. Möchten Sie den Vorgang wiederholen? (Es werden erneut die Originaldaten verwendet)"
+ },
+ "Por favor, selecione um único item para editar.": {
+  "en_US": "Please select a single item to edit.",
+  "de_DE": "Bitte wählen Sie ein einzelnes Element zum Bearbeiten."
+ },
+ "Seleção Insuficiente": {
+  "en_US": "Insufficient Selection",
+  "de_DE": "Unzureichende Auswahl"
+ },
+ "Selecione pelo menos dois CIFs para criar uma combinação.": {
+  "en_US": "Select at least two CIFs to create a combination.",
+  "de_DE": "Wählen Sie mindestens zwei CIFs, um eine Kombination zu erstellen."
+ },
+ "Recolher painel de controle": {
+  "en_US": "Collapse control panel",
+  "de_DE": "Bedienfeld einklappen"
+ },
+ "Expandir painel de controle": {
+  "en_US": "Expand control panel",
+  "de_DE": "Bedienfeld erweitern"
+ },
+ "Projeto Salvo": {
+  "en_US": "Project Saved",
+  "de_DE": "Projekt gespeichert"
+ },
+ "Dependência Faltando": {
+  "en_US": "Missing Dependency",
+  "de_DE": "Fehlende Abhängigkeit"
+ },
+ "A biblioteca 'pymatgen' é necessária para processar arquivos CIF.": {
+  "en_US": "The 'pymatgen' library is required to process CIF files.",
+  "de_DE": "Die Bibliothek 'pymatgen' wird zum Verarbeiten von CIF-Dateien benötigt."
+ },
+ "CIF Já Carregado": {
+  "en_US": "CIF Already Loaded",
+  "de_DE": "CIF bereits geladen"
+ },
+ "Nenhuma Seleção": {
+  "en_US": "No Selection",
+  "de_DE": "Keine Auswahl"
+ },
+ "Selecione um ou mais arquivos experimentais da lista para normalizar.": {
+  "en_US": "Select one or more experimental files from the list to normalize.",
+  "de_DE": "Wählen Sie eine oder mehrere experimentelle Dateien aus der Liste zum Normalisieren."
+ },
+ "Selecione um ou mais arquivos CIF da lista para calcular.": {
+  "en_US": "Select one or more CIF files from the list to calculate.",
+  "de_DE": "Wählen Sie eine oder mehrere CIF-Dateien aus der Liste zum Berechnen."
+ },
+ "Por favor, selecione um item CIF válido.": {
+  "en_US": "Please select a valid CIF item.",
+  "de_DE": "Bitte wählen Sie ein gültiges CIF-Element."
+ },
+ "Visualizador Indisponível": {
+  "en_US": "Viewer Unavailable",
+  "de_DE": "Viewer nicht verfügbar"
+ },
+ "O visualizador 3D não está disponível.\nCertifique-se de que 'pyqtgraph' e 'PyOpenGL' estão instalados.": {
+  "en_US": "The 3D viewer is not available. Make sure 'pyqtgraph' and 'PyOpenGL' are installed.",
+  "de_DE": "Der 3D-Viewer ist nicht verfügbar. Stellen Sie sicher, dass 'pyqtgraph' und 'PyOpenGL' installiert sind."
+ },
+ "Sem Estrutura": {
+  "en_US": "No Structure",
+  "de_DE": "Keine Struktur"
+ },
+ "Carregue uma estrutura CIF primeiro para usar as animações.": {
+  "en_US": "Load a CIF structure first to use the animations.",
+  "de_DE": "Laden Sie zuerst eine CIF-Struktur, um die Animationen zu nutzen."
+ },
+ "Erro": {
+  "en_US": "Error",
+  "de_DE": "Fehler"
+ },
+ "Não há conteúdo CIF para salvar.": {
+  "en_US": "There is no CIF content to save.",
+  "de_DE": "Es gibt keinen CIF-Inhalt zum Speichern."
+ },
+ "Salvo": {
+  "en_US": "Saved",
+  "de_DE": "Gespeichert"
+ },
+ "Sem Dados": {
+  "en_US": "No Data",
+  "de_DE": "Keine Daten"
+ },
+ "Selecione um ou mais arquivos experimentais da lista para suavizar.": {
+  "en_US": "Select one or more experimental files from the list to smooth.",
+  "de_DE": "Wählen Sie eine oder mehrere experimentelle Dateien aus der Liste zum Glätten."
+ },
+ "A biblioteca 'scipy' é necessária para a suavização.": {
+  "en_US": "The 'scipy' library is required for smoothing.",
+  "de_DE": "Die Bibliothek 'scipy' wird für die Glättung benötigt."
+ },
+ "Selecione um ou mais arquivos experimentais da lista para detectar picos.": {
+  "en_US": "Select one or more experimental files from the list to detect peaks.",
+  "de_DE": "Wählen Sie eine oder mehrere experimentelle Dateien aus der Liste zur Peak-Erkennung."
+ },
+ "A biblioteca 'scipy' é necessária para a detecção de picos.": {
+  "en_US": "The 'scipy' library is required for peak detection.",
+  "de_DE": "Die Bibliothek 'scipy' wird für die Peak-Erkennung benötigt."
+ },
+ "A biblioteca 'openpyxl' é necessária para exportar para Excel.\nPor favor, instale-a com: pip install openpyxl": {
+  "en_US": "The 'openpyxl' library is required to export to Excel. Please install it with: pip install openpyxl",
+  "de_DE": "Die Bibliothek 'openpyxl' wird für den Excel-Export benötigt. Bitte installieren Sie sie mit: pip install openpyxl"
+ },
+ "Exportar para Excel": {
+  "en_US": "Export to Excel",
+  "de_DE": "Nach Excel exportieren"
+ },
+ "Não há dados carregados para exportar.": {
+  "en_US": "There is no loaded data to export.",
+  "de_DE": "Es sind keine Daten zum Exportieren geladen."
+ },
+ "Exportação Concluída": {
+  "en_US": "Export Complete",
+  "de_DE": "Export abgeschlossen"
+ },
+ "Não foi possível encontrar os dados do arquivo selecionado.": {
+  "en_US": "Could not find the data of the selected file.",
+  "de_DE": "Die Daten der ausgewählten Datei konnten nicht gefunden werden."
+ },
+ "Dados não encontrados.": {
+  "en_US": "Data not found.",
+  "de_DE": "Daten nicht gefunden."
+ },
+ "Normalização Concluída": {
+  "en_US": "Normalization Complete",
+  "de_DE": "Normalisierung abgeschlossen"
+ },
+ "Aplicar paleta:": {
+  "en_US": "Apply palette:",
+  "de_DE": "Palette anwenden:"
+ },
+ "Valor Inválido": {
+  "en_US": "Invalid Value",
+  "de_DE": "Ungültiger Wert"
+ },
+ "O valor de X Ticks é muito pequeno (< 0.1) e foi definido como automático.\nValores muito pequenos causam geração excessiva de marcações no eixo.": {
+  "en_US": "The X Ticks value is too small (< 0.1) and was set to automatic. Very small values cause excessive tick generation on the axis.",
+  "de_DE": "Der X-Ticks-Wert ist zu klein (< 0,1) und wurde auf automatisch gesetzt. Sehr kleine Werte erzeugen zu viele Achsenmarkierungen."
+ },
+ "O valor de Y Ticks é muito pequeno (< 0.1) e foi definido como automático.\nValores muito pequenos causam geração excessiva de marcações no eixo.": {
+  "en_US": "The Y Ticks value is too small (< 0.1) and was set to automatic. Very small values cause excessive tick generation on the axis.",
+  "de_DE": "Der Y-Ticks-Wert ist zu klein (< 0,1) und wurde auf automatisch gesetzt. Sehr kleine Werte erzeugen zu viele Achsenmarkierungen."
+ },
+ "Caminho Inválido": {
+  "en_US": "Invalid Path",
+  "de_DE": "Ungültiger Pfad"
+ },
+ "Por favor, escolha um local para salvar o arquivo.": {
+  "en_US": "Please choose a location to save the file.",
+  "de_DE": "Bitte wählen Sie einen Speicherort für die Datei."
+ },
+ "Parâmetros Inválidos": {
+  "en_US": "Invalid Parameters",
+  "de_DE": "Ungültige Parameter"
+ },
+ "A 'Ordem do Polinômio' deve ser menor que o 'Tamanho da Janela'.": {
+  "en_US": "The 'Polynomial Order' must be smaller than the 'Window Size'.",
+  "de_DE": "Die 'Polynomordnung' muss kleiner als die 'Fenstergröße' sein."
+ },
+ "Erro ao Analisar CIF": {
+  "en_US": "Error Parsing CIF",
+  "de_DE": "Fehler beim Parsen der CIF"
+ },
+ "Simulação Necessária": {
+  "en_US": "Simulation Required",
+  "de_DE": "Simulation erforderlich"
+ },
+ "Pasta Existente": {
+  "en_US": "Existing Folder",
+  "de_DE": "Vorhandener Ordner"
+ },
+ "Erro ao Salvar": {
+  "en_US": "Error Saving",
+  "de_DE": "Fehler beim Speichern"
+ },
+ "Erro no CIF": {
+  "en_US": "CIF Error",
+  "de_DE": "CIF-Fehler"
+ },
+ "Normalização Parcial": {
+  "en_US": "Partial Normalization",
+  "de_DE": "Teilweise Normalisierung"
+ },
+ "Erro de Parâmetro": {
+  "en_US": "Parameter Error",
+  "de_DE": "Parameterfehler"
+ },
+ "Erro na Simulação": {
+  "en_US": "Simulation Error",
+  "de_DE": "Simulationsfehler"
+ },
+ "Comprimento de onda inválido.": {
+  "en_US": "Invalid wavelength.",
+  "de_DE": "Ungültige Wellenlänge."
+ },
+ "Erro na Suavização": {
+  "en_US": "Smoothing Error",
+  "de_DE": "Glättungsfehler"
+ },
+ "Erro na Detecção de Picos": {
+  "en_US": "Peak Detection Error",
+  "de_DE": "Fehler bei der Peak-Erkennung"
+ },
+ "Sucesso": {
+  "en_US": "Success",
+  "de_DE": "Erfolg"
+ },
+ "Nenhum dos itens carregados possui dados simulados ou lidos.": {
+  "en_US": "None of the loaded items has simulated or read data.",
+  "de_DE": "Keines der geladenen Elemente hat simulierte oder gelesene Daten."
+ },
+ "Erro na Exportação": {
+  "en_US": "Export Error",
+  "de_DE": "Exportfehler"
+ },
+ "Erro na Normalização": {
+  "en_US": "Normalization Error",
+  "de_DE": "Normalisierungsfehler"
+ },
+ "Arquivo de Projeto Não Encontrado": {
+  "en_US": "Project File Not Found",
+  "de_DE": "Projektdatei nicht gefunden"
+ },
+ "Erro ao Abrir": {
+  "en_US": "Error Opening",
+  "de_DE": "Fehler beim Öffnen"
+ },
+ "Erro ao Ler Arquivo": {
+  "en_US": "Error Reading File",
+  "de_DE": "Fehler beim Lesen der Datei"
+ },
+ "Erro ao Carregar CIF": {
+  "en_US": "Error Loading CIF",
+  "de_DE": "Fehler beim Laden der CIF"
+ },
+ "Erro de Normalização": {
+  "en_US": "Normalization Error",
+  "de_DE": "Normalisierungsfehler"
+ },
+ "CIF não calculado": {
+  "en_US": "CIF not calculated",
+  "de_DE": "CIF nicht berechnet"
+ },
+ "Erro de Paleta": {
+  "en_US": "Palette Error",
+  "de_DE": "Paletten-Fehler"
+ },
+ "Erro ao Criar Projeto": {
+  "en_US": "Error Creating Project",
+  "de_DE": "Fehler beim Erstellen des Projekts"
+ },
+ "Erro ao Apagar": {
+  "en_US": "Error Deleting",
+  "de_DE": "Fehler beim Löschen"
+ },
+ "Nenhuma estrutura carregada": {
+  "en_US": "No structure loaded",
+  "de_DE": "Keine Struktur geladen"
+ },
+ "Aviso": {
+  "en_US": "Warning",
+  "de_DE": "Warnung"
+ },
+ "Normalização de Dados": {
+  "en_US": "Data Normalization",
+  "de_DE": "Datennormalisierung"
+ },
+ "Selecione o método de normalização para os dados experimentais selecionados:": {
+  "en_US": "Select the normalization method for the selected experimental data:",
+  "de_DE": "Wählen Sie die Normalisierungsmethode für die ausgewählten experimentellen Daten:"
+ },
+ "Métodos de Normalização": {
+  "en_US": "Normalization Methods",
+  "de_DE": "Normalisierungsmethoden"
+ },
+ "Normalizar [0, 1]": {
+  "en_US": "Normalize [0, 1]",
+  "de_DE": "Normalisieren [0, 1]"
+ },
+ "Escala os dados para o intervalo [0, 1].\nFórmula: (y - y_min) / (y_max - y_min)": {
+  "en_US": "Scales the data to the [0, 1] range. Formula: (y - y_min) / (y_max - y_min)",
+  "de_DE": "Skaliert die Daten auf den Bereich [0, 1]. Formel: (y - y_min) / (y_max - y_min)"
+ },
+ "Dividir pelo Máximo": {
+  "en_US": "Divide by Maximum",
+  "de_DE": "Durch Maximum teilen"
+ },
+ "Divide todos os valores pelo valor máximo.\nFórmula: y / y_max": {
+  "en_US": "Divides all values by the maximum value. Formula: y / y_max",
+  "de_DE": "Teilt alle Werte durch den Maximalwert. Formel: y / y_max"
+ },
+ "Dividir pelo Mínimo": {
+  "en_US": "Divide by Minimum",
+  "de_DE": "Durch Minimum teilen"
+ },
+ "Divide todos os valores pelo valor mínimo.\nFórmula: y / y_min": {
+  "en_US": "Divides all values by the minimum value. Formula: y / y_min",
+  "de_DE": "Teilt alle Werte durch den Minimalwert. Formel: y / y_min"
+ },
+ "Dividir pela Mediana": {
+  "en_US": "Divide by Median",
+  "de_DE": "Durch Median teilen"
+ },
+ "Divide todos os valores pela mediana.\nFórmula: y / mediana(y)": {
+  "en_US": "Divides all values by the median. Formula: y / median(y)",
+  "de_DE": "Teilt alle Werte durch den Median. Formel: y / Median(y)"
+ },
+ "Normalizar por Pico Específico": {
+  "en_US": "Normalize by Specific Peak",
+  "de_DE": "Nach spezifischem Peak normalisieren"
+ },
+ "Normalização por Pico Específico": {
+  "en_US": "Normalization by Specific Peak",
+  "de_DE": "Normalisierung nach spezifischem Peak"
+ },
+ "Opções de Normalização": {
+  "en_US": "Normalization Options",
+  "de_DE": "Normalisierungsoptionen"
+ },
+ "Apenas o arquivo selecionado será normalizado pelo pico.\nOs outros arquivos permanecerão inalterados.": {
+  "en_US": "Only the selected file will be normalized by the peak. The other files will remain unchanged.",
+  "de_DE": "Nur die ausgewählte Datei wird am Peak normalisiert. Die anderen Dateien bleiben unverändert."
+ },
+ "Todos os arquivos experimentais serão normalizados usando\na intensidade do pico na mesma posição 2θ de cada arquivo.": {
+  "en_US": "All experimental files will be normalized using the peak intensity at the same 2θ position of each file.",
+  "de_DE": "Alle experimentellen Dateien werden anhand der Peak-Intensität an derselben 2θ-Position jeder Datei normalisiert."
+ },
+ "<i>Este é o único arquivo experimental carregado.</i>": {
+  "en_US": "<i>This is the only experimental file loaded.</i>",
+  "de_DE": "<i>Dies ist die einzige geladene experimentelle Datei.</i>"
+ },
+ "Pymatgen não disponível para cálculo de reflexões.": {
+  "en_US": "Pymatgen not available for reflection calculation.",
+  "de_DE": "Pymatgen für die Reflexionsberechnung nicht verfügbar."
+ },
+ "Conditions": {
+  "en_US": "Conditions",
+  "de_DE": "Bedingungen"
+ },
+ "Reflections": {
+  "en_US": "Reflections",
+  "de_DE": "Reflexe"
+ },
+ "Fechar": {
+  "en_US": "Close",
+  "de_DE": "Schließen"
+ },
+ "Personalizar Legenda": {
+  "en_US": "Customize Legend",
+  "de_DE": "Legende anpassen"
+ },
+ "Aplicar": {
+  "en_US": "Apply",
+  "de_DE": "Anwenden"
+ },
+ "Aceitar": {
+  "en_US": "Accept",
+  "de_DE": "Übernehmen"
+ },
+ "Cancelar": {
+  "en_US": "Cancel",
+  "de_DE": "Abbrechen"
+ },
+ "Aparência da Fonte": {
+  "en_US": "Font Appearance",
+  "de_DE": "Schrift-Aussehen"
+ },
+ " pt": {
+  "en_US": "pt",
+  "de_DE": "pt"
+ },
+ "Borda e Estilo": {
+  "en_US": "Border and Style",
+  "de_DE": "Rahmen und Stil"
+ },
+ "Mostrar borda ao redor da legenda": {
+  "en_US": "Show border around the legend",
+  "de_DE": "Rahmen um die Legende anzeigen"
+ },
+ "Cantos arredondados": {
+  "en_US": "Rounded corners",
+  "de_DE": "Abgerundete Ecken"
+ },
+ "Adicionar sombra": {
+  "en_US": "Add shadow",
+  "de_DE": "Schatten hinzufügen"
+ },
+ "Posição e Comportamento": {
+  "en_US": "Position and Behavior",
+  "de_DE": "Position und Verhalten"
+ },
+ "Permitir mover legenda com o mouse": {
+  "en_US": "Allow moving the legend with the mouse",
+  "de_DE": "Verschieben der Legende mit der Maus erlauben"
+ },
+ "Se ativado, você pode clicar e arrastar a legenda para qualquer posição no gráfico.\nSe desativado, a legenda fica fixa na posição selecionada acima.": {
+  "en_US": "If enabled, you can click and drag the legend to any position on the plot. If disabled, the legend stays fixed at the position selected above.",
+  "de_DE": "Wenn aktiviert, können Sie die Legende an eine beliebige Position im Diagramm ziehen. Wenn deaktiviert, bleibt die Legende an der oben gewählten Position fixiert."
+ },
+ "<i>Dica: Com a opção acima ativada, clique e arraste a legenda no gráfico para reposicioná-la.</i>": {
+  "en_US": "<i>Tip: With the option above enabled, click and drag the legend on the plot to reposition it.</i>",
+  "de_DE": "<i>Tipp: Wenn die obige Option aktiviert ist, klicken und ziehen Sie die Legende im Diagramm, um sie neu zu positionieren.</i>"
+ },
+ "Resetar Posição Customizada": {
+  "en_US": "Reset Custom Position",
+  "de_DE": "Benutzerdefinierte Position zurücksetzen"
+ },
+ "Clique para remover qualquer posição customizada (arrastada) e usar a localização selecionada acima.": {
+  "en_US": "Click to remove any custom (dragged) position and use the location selected above.",
+  "de_DE": "Klicken Sie, um eine benutzerdefinierte (gezogene) Position zu entfernen und den oben gewählten Ort zu verwenden."
+ },
+ "Layout da Legenda": {
+  "en_US": "Legend Layout",
+  "de_DE": "Legenden-Layout"
+ },
+ "Número de colunas para organizar os itens da legenda.\n1 coluna = vertical (padrão)\n2+ colunas = itens organizados horizontalmente": {
+  "en_US": "Number of columns to organize the legend items. 1 column = vertical (default). 2+ columns = items organized horizontally.",
+  "de_DE": "Anzahl der Spalten zur Anordnung der Legendeneinträge. 1 Spalte = vertikal (Standard). 2+ Spalten = horizontal angeordnet."
+ },
+ "Inverter ordem dos itens": {
+  "en_US": "Reverse item order",
+  "de_DE": "Reihenfolge der Einträge umkehren"
+ },
+ "Inverte a ordem em que os itens aparecem na legenda.\nÚtil para ajustar a ordem de visualização.": {
+  "en_US": "Reverses the order in which items appear in the legend. Useful to adjust the display order.",
+  "de_DE": "Kehrt die Reihenfolge der Einträge in der Legende um. Nützlich, um die Anzeigereihenfolge anzupassen."
+ },
+ "Posição Resetada": {
+  "en_US": "Position Reset",
+  "de_DE": "Position zurückgesetzt"
+ },
+ "A posição customizada foi removida.\nA legenda agora usará a localização selecionada acima.\n\nClique em 'Aplicar' ou 'Aceitar' para ver o resultado.": {
+  "en_US": "The custom position was removed. The legend will now use the location selected above. Click 'Apply' or 'Accept' to see the result.",
+  "de_DE": "Die benutzerdefinierte Position wurde entfernt. Die Legende verwendet nun den oben gewählten Ort. Klicken Sie auf 'Anwenden' oder 'Übernehmen', um das Ergebnis zu sehen."
+ },
+ "Auto-Ajuste de Parametros de Rede": {
+  "en_US": "Lattice Parameters Auto-Fit",
+  "de_DE": "Auto-Anpassung der Gitterparameter"
+ },
+ "Detecao de Picos": {
+  "en_US": "Peak Detection",
+  "de_DE": "Peak-Erkennung"
+ },
+ "Baixo = menos picos (apenas os maiores)\nAlto = mais picos (inclui menores)": {
+  "en_US": "Low = fewer peaks (only the largest) High = more peaks (includes smaller)",
+  "de_DE": "Niedrig = weniger Peaks (nur die größten) Hoch = mehr Peaks (auch kleinere)"
+ },
+ "Detectar": {
+  "en_US": "Detect",
+  "de_DE": "Erkennen"
+ },
+ "Adicionar": {
+  "en_US": "Add",
+  "de_DE": "Hinzufügen"
+ },
+ "Clique no grafico para adicionar um pico manualmente": {
+  "en_US": "Click on the plot to add a peak manually",
+  "de_DE": "Klicken Sie auf den Graphen, um manuell einen Peak hinzuzufügen"
+ },
+ "Remover": {
+  "en_US": "Remove",
+  "de_DE": "Entfernen"
+ },
+ "Remove os picos selecionados da tabela": {
+  "en_US": "Removes the selected peaks from the table",
+  "de_DE": "Entfernt die ausgewählten Peaks aus der Tabelle"
+ },
+ "0 picos detectados": {
+  "en_US": "0 peaks detected",
+  "de_DE": "0 Peaks erkannt"
+ },
+ "Picos Selecionados": {
+  "en_US": "Selected Peaks",
+  "de_DE": "Ausgewählte Peaks"
+ },
+ "Ajuste": {
+  "en_US": "Fit",
+  "de_DE": "Anpassung"
+ },
+ "Variacao maxima permitida para cada parametro de rede.\nValores menores = ajuste mais conservador.\nRecomendado: 3-5% para ajuste fino.": {
+  "en_US": "Maximum variation allowed for each lattice parameter. Smaller values = more conservative fit. Recommended: 3-5% for fine tuning.",
+  "de_DE": "Maximal erlaubte Variation für jeden Gitterparameter. Kleinere Werte = konservativere Anpassung. Empfohlen: 3-5% für die Feinabstimmung."
+ },
+ "Ajustar": {
+  "en_US": "Fit",
+  "de_DE": "Anpassen"
+ },
+ "Resultado": {
+  "en_US": "Result",
+  "de_DE": "Ergebnis"
+ },
+ "Sensibilidade:": {
+  "en_US": "Sensitivity:",
+  "de_DE": "Empfindlichkeit:"
+ },
+ "Dist. min (°):": {
+  "en_US": "Min. dist (°):",
+  "de_DE": "Min. Abstand (°):"
+ },
+ "Variacao max (%):": {
+  "en_US": "Max variation (%):",
+  "de_DE": "Max. Variation (%):"
+ },
+ "Sem Picos": {
+  "en_US": "No Peaks",
+  "de_DE": "Keine Peaks"
+ },
+ "Detecte ou adicione pelo menos 3 picos para o ajuste.": {
+  "en_US": "Detect or add at least 3 peaks for the fit.",
+  "de_DE": "Erkennen oder fügen Sie mindestens 3 Peaks für die Anpassung hinzu."
+ },
+ "Poucos Picos": {
+  "en_US": "Few Peaks",
+  "de_DE": "Wenige Peaks"
+ },
+ "Recomenda-se pelo menos 3 picos para um ajuste confiavel.\nAdicione mais picos ou aumente a sensibilidade.": {
+  "en_US": "At least 3 peaks are recommended for a reliable fit. Add more peaks or increase the sensitivity.",
+  "de_DE": "Für eine zuverlässige Anpassung werden mindestens 3 Peaks empfohlen. Fügen Sie mehr Peaks hinzu oder erhöhen Sie die Empfindlichkeit."
+ },
+ "Erro no Ajuste": {
+  "en_US": "Fit Error",
+  "de_DE": "Anpassungsfehler"
+ },
+ "Spline: mínimo 3 pontos necessários": {
+  "en_US": "Spline: minimum 3 points required",
+  "de_DE": "Spline: mindestens 3 Punkte erforderlich"
+ },
+ "pymatgen não disponível. Instale com: pip install pymatgen": {
+  "en_US": "pymatgen not available. Install with: pip install pymatgen",
+  "de_DE": "pymatgen nicht verfügbar. Installieren mit: pip install pymatgen"
+ },
+ "⚠️  Biblioteca de ligações não disponível - usando fallback genérico": {
+  "en_US": "⚠️  Bonds library not available - using generic fallback",
+  "de_DE": "⚠️  Bindungsbibliothek nicht verfügbar - generischer Fallback wird verwendet"
+ },
+ "Resetar visualização da câmera": {
+  "en_US": "Reset camera view",
+  "de_DE": "Kameraansicht zurücksetzen"
+ },
+ "Configurações de Visualização 3D": {
+  "en_US": "3D View Settings",
+  "de_DE": "3D-Ansichtseinstellungen"
+ },
+ "Tamanho dos Átomos": {
+  "en_US": "Atom Size",
+  "de_DE": "Atomgröße"
+ },
+ "Visibilidade": {
+  "en_US": "Visibility",
+  "de_DE": "Sichtbarkeit"
+ },
+ "Mostrar Célula Unitária": {
+  "en_US": "Show Unit Cell",
+  "de_DE": "Elementarzelle anzeigen"
+ },
+ "Mostra/oculta as arestas da célula unitária": {
+  "en_US": "Shows/hides the unit cell edges",
+  "de_DE": "Zeigt/verbirgt die Kanten der Elementarzelle"
+ },
+ "Mostrar Ligações": {
+  "en_US": "Show Bonds",
+  "de_DE": "Bindungen anzeigen"
+ },
+ "Mostra/oculta as ligações químicas entre átomos": {
+  "en_US": "Shows/hides the chemical bonds between atoms",
+  "de_DE": "Zeigt/verbirgt die chemischen Bindungen zwischen Atomen"
+ },
+ "Mesclar Células (Caixa Única)": {
+  "en_US": "Merge Cells (Single Box)",
+  "de_DE": "Zellen zusammenführen (einzelner Kasten)"
+ },
+ "Mostra apenas uma caixa englobando toda a supercélula\nao invés de mostrar cada célula unitária individualmente.\nÚtil para visualização mais limpa e didática.": {
+  "en_US": "Shows only one box enclosing the whole supercell instead of showing each unit cell individually. Useful for a cleaner, more didactic view.",
+  "de_DE": "Zeigt nur einen Kasten um die gesamte Superzelle, anstatt jede Elementarzelle einzeln darzustellen. Nützlich für eine sauberere, anschaulichere Ansicht."
+ },
+ "Ligações": {
+  "en_US": "Bonds",
+  "de_DE": "Bindungen"
+ },
+ "Animações 3D": {
+  "en_US": "3D Animations",
+  "de_DE": "3D-Animationen"
+ },
+ "Rotação Contínua": {
+  "en_US": "Continuous Rotation",
+  "de_DE": "Kontinuierliche Rotation"
+ },
+ " Lenta": {
+  "en_US": "Slow",
+  "de_DE": "Langsam"
+ },
+ " Normal": {
+  "en_US": "Normal",
+  "de_DE": "Normal"
+ },
+ " Rápida": {
+  "en_US": "Fast",
+  "de_DE": "Schnell"
+ },
+ "Girar em torno do eixo:": {
+  "en_US": "Rotate around axis:",
+  "de_DE": "Um Achse drehen:"
+ },
+ "Eixo Z": {
+  "en_US": "Z Axis",
+  "de_DE": "Z-Achse"
+ },
+ "Vibração Térmica": {
+  "en_US": "Thermal Vibration",
+  "de_DE": "Thermische Vibration"
+ },
+ "0.10 Å": {
+  "en_US": "0.10 Å",
+  "de_DE": "0.10 Å"
+ },
+ "Iniciar Vibração": {
+  "en_US": "Start Vibration",
+  "de_DE": "Vibration starten"
+ },
+ "⏹ Parar Animação": {
+  "en_US": "⏹ Stop Animation",
+  "de_DE": "⏹ Animation stoppen"
+ },
+ "Expansão Estrutural (Supercélula)": {
+  "en_US": "Structural Expansion (Supercell)",
+  "de_DE": "Strukturelle Erweiterung (Superzelle)"
+ },
+ "Configuração Atual": {
+  "en_US": "Current Configuration",
+  "de_DE": "Aktuelle Konfiguration"
+ },
+ "Expansão Estrutural": {
+  "en_US": "Structural Expansion",
+  "de_DE": "Strukturelle Erweiterung"
+ },
+ "Expansão Predefinida": {
+  "en_US": "Predefined Expansion",
+  "de_DE": "Vordefinierte Erweiterung"
+ },
+ "Resetar": {
+  "en_US": "Reset",
+  "de_DE": "Zurücksetzen"
+ },
+ "Dependência Ausente": {
+  "en_US": "Missing Dependency",
+  "de_DE": "Fehlende Abhängigkeit"
+ },
+ "A biblioteca 'pymatgen' não está instalada.\n\nPara instalar, execute:\npip install pymatgen": {
+  "en_US": "The 'pymatgen' library is not installed. To install, run: pip install pymatgen",
+  "de_DE": "Die Bibliothek 'pymatgen' ist nicht installiert. Zum Installieren ausführen: pip install pymatgen"
+ },
+ "Escala:": {
+  "en_US": "Scale:",
+  "de_DE": "Skala:"
+ },
+ "Espessura:": {
+  "en_US": "Thickness:",
+  "de_DE": "Dicke:"
+ },
+ "Nenhuma Estrutura": {
+  "en_US": "No Structure",
+  "de_DE": "Keine Struktur"
+ },
+ "Não há estrutura carregada para aplicar configurações.": {
+  "en_US": "There is no loaded structure to apply settings.",
+  "de_DE": "Es ist keine Struktur geladen, um Einstellungen anzuwenden."
+ },
+ "Velocidade:": {
+  "en_US": "Speed:",
+  "de_DE": "Geschwindigkeit:"
+ },
+ "Amplitude:": {
+  "en_US": "Amplitude:",
+  "de_DE": "Amplitude:"
+ },
+ "Erro ao carregar estrutura": {
+  "en_US": "Error loading structure",
+  "de_DE": "Fehler beim Laden der Struktur"
+ },
+ "⚠️ Renderização ignorada: view_widget destruído": {
+  "en_US": "⚠️ Rendering skipped: view_widget destroyed",
+  "de_DE": "⚠️ Rendering übersprungen: view_widget zerstört"
+ },
+ "Remoção de Background - PhaseDRX": {
+  "en_US": "Background Removal - PhaseDRX",
+  "de_DE": "Untergrundentfernung - PhaseDRX"
+ },
+ "Configurações de Remoção de Background": {
+  "en_US": "Background Removal Settings",
+  "de_DE": "Einstellungen zur Untergrundentfernung"
+ },
+ "Aplicar suavização (recomendado para dados ruidosos)": {
+  "en_US": "Apply smoothing (recommended for noisy data)",
+  "de_DE": "Glättung anwenden (empfohlen für verrauschte Daten)"
+ },
+ "<b>Como usar:</b><br>1. Clique no gráfico em <b>regiões de background</b> (sem picos)<br>2. Continue clicando para adicionar mais pontos<br>3. Mínimo de pontos necessários = Grau + 1<br>4. Clique em 'Limpar Pontos' para recomeçar": {
+  "en_US": "<b>How to use:</b><br>1. Click on the plot in <b>background regions</b> (no peaks)<br>2. Keep clicking to add more points<br>3. Minimum points required = Degree + 1<br>4. Click 'Clear Points' to start over",
+  "de_DE": "<b>Verwendung:</b><br>1. Klicken Sie im Diagramm auf <b>Untergrundbereiche</b> (ohne Peaks)<br>2. Klicken Sie weiter, um mehr Punkte hinzuzufügen<br>3. Mindestpunkte = Grad + 1<br>4. Klicken Sie auf 'Punkte löschen', um neu zu beginnen"
+ },
+ "Limpar Pontos": {
+  "en_US": "Clear Points",
+  "de_DE": "Punkte löschen"
+ },
+ "Pontos selecionados: 0": {
+  "en_US": "Selected points: 0",
+  "de_DE": "Ausgewählte Punkte: 0"
+ },
+ "Visualização": {
+  "en_US": "View",
+  "de_DE": "Ansicht"
+ },
+ "Mostrar resultado da subtração (verde)": {
+  "en_US": "Show subtraction result (green)",
+  "de_DE": "Subtraktionsergebnis anzeigen (grün)"
+ },
+ "Mostrar background estimado (vermelho)": {
+  "en_US": "Show estimated background (red)",
+  "de_DE": "Geschätzten Untergrund anzeigen (rot)"
+ },
+ "OK": {
+  "en_US": "OK",
+  "de_DE": "OK"
+ },
+ "Bem-vindo ao PhaseDRX": {
+  "en_US": "Welcome to PhaseDRX",
+  "de_DE": "Willkommen bei PhaseDRX"
+ },
+ "Novo Projeto": {
+  "en_US": "New Project",
+  "de_DE": "Neues Projekt"
+ },
+ "Ex: Analise_Amostra_X": {
+  "en_US": "E.g.: Analysis_Sample_X",
+  "de_DE": "Z.B.: Analyse_Probe_X"
+ },
+ "Criar Novo Projeto": {
+  "en_US": "Create New Project",
+  "de_DE": "Neues Projekt erstellen"
+ },
+ "Abrir Projeto Existente...": {
+  "en_US": "Open Existing Project...",
+  "de_DE": "Vorhandenes Projekt öffnen..."
+ },
+ "Continuar em Sessão Anônima": {
+  "en_US": "Continue in Anonymous Session",
+  "de_DE": "In anonymer Sitzung fortfahren"
+ },
+ "Licença - GNU GPL v3": {
+  "en_US": "License - GNU GPL v3",
+  "de_DE": "Lizenz - GNU GPL v3"
+ },
+ "Tentativa de cálculo de proporção de massa sem elementos selecionados.": {
+  "en_US": "Attempt to calculate mass ratio without selected elements.",
+  "de_DE": "Versuch, das Massenverhältnis ohne ausgewählte Elemente zu berechnen."
+ },
+ "<b>Método:</b>": {
+  "en_US": "<b>Method:</b>",
+  "de_DE": "<b>Methode:</b>"
+ },
+ "<i>Mais iterações = background mais baixo (20-60 típico)</i>": {
+  "en_US": "<i>More iterations = lower background (20-60 typical)</i>",
+  "de_DE": "<i>Mehr Iterationen = niedrigerer Untergrund (20-60 typisch)</i>"
+ },
+ "<i>Valores maiores = background mais suave</i>": {
+  "en_US": "<i>Larger values = smoother background</i>",
+  "de_DE": "<i>Größere Werte = glatterer Untergrund</i>"
+ },
+ "Nenhum background foi calculado ainda.": {
+  "en_US": "No background has been calculated yet.",
+  "de_DE": "Es wurde noch kein Untergrund berechnet."
+ },
+ "Nome Inválido": {
+  "en_US": "Invalid Name",
+  "de_DE": "Ungültiger Name"
+ },
+ "Por favor, insira um nome para o projeto.": {
+  "en_US": "Please enter a name for the project.",
+  "de_DE": "Bitte geben Sie einen Namen für das Projekt ein."
+ },
+ "Por favor, selecione uma pasta válida para salvar o projeto.": {
+  "en_US": "Please select a valid folder to save the project.",
+  "de_DE": "Bitte wählen Sie einen gültigen Ordner zum Speichern des Projekts."
+ },
+ "Erro de valor (ValueError) ao ler proporções na Calculadora de Proporção.": {
+  "en_US": "Value error (ValueError) when reading ratios in the Ratio Calculator.",
+  "de_DE": "Wertfehler (ValueError) beim Lesen der Verhältnisse im Verhältnisrechner."
+ },
+ "Valor numérico inválido (ValueError) para massa total na Calculadora de Proporção.": {
+  "en_US": "Invalid numeric value (ValueError) for total mass in the Ratio Calculator.",
+  "de_DE": "Ungültiger Zahlenwert (ValueError) für die Gesamtmasse im Verhältnisrechner."
+ }
+}

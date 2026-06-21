@@ -240,3 +240,41 @@ def set_language(language: str) -> bool:
 def get_current_language() -> str:
     """Função de conveniência para obter idioma atual."""
     return get_translator().get_current_language()
+
+
+# --- i18n do PhaseDRX -------------------------------------------------------
+# O PhaseDRX (xrd.py e diálogos) tinha as strings em PT hardcoded. Em vez de
+# inventar centenas de chaves pontilhadas, usamos o TEXTO ORIGINAL EM PT como
+# chave num mapa plano (phasedrx_i18n.json). ptr() traduz conforme o idioma,
+# com fallback para o próprio PT (nada quebra se faltar tradução).
+_phasedrx_i18n = None
+
+
+def _load_phasedrx_i18n() -> dict:
+    global _phasedrx_i18n
+    if _phasedrx_i18n is None:
+        _phasedrx_i18n = {}
+        try:
+            path = os.path.join(
+                os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                'assets', 'translations', 'phasedrx_i18n.json')
+            with open(path, 'r', encoding='utf-8') as f:
+                _phasedrx_i18n = json.load(f)
+        except Exception as e:
+            logging.debug(f"phasedrx_i18n.json não carregado: {e}")
+            _phasedrx_i18n = {}
+    return _phasedrx_i18n
+
+
+def ptr(text: str) -> str:
+    """Traduz uma string do PhaseDRX usando o texto ORIGINAL (PT) como chave.
+    Em pt_BR retorna o próprio texto; em en_US/de_DE busca em phasedrx_i18n.json
+    e, se não houver, retorna o PT (fallback)."""
+    if not isinstance(text, str) or not text:
+        return text
+    if get_current_language() == 'pt_BR':
+        return text
+    entry = _load_phasedrx_i18n().get(text)
+    if isinstance(entry, dict):
+        return entry.get(get_current_language(), text)
+    return text

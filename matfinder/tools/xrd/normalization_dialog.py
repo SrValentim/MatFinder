@@ -8,6 +8,7 @@ from PySide6.QtWidgets import (
     QRadioButton, QButtonGroup, QDialogButtonBox, QGroupBox, QMessageBox
 )
 from PySide6.QtCore import Signal, Qt
+from matfinder.core.translator import ptr
 
 
 class NormalizationDialog(QDialog):
@@ -25,7 +26,7 @@ class NormalizationDialog(QDialog):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("Normalização de Dados")
+        self.setWindowTitle(ptr("Normalização de Dados"))
         self.setModal(True)
         self.selected_method = None
         self._setup_ui()
@@ -36,20 +37,20 @@ class NormalizationDialog(QDialog):
 
         # Descrição
         description = QLabel(
-            "Selecione o método de normalização para os dados experimentais selecionados:"
+            ptr("Selecione o método de normalização para os dados experimentais selecionados:")
         )
         description.setWordWrap(True)
         layout.addWidget(description)
 
         # Grupo de opções de normalização
-        options_group = QGroupBox("Métodos de Normalização")
+        options_group = QGroupBox(ptr("Métodos de Normalização"))
         options_layout = QVBoxLayout(options_group)
 
         # Criar grupo de botões de rádio
         self.button_group = QButtonGroup(self)
 
         # Opção 1: Normalizar [0, 1]
-        self.radio_normalize_01 = QRadioButton("Normalizar [0, 1]")
+        self.radio_normalize_01 = QRadioButton(ptr("Normalizar [0, 1]"))
         self.radio_normalize_01.setToolTip(
             "Escala os dados para o intervalo [0, 1].\n"
             "Fórmula: (y - y_min) / (y_max - y_min)"
@@ -59,7 +60,7 @@ class NormalizationDialog(QDialog):
         options_layout.addWidget(self.radio_normalize_01)
 
         # Opção 2: Dividir pelo Máximo
-        self.radio_div_max = QRadioButton("Dividir pelo Máximo")
+        self.radio_div_max = QRadioButton(ptr("Dividir pelo Máximo"))
         self.radio_div_max.setToolTip(
             "Divide todos os valores pelo valor máximo.\n"
             "Fórmula: y / y_max"
@@ -68,7 +69,7 @@ class NormalizationDialog(QDialog):
         options_layout.addWidget(self.radio_div_max)
 
         # Opção 3: Dividir pelo Mínimo
-        self.radio_div_min = QRadioButton("Dividir pelo Mínimo")
+        self.radio_div_min = QRadioButton(ptr("Dividir pelo Mínimo"))
         self.radio_div_min.setToolTip(
             "Divide todos os valores pelo valor mínimo.\n"
             "Fórmula: y / y_min"
@@ -77,7 +78,7 @@ class NormalizationDialog(QDialog):
         options_layout.addWidget(self.radio_div_min)
 
         # Opção 4: Dividir pela Mediana
-        self.radio_div_median = QRadioButton("Dividir pela Mediana")
+        self.radio_div_median = QRadioButton(ptr("Dividir pela Mediana"))
         self.radio_div_median.setToolTip(
             "Divide todos os valores pela mediana.\n"
             "Fórmula: y / mediana(y)"
@@ -244,7 +245,7 @@ class NormalizeByPeakConfirmDialog(QDialog):
 
     def __init__(self, selected_label, peak_position, other_count, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("Normalizar por Pico Específico")
+        self.setWindowTitle(ptr("Normalizar por Pico Específico"))
         self.setModal(True)
         self.normalize_others = False
         self._setup_ui(selected_label, peak_position, other_count)
@@ -254,7 +255,7 @@ class NormalizeByPeakConfirmDialog(QDialog):
         layout = QVBoxLayout(self)
 
         # Título
-        title_label = QLabel("Normalização por Pico Específico")
+        title_label = QLabel(ptr("Normalização por Pico Específico"))
         title_font = title_label.font()
         title_font.setPointSize(12)
         title_font.setBold(True)
@@ -285,7 +286,7 @@ class NormalizeByPeakConfirmDialog(QDialog):
             layout.addWidget(question_label)
 
             # Grupo de opções
-            options_group = QGroupBox("Opções de Normalização")
+            options_group = QGroupBox(ptr("Opções de Normalização"))
             options_layout = QVBoxLayout(options_group)
 
             self.button_group = QButtonGroup(self)
@@ -317,7 +318,7 @@ class NormalizeByPeakConfirmDialog(QDialog):
         else:
             # Não há outros arquivos
             note_label = QLabel(
-                "<i>Este é o único arquivo experimental carregado.</i>"
+                ptr("<i>Este é o único arquivo experimental carregado.</i>")
             )
             layout.addWidget(note_label)
 

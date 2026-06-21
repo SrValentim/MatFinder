@@ -8,6 +8,7 @@ from scipy import sparse
 from scipy.sparse.linalg import spsolve
 from scipy.signal import savgol_filter
 from scipy.interpolate import UnivariateSpline
+from matfinder.core.translator import ptr
 
 
 # ============================================================================
@@ -298,7 +299,7 @@ def spline_background(x_data, y_data, points_x, smoothing=0):
     """
     try:
         if len(points_x) < 3:
-            logging.warning("Spline: mínimo 3 pontos necessários")
+            logging.warning(ptr("Spline: mínimo 3 pontos necessários"))
             return np.zeros_like(y_data)
 
         # Encontrar valores Y
