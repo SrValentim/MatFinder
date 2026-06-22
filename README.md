@@ -20,6 +20,10 @@
 
   <br/>
   <sub><b>~172 MB</b> · no Python required · just extract and run <code>MatFinder.exe</code></sub>
+
+  <br/><br/>
+
+  ### 📖 [Overview](README.md) · 📸 [Screenshots](SCREENSHOTS.md)
 </div>
 
 ---
