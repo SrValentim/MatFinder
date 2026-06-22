@@ -2047,8 +2047,10 @@ class PhaseDRXTool(QMainWindow):
             Structure.from_str(cif_content, fmt="cif")
             item_id = str(uuid.uuid4())
 
-            temp_dir = os.path.join(os.path.dirname(sys.executable) if getattr(sys, 'frozen', False) else '.',
-                                    'temp_cifs')
+            # Grava em temp_cifs no diretório de dados GRAVÁVEL (cwd já foi ajustado
+            # por run_matfinder/run_phasedrx). NÃO usar a pasta do .exe: instalado em
+            # "C:\Program Files\MatFinder" ela é somente-leitura (WinError 5 ao exportar).
+            temp_dir = os.path.join(os.getcwd(), 'temp_cifs')
             os.makedirs(temp_dir, exist_ok=True)
             temp_path = os.path.join(temp_dir, filename)
             with open(temp_path, 'w', encoding='utf-8') as f:

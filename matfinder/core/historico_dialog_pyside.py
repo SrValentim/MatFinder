@@ -123,7 +123,7 @@ class HistoricoDialog(QDialog):
         return os.path.join(base_path, relative_path)
 
     def carregar_historico(self):
-        filepath = self.resource_path(HISTORICO_FILE)
+        filepath = os.path.join(os.getcwd(), HISTORICO_FILE)  # dir gravável (não _MEIPASS, read-only)
         try:
             if os.path.exists(filepath) and os.path.getsize(filepath) > 0:
                 with open(filepath, 'r', encoding='utf-8') as f:
@@ -139,7 +139,7 @@ class HistoricoDialog(QDialog):
         self.ordenar_e_popular_tabela()
 
     def salvar_historico(self):
-        filepath = self.resource_path(HISTORICO_FILE)
+        filepath = os.path.join(os.getcwd(), HISTORICO_FILE)  # dir gravável (não _MEIPASS, read-only)
         try:
             with open(filepath, 'w', encoding='utf-8') as f:
                 json.dump(self.historico_data, f, indent=4, ensure_ascii=False)

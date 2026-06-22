@@ -14,7 +14,10 @@ FAVORITES_FILE = "favorites.json"
 
 class FavoritesManager:
     def __init__(self):
-        self.favorites_file_path = self._resource_path(FAVORITES_FILE)
+        # favorites.json vai no diretório de dados GRAVÁVEL (cwd já ajustado por
+        # run_matfinder/run_phasedrx). Antes usava _MEIPASS/raiz do projeto, que em
+        # "C:\Program Files\MatFinder\_internal" é somente-leitura -> não salvava.
+        self.favorites_file_path = os.path.join(os.getcwd(), FAVORITES_FILE)
         self.favorited_ids = self.load_favorites()
 
     def _resource_path(self, relative_path):

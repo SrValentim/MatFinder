@@ -2599,7 +2599,8 @@ class MaterialsApp(QMainWindow):
 
         self.cif_export_target = 'phasedrx'
         if source_db == "Materials Project":
-            self.trigger_baixar_cif_mp(name_display, id_original)
+            # Exportar para PhaseDRX usa SEMPRE o CIF simetrizado (explícito).
+            self.trigger_baixar_cif_mp(name_display, id_original, mode="symmetrized")
         elif source_db == "COD":
             self.trigger_baixar_cif_cod(id_original, name_display)
 
@@ -3340,7 +3341,7 @@ class MaterialsApp(QMainWindow):
     def _add_search_to_history(self, termos_busca: str, base_dados: str):
         # --- ALTERAÇÃO DE REATORAÇÃO: Importação Local ---
         # (HISTORICO_FILE já é importado do local correto no topo do ficheiro)
-        filepath = self.resource_path(HISTORICO_FILE)
+        filepath = os.path.join(os.getcwd(), HISTORICO_FILE)  # dir gravável (não _MEIPASS, read-only)
         historico_existente = []
         try:
             if os.path.exists(filepath) and os.path.getsize(filepath) > 0:
