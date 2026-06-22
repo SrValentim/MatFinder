@@ -9,12 +9,24 @@ e versionamento [Semantic Versioning](https://semver.org/lang/pt-BR/) (MAJOR.MIN
 - **PATCH** — correções de bugs compatíveis.
 
 ## Fluxo de release (profissional)
+
+**Caminho A — automático (quando o GitHub Actions estiver ativo):**
 1. `python version_manager.py --bump patch|minor|major` (sincroniza VERSION, `__init__.py`,
    traduções, `setup.py`, `MatFinder.iss` e `CITATION.cff`).
 2. Mover as entradas de **[Não publicado]** para a nova versão aqui.
 3. `git commit -am "chore: release vX.Y.Z"`
 4. `git tag vX.Y.Z && git push origin main --tags`
 5. O GitHub Actions compila (zip + instalador) e publica o Release automaticamente.
+
+**Caminho B — local, de um comando (fallback / sem depender do Actions):**
+1. Editar o CHANGELOG ([Não publicado] → versão).
+2. `.venv-build\Scripts\python build_tools\release.py --bump patch`
+   (faz bump + build + instalador + zip + commit + tag + push + Release no GitHub).
+   Use `--no-publish` para um ensaio (só build/instalador/zip, sem enviar nada).
+
+> ⚠️ O Actions está **bloqueado por pendência de billing** na conta do GitHub
+> (Settings → Billing). Até regularizar, use o **Caminho B**. O workflow já está
+> pronto e passa a valer sozinho quando o billing for resolvido.
 
 > Tags publicadas são **imutáveis** — nunca mover/reescrever uma tag já lançada.
 
@@ -31,6 +43,9 @@ e versionamento [Semantic Versioning](https://semver.org/lang/pt-BR/) (MAJOR.MIN
 
 ### Added
 - `CHANGELOG.md`.
+- `build_tools/release.py` — release local de um comando (bump → build → instalador →
+  zip → commit/tag/push → Release no GitHub), usado como fallback enquanto o Actions
+  está bloqueado por billing.
 
 ---
 
