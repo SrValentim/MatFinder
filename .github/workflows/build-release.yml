@@ -1,8 +1,8 @@
 name: Build & Release (Windows)
 
 # Dispara:
-#  - ao enviar uma tag vX.Y.Z  -> compila e PUBLICA um Release com o .zip
-#  - manualmente (aba Actions > Run workflow) -> compila e sobe o .zip como artifact
+#  - ao enviar uma tag vX.Y.Z  -> compila e PUBLICA um Release com .zip + instalador
+#  - manualmente (aba Actions > Run workflow) -> compila e sobe os artifacts (sem release)
 on:
   push:
     tags:
@@ -15,7 +15,7 @@ permissions:
 jobs:
   build:
     runs-on: windows-latest
-    timeout-minutes: 40
+    timeout-minutes: 60
 
     steps:
       - name: Checkout
@@ -34,22 +34,36 @@ jobs:
       - name: Compilar (build + selftest headless)
         run: python build_tools/build_clean.py --allow-any-venv
 
-      - name: Empacotar .zip
+      - name: Instalar Inno Setup
+        run: choco install innosetup --no-progress -y
+
+      - name: Gerar instalador (.exe)
+        shell: pwsh
+        run: |
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" build_tools\MatFinder.iss
+          if ($LASTEXITCODE -ne 0) { throw "ISCC falhou (exit $LASTEXITCODE)" }
+
+      - name: Empacotar .zip + coletar assets
         shell: pwsh
         run: |
           $ver = (Get-Content VERSION -Raw).Trim()
           if ([string]::IsNullOrWhiteSpace($ver)) { $ver = "0.0.0" }
           $zip = "MatFinder-$ver-win64.zip"
           Compress-Archive -Path dist/MatFinder -DestinationPath $zip -Force
+          $setup = "dist/installer/MatFinder-$ver-Setup.exe"
+          if (-not (Test-Path $setup)) { throw "Instalador nao encontrado: $setup" }
           "ZIP=$zip"     | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          "SETUP=$setup" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
           "VERSION=$ver" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
-          Write-Host "Gerado: $zip"
+          Write-Host "Gerados: $zip  +  $setup"
 
-      - name: Subir artifact (sempre)
+      - name: Subir artifacts (sempre)
         uses: actions/upload-artifact@v4
         with:
           name: MatFinder-win64
-          path: ${{ env.ZIP }}
+          path: |
+            ${{ env.ZIP }}
+            ${{ env.SETUP }}
           retention-days: 14
 
       - name: Publicar Release (somente em tag v*)
@@ -59,13 +73,14 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           $notes = @"
-          Build automatico do MatFinder (Windows x64, ~400 MB).
+          Build automatico do MatFinder (Windows x64).
 
-          Como usar:
-          1. Baixe o .zip abaixo.
-          2. Extraia.
-          3. Rode MatFinder/MatFinder.exe.
+          Downloads:
+          - **MatFinder-${{ env.VERSION }}-Setup.exe** - instalador (recomendado).
+          - **MatFinder-${{ env.VERSION }}-win64.zip** - versao portatil (extrair e rodar MatFinder/MatFinder.exe ou PhaseDRX.exe).
+
+          Veja o CHANGELOG.md para as mudancas desta versao.
           "@
-          gh release create "${{ github.ref_name }}" "$env:ZIP" `
+          gh release create "${{ github.ref_name }}" "$env:ZIP" "$env:SETUP" `
             --title "MatFinder ${{ github.ref_name }}" `
             --notes "$notes"

@@ -38,6 +38,7 @@ favorites.json
 
 # Configurações locais do usuário
 settings.json
+/config.txt
 matfinder/assets/config/config.txt
 matfinder/assets/config/config_test.txt
 matfinder/assets/config/config_console_test.txt
@@ -65,6 +66,10 @@ desktop.ini
 # Playground e projetos paralelos
 /Playground/
 /Dumb/
+
+# Cópia de trabalho/scratch (não faz parte do repo)
+/MatFinder CIF retification/
+/Galeria de CIF/Teste/
 
 # Manual do usuário (desatualizado) - mantido local p/ o app, fora do repo
 # ate sair a versao nova. Remover esta linha quando o novo manual for adicionado.

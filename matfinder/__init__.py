@@ -1,4 +1,3 @@
-from matfinder.core.translator import ptr
 """
 MatFinder - Ferramenta de busca de materiais cristalográficos
 Copyright (C) 2025 Raynner Valentim (UFAM)
@@ -6,8 +5,8 @@ Copyright (C) 2025 Raynner Valentim (UFAM)
 Sistema centralizado de versionamento
 """
 
-# Versão do programa - ALTERE APENAS AQUI
-__version__ = "3.24"
+# Versão do programa - ALTERE APENAS AQUI OU USE version_manager.py
+__version__ = "3.24.0"
 __version_info__ = (3, 24, 0)  # (major, minor, patch)
 
 # Informações do programa
@@ -21,4 +20,4 @@ def get_version():
 
 def get_full_title():
     """Retorna o título completo com versão."""
-    return ptr("MatFinder Ver. {}").format(__version__)
+    return f"MatFinder Ver. {__version__}"

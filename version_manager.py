@@ -20,6 +20,14 @@ import os
 import re
 import sys
 
+# Console Windows (cp1252) quebra com os emojis das mensagens; força UTF-8 no
+# stdout/stderr para a ferramenta rodar igual no terminal local e no CI.
+for _stream in (sys.stdout, sys.stderr):
+    try:
+        _stream.reconfigure(encoding='utf-8')
+    except Exception:
+        pass
+
 
 def get_root_dir():
     """Retorna o diretório raiz do projeto."""
@@ -78,8 +86,8 @@ def update_init_file(version):
     init_file = os.path.join(get_root_dir(), 'matfinder', '__init__.py')
     major, minor, patch = parse_version(version)
 
-    # Versão simplificada (sem patch se for 0)
-    simple_version = f"{major}.{minor}" if patch == 0 else f"{major}.{minor}.{patch}"
+    # Sempre X.Y.Z completo (consistência entre VERSION/setup/.iss/__init__/CITATION).
+    simple_version = f"{major}.{minor}.{patch}"
 
     content = f'''"""
 MatFinder - Ferramenta de busca de materiais cristalográficos
@@ -117,8 +125,7 @@ def update_translation_files(version):
     translations_dir = os.path.join(get_root_dir(), 'matfinder', 'assets', 'translations')
 
     major, minor, patch = parse_version(version)
-    simple_version = f"{major}.{minor}" if patch == 0 else f"{major}.{minor}.{patch}"
-    title = f"MatFinder Ver. {simple_version}"
+    title = f"MatFinder Ver. {major}.{minor}.{patch}"
 
     for filename in ['pt_BR.json', 'en_US.json', 'de_DE.json']:
         filepath = os.path.join(translations_dir, filename)
@@ -163,8 +170,51 @@ def update_setup_file(version):
         print(f"✗ Erro ao atualizar {setup_file}: {e}")
 
 
+def update_iss_file(version):
+    """Atualiza build_tools/MatFinder.iss (#define AppVersion)."""
+    iss_file = os.path.join(get_root_dir(), 'build_tools', 'MatFinder.iss')
+    if not os.path.exists(iss_file):
+        return
+    try:
+        with open(iss_file, 'r', encoding='utf-8') as f:
+            content = f.read()
+        content = re.sub(
+            r'(#define\s+AppVersion\s+)"[\d.]+"',
+            rf'\g<1>"{version}"',
+            content
+        )
+        with open(iss_file, 'w', encoding='utf-8') as f:
+            f.write(content)
+        print(f"✓ Atualizado: {iss_file}")
+    except Exception as e:
+        print(f"✗ Erro ao atualizar {iss_file}: {e}")
+
+
+def update_citation_file(version):
+    """Atualiza CITATION.cff (campo version)."""
+    cff_file = os.path.join(get_root_dir(), 'CITATION.cff')
+    if not os.path.exists(cff_file):
+        return
+    try:
+        with open(cff_file, 'r', encoding='utf-8') as f:
+            content = f.read()
+        content = re.sub(
+            r'(?m)^(version:\s*)".*"\s*$',
+            rf'\g<1>"{version}"',
+            content
+        )
+        with open(cff_file, 'w', encoding='utf-8') as f:
+            f.write(content)
+        print(f"✓ Atualizado: {cff_file}  (obs.: o DOI Zenodo por versão é manual)")
+    except Exception as e:
+        print(f"✗ Erro ao atualizar {cff_file}: {e}")
+
+
 def update_all(version):
     """Atualiza todos os arquivos com a nova versão."""
+    # Normaliza sempre para X.Y.Z completo.
+    major, minor, patch = parse_version(version)
+    version = f"{major}.{minor}.{patch}"
     print(f"\n📦 Atualizando versão para: {version}\n")
 
     write_version(version)
@@ -173,12 +223,16 @@ def update_all(version):
     update_init_file(version)
     update_translation_files(version)
     update_setup_file(version)
+    update_iss_file(version)
+    update_citation_file(version)
 
     print(f"\n✅ Versão atualizada com sucesso para {version}!")
-    print("\nPróximos passos sugeridos:")
-    print("  1. Testar o programa")
-    print("  2. Commitar alterações: git commit -am 'Bump version to {}'".format(version))
-    print("  3. Criar tag: git tag v{}".format(version))
+    print("\nPróximos passos (fluxo profissional — a tag dispara o build no GitHub Actions):")
+    print(f"  1. Atualizar CHANGELOG.md (mover de [Não publicado] para [{version}])")
+    print(f"  2. git commit -am \"chore: release v{version}\"")
+    print(f"  3. git tag v{version}")
+    print(f"  4. git push origin main --tags")
+    print("     -> o workflow build-release.yml compila (zip + instalador) e publica o Release.")
 
 
 def main():
