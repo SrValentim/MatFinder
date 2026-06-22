@@ -1,6 +1,6 @@
 <div align="center">
 
-# 📸 MatFinder — Screenshots
+# MatFinder — Screenshots
 
 ### 📖 [Overview](README.md) · 📸 [Screenshots](SCREENSHOTS.md)
 
