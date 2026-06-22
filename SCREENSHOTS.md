@@ -2,7 +2,7 @@
 
 # MatFinder — Screenshots
 
-### 📖 [Overview](README.md) · 📸 [Screenshots](SCREENSHOTS.md)
+###  [Overview](README.md) ·  [Screenshots](SCREENSHOTS.md)
 
 A visual tour of MatFinder and its built-in XRD suite, **PhaseDRX**.
 
