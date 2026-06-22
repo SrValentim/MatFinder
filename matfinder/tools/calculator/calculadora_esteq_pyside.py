@@ -12,6 +12,7 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtGui import QFont, QColor, QGuiApplication
 from PySide6.QtCore import Qt, Signal
+from matfinder.core.translator import ptr
 
 # Importar sistema de tradução
 try:
@@ -43,9 +44,8 @@ except ImportError:
         print(f"ERRO CRÍTICO: Função de 'quimica_calc.py' não encontrada: {args}, {kwargs}")
         app = QApplication.instance()
         if app:  # Só mostra QMessageBox se a aplicação QApplication já existe
-            QMessageBox.critical(None, "Erro de Importação Crítico",
-                                 "O arquivo essencial 'quimica_calc.py' não foi encontrado.\n"
-                                 "A calculadora não pode funcionar. Verifique a instalação.")
+            QMessageBox.critical(None, ptr("Erro de Importação Crítico"),
+                                 ptr("O arquivo essencial 'quimica_calc.py' não foi encontrado.\nA calculadora não pode funcionar. Verifique a instalação."))
         # Para o caso de teste __main__ sem app ainda, apenas imprimir.
         # Em uma aplicação real, talvez queira sair ou impedir a instanciação da classe.
         return None
@@ -191,7 +191,7 @@ class CalculadoraEstequiometricaDialog(QDialog):
         rend_real_unit_layout = QHBoxLayout()
         rend_real_unit_layout.addWidget(self.rend_real_entry)
         self.rend_real_unit_combo = QComboBox()
-        self.rend_real_unit_combo.addItems(["g", "mol"])
+        self.rend_real_unit_combo.addItems(["g", ptr("mol")])
         rend_real_unit_layout.addWidget(self.rend_real_unit_combo)
         rend_content_layout.addLayout(rend_real_unit_layout, 1, 1)
 
@@ -235,7 +235,7 @@ class CalculadoraEstequiometricaDialog(QDialog):
         self.molaridade_volume_solucao_entry = QLineEdit()
         self.molaridade_volume_solucao_entry.setPlaceholderText(tr('calculators.stoichiometric.volume_placeholder'))
         self.molaridade_volume_unit_combo = QComboBox()
-        self.molaridade_volume_unit_combo.addItems(["L", "mL"])
+        self.molaridade_volume_unit_combo.addItems(["L", ptr("mL")])
         molaridade_volume_layout = QHBoxLayout()
         molaridade_volume_layout.addWidget(self.molaridade_volume_solucao_entry)
         molaridade_volume_layout.addWidget(self.molaridade_volume_unit_combo)
@@ -344,19 +344,19 @@ class CalculadoraEstequiometricaDialog(QDialog):
 
         equation_str = self.equation_entry.text().strip()
         if not equation_str:
-            self.balanced_equation_label.setText(f"<font color='red'>{tr('calculators.stoichiometric.error_no_equation')}</font>")
+            self.balanced_equation_label.setText(ptr("<font color='red'>{}</font>").format(tr('calculators.stoichiometric.error_no_equation')))
             self._update_sections_state()
             return
 
         if not CHEMPY_AVAILABLE:
             self.balanced_equation_label.setText(
-                f"<font color='red'>{tr('calculators.stoichiometric.error_chempy_missing')}</font>")
+                ptr("<font color='red'>{}</font>").format(tr('calculators.stoichiometric.error_chempy_missing')))
             self._update_sections_state()
             return
 
         parsed_data = parse_equation_string(equation_str)
         if not parsed_data or not parsed_data[0] or not parsed_data[1]:
-            self.balanced_equation_label.setText(f"<font color='red'>{tr('calculators.stoichiometric.error_parse')}</font>")
+            self.balanced_equation_label.setText(ptr("<font color='red'>{}</font>").format(tr('calculators.stoichiometric.error_parse')))
             self._update_sections_state()
             return
 
@@ -367,7 +367,7 @@ class CalculadoraEstequiometricaDialog(QDialog):
             prod_set = {str(f) for f in self.parsed_products_formulas}
             coeffs = balance_chemical_equation(reac_set, prod_set)
         except Exception as e:
-            self.balanced_equation_label.setText(f"<font color='red'>{tr('calculators.stoichiometric.error_balance')}: {e}</font>")
+            self.balanced_equation_label.setText(ptr("<font color='red'>{}: {}</font>").format(tr('calculators.stoichiometric.error_balance'), e))
             self._update_sections_state()
             return
 
@@ -379,7 +379,7 @@ class CalculadoraEstequiometricaDialog(QDialog):
                 self.balanced_reac_coeffs,
                 self.balanced_prod_coeffs
             )
-            self.balanced_equation_label.setText(f"<b>{formatted_eq}</b>")
+            self.balanced_equation_label.setText(ptr("<b>{}</b>").format(formatted_eq))
             self.log_resultado(f"{tr('calculators.stoichiometric.balanced_equation')}: {formatted_eq}")
             self._create_reagent_fields()
             self._populate_product_combo()
@@ -389,7 +389,7 @@ class CalculadoraEstequiometricaDialog(QDialog):
             self.molaridade_group.setChecked(False)  # Recolhe molaridade também
         else:
             self.balanced_equation_label.setText(
-                f"<font color='red'>{tr('calculators.stoichiometric.error_balance_failed')}</font>")
+                ptr("<font color='red'>{}</font>").format(tr('calculators.stoichiometric.error_balance_failed')))
             self._update_sections_state()
 
     def _clear_reagent_fields(self):
@@ -422,7 +422,7 @@ class CalculadoraEstequiometricaDialog(QDialog):
             entry = QLineEdit()
             entry.setPlaceholderText(tr('calculators.stoichiometric.quantity'))
             unit_combo = QComboBox()
-            unit_combo.addItems(["g", "mol"])
+            unit_combo.addItems(["g", ptr("mol")])
 
             h_layout.addWidget(label)
             h_layout.addWidget(entry)
@@ -629,7 +629,7 @@ class CalculadoraEstequiometricaDialog(QDialog):
         if formula_soluto:
             mm = calcular_massa_molar(formula_soluto)
             if mm is not None and mm > 0:
-                self.molaridade_mm_entry.setText(f"{mm:.4f}")
+                self.molaridade_mm_entry.setText(ptr("{:.4f}").format(mm))
             else:
                 self.molaridade_mm_entry.clear()
                 # Opcional: notificar o usuário se o cálculo da MM falhar silenciosamente
@@ -676,7 +676,7 @@ class CalculadoraEstequiometricaDialog(QDialog):
             moles_soluto = massa_soluto / mm_soluto
             molaridade = moles_soluto / volume_solucao_L
 
-            self.molaridade_resultado_label.setText(f"{tr('calculators.stoichiometric.molarity_label')}: {molaridade:.4f} mol/L")
+            self.molaridade_resultado_label.setText(ptr("{}: {:.4f} mol/L").format(tr('calculators.stoichiometric.molarity_label'), molaridade))
             self.log_resultado(f"\n--- {tr('calculators.stoichiometric.molarity_calc')} ---")
             if formula_soluto_str:
                 self.log_resultado(f"  {tr('calculators.stoichiometric.solute')}: {formula_soluto_str}")
@@ -714,7 +714,7 @@ class CalculadoraEstequiometricaDialog(QDialog):
             QMessageBox.information(self, tr('calculators.stoichiometric.nothing_to_copy'), tr('calculators.stoichiometric.results_empty'))
 
     def exportar_resultados(self):  # Mantido, mas o botão agora é de copiar
-        QMessageBox.information(self, "TODO",
+        QMessageBox.information(self, ptr("TODO"),
                                 tr('calculators.stoichiometric.export_todo'))
 
     def resetar_calculadora(self):

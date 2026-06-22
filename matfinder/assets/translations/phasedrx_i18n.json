@@ -1122,5 +1122,1521 @@
  "Valor numérico inválido (ValueError) para massa total na Calculadora de Proporção.": {
   "en_US": "Invalid numeric value (ValueError) for total mass in the Ratio Calculator.",
   "de_DE": "Ungültiger Zahlenwert (ValueError) für die Gesamtmasse im Verhältnisrechner."
+ },
+ "Chave API MP não encontrada ou inválida.": {
+  "en_US": "MP API key not found or invalid.",
+  "de_DE": "MP-API-Schlüssel nicht gefunden oder ungültig."
+ },
+ "Salvar PDF do Artigo": {
+  "en_US": "Save Article PDF",
+  "de_DE": "Artikel-PDF speichern"
+ },
+ "PDF Files (*.pdf)": {
+  "en_US": "PDF Files (*.pdf)",
+  "de_DE": "PDF-Dateien (*.pdf)"
+ },
+ "Text Files (*.txt);;All Files (*)": {
+  "en_US": "Text Files (*.txt);;All Files (*)",
+  "de_DE": "Textdateien (*.txt);;Alle Dateien (*)"
+ },
+ "CIF Files (*.cif);;All Files (*)": {
+  "en_US": "CIF Files (*.cif);;All Files (*)",
+  "de_DE": "CIF-Dateien (*.cif);;Alle Dateien (*)"
+ },
+ "Logo": {
+  "en_US": "Logo",
+  "de_DE": "Logo"
+ },
+ "ROD API: A lista de elementos não pode ser vazia.": {
+  "en_US": "ROD API: The element list cannot be empty.",
+  "de_DE": "ROD-API: Die Elementliste darf nicht leer sein."
+ },
+ "Dados não encontrados ou em formato incorreto para o item no menu de contexto.": {
+  "en_US": "Data not found or in incorrect format for the item in the context menu.",
+  "de_DE": "Daten nicht gefunden oder im falschen Format für das Element im Kontextmenü."
+ },
+ "Download Cancelado": {
+  "en_US": "Download Canceled",
+  "de_DE": "Download abgebrochen"
+ },
+ "O download do arquivo .rod foi cancelado.": {
+  "en_US": "The .rod file download was canceled.",
+  "de_DE": "Der Download der .rod-Datei wurde abgebrochen."
+ },
+ "Erro de URL": {
+  "en_US": "URL Error",
+  "de_DE": "URL-Fehler"
+ },
+ "Base de Dados Desconhecida": {
+  "en_US": "Unknown Database",
+  "de_DE": "Unbekannte Datenbank"
+ },
+ "Arquivo Não Encontrado": {
+  "en_US": "File Not Found",
+  "de_DE": "Datei nicht gefunden"
+ },
+ "Biblioteca 'cloudscraper' não encontrada. O download do Sci-Hub pode falhar.": {
+  "en_US": "'cloudscraper' library not found. Sci-Hub download may fail.",
+  "de_DE": "Bibliothek 'cloudscraper' nicht gefunden. Der Sci-Hub-Download kann fehlschlagen."
+ },
+ "Erro ao Salvar Chave": {
+  "en_US": "Error Saving Key",
+  "de_DE": "Fehler beim Speichern des Schlüssels"
+ },
+ "Elementos (ex: C, H, O)": {
+  "en_US": "Elements (e.g.: C, H, O)",
+  "de_DE": "Elemente (z.B.: C, H, O)"
+ },
+ "Elementos (ex: Sm, Fe, O)": {
+  "en_US": "Elements (e.g.: Sm, Fe, O)",
+  "de_DE": "Elemente (z.B.: Sm, Fe, O)"
+ },
+ "Para OQMD/MP, insira elementos separados por vírgula.": {
+  "en_US": "For OQMD/MP, enter elements separated by commas.",
+  "de_DE": "Für OQMD/MP geben Sie durch Kommas getrennte Elemente ein."
+ },
+ "Não foi possível abrir a página para o material (ID não encontrado ou dados insuficientes).": {
+  "en_US": "Could not open the page for the material (ID not found or insufficient data).",
+  "de_DE": "Die Seite für das Material konnte nicht geöffnet werden (ID nicht gefunden oder unzureichende Daten)."
+ },
+ "Erro ao Abrir URL": {
+  "en_US": "Error Opening URL",
+  "de_DE": "Fehler beim Öffnen der URL"
+ },
+ "Abrir Projeto PhaseDRX": {
+  "en_US": "Open PhaseDRX Project",
+  "de_DE": "PhaseDRX-Projekt öffnen"
+ },
+ "Projetos MatFinder (*.mfpx);;Todos os Arquivos (*)": {
+  "en_US": "MatFinder Projects (*.mfpx);;All Files (*)",
+  "de_DE": "MatFinder-Projekte (*.mfpx);;Alle Dateien (*)"
+ },
+ "Erro ao Abrir PhaseDRX": {
+  "en_US": "Error Opening PhaseDRX",
+  "de_DE": "Fehler beim Öffnen von PhaseDRX"
+ },
+ "Erro ao Ler Licença": {
+  "en_US": "Error Reading License",
+  "de_DE": "Fehler beim Lesen der Lizenz"
+ },
+ "N/D": {
+  "en_US": "N/A",
+  "de_DE": "N/V"
+ },
+ "Erro ao Salvar Arquivo": {
+  "en_US": "Error Saving File",
+  "de_DE": "Fehler beim Speichern der Datei"
+ },
+ "Abrir Arquivo": {
+  "en_US": "Open File",
+  "de_DE": "Datei öffnen"
+ },
+ "Erro ao Abrir Calculadora": {
+  "en_US": "Error Opening Calculator",
+  "de_DE": "Fehler beim Öffnen des Rechners"
+ },
+ "Erro ao Abrir Histórico": {
+  "en_US": "Error Opening History",
+  "de_DE": "Fehler beim Öffnen des Verlaufs"
+ },
+ "Erro ao Abrir Instruções": {
+  "en_US": "Error Opening Instructions",
+  "de_DE": "Fehler beim Öffnen der Anleitung"
+ },
+ "Busca JSON no COD falhou ou retornou None na função principal.": {
+  "en_US": "JSON search on COD failed or returned None in the main function.",
+  "de_DE": "JSON-Suche in COD fehlgeschlagen oder None in der Hauptfunktion zurückgegeben."
+ },
+ "Busca JSON na ROD falhou ou retornou None.": {
+  "en_US": "JSON search on ROD failed or returned None.",
+  "de_DE": "JSON-Suche in ROD fehlgeschlagen oder None zurückgegeben."
+ },
+ "Selecionar Pasta Base para o Projeto": {
+  "en_US": "Select Base Folder for the Project",
+  "de_DE": "Basisordner für das Projekt auswählen"
+ },
+ "Total: 0 entradas": {
+  "en_US": "Total: 0 entries",
+  "de_DE": "Gesamt: 0 Einträge"
+ },
+ "Erros: 0": {
+  "en_US": "Errors: 0",
+  "de_DE": "Fehler: 0"
+ },
+ "Avisos: 0": {
+  "en_US": "Warnings: 0",
+  "de_DE": "Warnungen: 0"
+ },
+ "Info: 0": {
+  "en_US": "Info: 0",
+  "de_DE": "Info: 0"
+ },
+ "Editor de Parâmetros Cristalográficos": {
+  "en_US": "Crystallographic Parameters Editor",
+  "de_DE": "Editor für kristallographische Parameter"
+ },
+ "Parâmetros da Célula Unitária": {
+  "en_US": "Unit Cell Parameters",
+  "de_DE": "Parameter der Elementarzelle"
+ },
+ "Auto-Ajuste": {
+  "en_US": "Auto-Fit",
+  "de_DE": "Auto-Anpassung"
+ },
+ "Ajusta automaticamente os parametros de rede\npara alinhar os picos calculados com o experimental.": {
+  "en_US": "Automatically adjusts the lattice parameters to align the calculated peaks with the experimental.",
+  "de_DE": "Passt die Gitterparameter automatisch an, um die berechneten Peaks an das Experiment anzugleichen."
+ },
+ "Parâmetros de Simulação de Pico": {
+  "en_US": "Peak Simulation Parameters",
+  "de_DE": "Parameter der Peak-Simulation"
+ },
+ "Aplicar Função": {
+  "en_US": "Apply Function",
+  "de_DE": "Funktion anwenden"
+ },
+ "Picos Detectados (2θ)": {
+  "en_US": "Detected Peaks (2θ)",
+  "de_DE": "Erkannte Peaks (2θ)"
+ },
+ "Ranges para Convolução": {
+  "en_US": "Ranges for Convolution",
+  "de_DE": "Bereiche für die Faltung"
+ },
+ "Editor de Combinação Multifásica": {
+  "en_US": "Multiphase Combination Editor",
+  "de_DE": "Editor für Mehrphasen-Kombination"
+ },
+ "Total: 100.0%": {
+  "en_US": "Total: 100.0%",
+  "de_DE": "Gesamt: 100.0%"
+ },
+ "Parâmetros de Simulação de Pico (para a combinação)": {
+  "en_US": "Peak Simulation Parameters (for the combination)",
+  "de_DE": "Parameter der Peak-Simulation (für die Kombination)"
+ },
+ "a (Å)": {
+  "en_US": "a (Å)",
+  "de_DE": "a (Å)"
+ },
+ "b (Å)": {
+  "en_US": "b (Å)",
+  "de_DE": "b (Å)"
+ },
+ "c (Å)": {
+  "en_US": "c (Å)",
+  "de_DE": "c (Å)"
+ },
+ "α (°)": {
+  "en_US": "α (°)",
+  "de_DE": "α (°)"
+ },
+ "β (°)": {
+  "en_US": "β (°)",
+  "de_DE": "β (°)"
+ },
+ "γ (°)": {
+  "en_US": "γ (°)",
+  "de_DE": "γ (°)"
+ },
+ "Volume (Å³)": {
+  "en_US": "Volume (Å³)",
+  "de_DE": "Volumen (Å³)"
+ },
+ "Função de Perfil:": {
+  "en_US": "Profile Function:",
+  "de_DE": "Profilfunktion:"
+ },
+ "FWHM (°):": {
+  "en_US": "FWHM (°):",
+  "de_DE": "FWHM (°):"
+ },
+ "Aplicar em:": {
+  "en_US": "Apply to:",
+  "de_DE": "Anwenden auf:"
+ },
+ "Carregue um dado experimental para usar o auto-ajuste.": {
+  "en_US": "Load experimental data to use auto-fit.",
+  "de_DE": "Laden Sie experimentelle Daten, um die Auto-Anpassung zu nutzen."
+ },
+ "Selecione um ou mais picos para criar um range.": {
+  "en_US": "Select one or more peaks to create a range.",
+  "de_DE": "Wählen Sie einen oder mehrere Peaks, um einen Bereich zu erstellen."
+ },
+ "Soma Inválida": {
+  "en_US": "Invalid Sum",
+  "de_DE": "Ungültige Summe"
+ },
+ "A soma das proporções deve ser 100%. Por favor, ajuste os valores.": {
+  "en_US": "The sum of the ratios must be 100%. Please adjust the values.",
+  "de_DE": "Die Summe der Anteile muss 100% betragen. Bitte passen Sie die Werte an."
+ },
+ "Carregue um dado experimental no PhaseDRX para habilitar o auto-ajuste.": {
+  "en_US": "Load experimental data in PhaseDRX to enable auto-fit.",
+  "de_DE": "Laden Sie experimentelle Daten in PhaseDRX, um die Auto-Anpassung zu aktivieren."
+ },
+ "Erro de Atualização": {
+  "en_US": "Update Error",
+  "de_DE": "Aktualisierungsfehler"
+ },
+ "Pymatgen não encontrado. A manipulação de CIF não funcionará.": {
+  "en_US": "Pymatgen not found. CIF handling will not work.",
+  "de_DE": "Pymatgen nicht gefunden. Die CIF-Verarbeitung funktioniert nicht."
+ },
+ "Não foi possível localizar bloco de operações de simetria para substituição": {
+  "en_US": "Could not locate symmetry operations block for replacement",
+  "de_DE": "Block der Symmetrieoperationen für die Ersetzung konnte nicht gefunden werden"
+ },
+ "Sem átomos do CIF original. Usando estrutura P1.": {
+  "en_US": "No atoms from the original CIF. Using P1 structure.",
+  "de_DE": "Keine Atome aus der ursprünglichen CIF. P1-Struktur wird verwendet."
+ },
+ "TODO": {
+  "en_US": "TODO",
+  "de_DE": "TODO"
+ },
+ "Erro de Importação Crítico": {
+  "en_US": "Critical Import Error",
+  "de_DE": "Kritischer Importfehler"
+ },
+ "O arquivo essencial 'quimica_calc.py' não foi encontrado.\nA calculadora não pode funcionar. Verifique a instalação.": {
+  "en_US": "The essential file 'quimica_calc.py' was not found. The calculator cannot work. Check the installation.",
+  "de_DE": "Die essenzielle Datei 'quimica_calc.py' wurde nicht gefunden. Der Rechner funktioniert nicht. Überprüfen Sie die Installation."
+ },
+ "&Arquivo": {
+  "en_US": "&File",
+  "de_DE": "&Datei"
+ },
+ "Remover da Lista": {
+  "en_US": "Remove from List",
+  "de_DE": "Aus Liste entfernen"
+ },
+ "Salvar CIF Modificado": {
+  "en_US": "Save Modified CIF",
+  "de_DE": "Geänderte CIF speichern"
+ },
+ "Arquivo CIF (*.cif);;Todos os arquivos (*.*)": {
+  "en_US": "CIF File (*.cif);;All files (*.*)",
+  "de_DE": "CIF-Datei (*.cif);;Alle Dateien (*.*)"
+ },
+ "Exportar para Origin (.xlsx)": {
+  "en_US": "Export to Origin (.xlsx)",
+  "de_DE": "Nach Origin exportieren (.xlsx)"
+ },
+ "Pasta de Trabalho do Excel (*.xlsx)": {
+  "en_US": "Excel Workbook (*.xlsx)",
+  "de_DE": "Excel-Arbeitsmappe (*.xlsx)"
+ },
+ "Salvar Gráfico": {
+  "en_US": "Save Plot",
+  "de_DE": "Diagramm speichern"
+ },
+ "Abrir Projeto": {
+  "en_US": "Open Project",
+  "de_DE": "Projekt öffnen"
+ },
+ "Salvar Projeto Como...": {
+  "en_US": "Save Project As...",
+  "de_DE": "Projekt speichern unter..."
+ },
+ "Normalizar por Pico Específico...": {
+  "en_US": "Normalize by Specific Peak...",
+  "de_DE": "Nach spezifischem Peak normalisieren..."
+ },
+ "Reflexão": {
+  "en_US": "Reflection",
+  "de_DE": "Reflexion"
+ },
+ "Salvar CIF": {
+  "en_US": "Save CIF",
+  "de_DE": "CIF speichern"
+ },
+ "Resetar para Original": {
+  "en_US": "Reset to Original",
+  "de_DE": "Auf Original zurücksetzen"
+ },
+ "Visualizar 3D": {
+  "en_US": "View 3D",
+  "de_DE": "3D anzeigen"
+ },
+ "O download do arquivo CIF ({}) foi cancelado.": {
+  "en_US": "The download of the CIF file ({}) was cancelled.",
+  "de_DE": "Der Download der CIF-Datei ({}) wurde abgebrochen."
+ },
+ "Fonte de base de dados '{}' desconhecida ou ID '{}' inválido.": {
+  "en_US": "Unknown database source '{}' or invalid ID '{}'.",
+  "de_DE": "Unbekannte Datenbankquelle '{}' oder ungültige ID '{}'."
+ },
+ "O arquivo de licença não foi encontrado em:\n{}": {
+  "en_US": "The license file was not found at:\n{}",
+  "de_DE": "Die Lizenzdatei wurde nicht gefunden unter:\n{}"
+ },
+ "Não foi possível salvar a chave da API em '{}':\n{}": {
+  "en_US": "Could not save the API key to '{}':\n{}",
+  "de_DE": "Der API-Schlüssel konnte nicht in '{}' gespeichert werden:\n{}"
+ },
+ "Para {}, insira elementos separados por vírgula.": {
+  "en_US": "For {}, enter elements separated by commas.",
+  "de_DE": "Für {} geben Sie durch Kommas getrennte Elemente ein."
+ },
+ "Arquivo .rod Salvo como .txt (ROD {})": {
+  "en_US": ".rod File Saved as .txt (ROD {})",
+  "de_DE": ".rod-Datei als .txt gespeichert (ROD {})"
+ },
+ "Arquivo .rod salvo com sucesso como .txt em:\n{}": {
+  "en_US": ".rod file saved successfully as .txt at:\n{}",
+  "de_DE": ".rod-Datei erfolgreich als .txt gespeichert unter:\n{}"
+ },
+ "CIF Salvo ({})": {
+  "en_US": "CIF Saved ({})",
+  "de_DE": "CIF gespeichert ({})"
+ },
+ "Arquivo CIF salvo com sucesso em:\n{}": {
+  "en_US": "CIF file saved successfully at:\n{}",
+  "de_DE": "CIF-Datei erfolgreich gespeichert unter:\n{}"
+ },
+ "Não foi possível abrir o URL no navegador:\n{}": {
+  "en_US": "Could not open the URL in the browser:\n{}",
+  "de_DE": "Die URL konnte nicht im Browser geöffnet werden:\n{}"
+ },
+ "Não foi possível abrir o visualizador de log:\n{}": {
+  "en_US": "Could not open the log viewer:\n{}",
+  "de_DE": "Der Log-Betrachter konnte nicht geöffnet werden:\n{}"
+ },
+ "Não foi possível ler o arquivo de licença:\n{}": {
+  "en_US": "Could not read the license file:\n{}",
+  "de_DE": "Die Lizenzdatei konnte nicht gelesen werden:\n{}"
+ },
+ "Não foi possível salvar o arquivo (erro de E/S):\n{}": {
+  "en_US": "Could not save the file (I/O error):\n{}",
+  "de_DE": "Die Datei konnte nicht gespeichert werden (E/A-Fehler):\n{}"
+ },
+ "Não foi possível salvar o arquivo:\n{}": {
+  "en_US": "Could not save the file:\n{}",
+  "de_DE": "Die Datei konnte nicht gespeichert werden:\n{}"
+ },
+ "Erro ao Salvar CIF ({})": {
+  "en_US": "Error Saving CIF ({})",
+  "de_DE": "Fehler beim Speichern der CIF ({})"
+ },
+ "Não foi possível salvar o arquivo CIF (erro de E/S):\n{}": {
+  "en_US": "Could not save the CIF file (I/O error):\n{}",
+  "de_DE": "Die CIF-Datei konnte nicht gespeichert werden (E/A-Fehler):\n{}"
+ },
+ "Não foi possível salvar o arquivo CIF:\n{}": {
+  "en_US": "Could not save the CIF file:\n{}",
+  "de_DE": "Die CIF-Datei konnte nicht gespeichert werden:\n{}"
+ },
+ "Não foi possível abrir a Calculadora de Proporção de Massa:\n{}": {
+  "en_US": "Could not open the Mass Ratio Calculator:\n{}",
+  "de_DE": "Der Massenverhältnis-Rechner konnte nicht geöffnet werden:\n{}"
+ },
+ "Não foi possível encontrar o arquivo de instruções ('{}').": {
+  "en_US": "Could not find the instructions file ('{}').",
+  "de_DE": "Die Anleitungsdatei ('{}') konnte nicht gefunden werden."
+ },
+ "Não foi possível salvar o histórico: {}": {
+  "en_US": "Could not save the history: {}",
+  "de_DE": "Der Verlauf konnte nicht gespeichert werden: {}"
+ },
+ "Total: {} entradas": {
+  "en_US": "Total: {} entries",
+  "de_DE": "Gesamt: {} Einträge"
+ },
+ "Erros: {}": {
+  "en_US": "Errors: {}",
+  "de_DE": "Fehler: {}"
+ },
+ "Avisos: {}": {
+  "en_US": "Warnings: {}",
+  "de_DE": "Warnungen: {}"
+ },
+ "Info: {}": {
+  "en_US": "Info: {}",
+  "de_DE": "Info: {}"
+ },
+ "Erro ao exportar log: {}": {
+  "en_US": "Error exporting log: {}",
+  "de_DE": "Fehler beim Exportieren des Logs: {}"
+ },
+ "Erro ao limpar log: {}": {
+  "en_US": "Error clearing log: {}",
+  "de_DE": "Fehler beim Leeren des Logs: {}"
+ },
+ "Range: {:.2f}° - {:.2f}°": {
+  "en_US": "Range: {:.2f}° - {:.2f}°",
+  "de_DE": "Bereich: {:.2f}° - {:.2f}°"
+ },
+ "Proporções de Fase": {
+  "en_US": "Phase Proportions",
+  "de_DE": "Phasenanteile"
+ },
+ "Total: {:.1f}%": {
+  "en_US": "Total: {:.1f}%",
+  "de_DE": "Gesamt: {:.1f}%"
+ },
+ "Não foi possível processar o arquivo CIF:\n{}": {
+  "en_US": "Could not process the CIF file:\n{}",
+  "de_DE": "Die CIF-Datei konnte nicht verarbeitet werden:\n{}"
+ },
+ "Modulo de auto-ajuste nao encontrado:\n{}": {
+  "en_US": "Auto-fit module not found:\n{}",
+  "de_DE": "Auto-Anpassungsmodul nicht gefunden:\n{}"
+ },
+ "Erro ao abrir auto-ajuste:\n{}": {
+  "en_US": "Error opening auto-fit:\n{}",
+  "de_DE": "Fehler beim Öffnen der Auto-Anpassung:\n{}"
+ },
+ "Erro ao aplicar auto-ajuste:\n{}": {
+  "en_US": "Error applying auto-fit:\n{}",
+  "de_DE": "Fehler beim Anwenden der Auto-Anpassung:\n{}"
+ },
+ "Erro ao atualizar: {}": {
+  "en_US": "Error updating: {}",
+  "de_DE": "Fehler beim Aktualisieren: {}"
+ },
+ "Não foi possível atualizar a estrutura:\n{}": {
+  "en_US": "Could not update the structure:\n{}",
+  "de_DE": "Die Struktur konnte nicht aktualisiert werden:\n{}"
+ },
+ "Erro ao escalar volume: {}": {
+  "en_US": "Error scaling volume: {}",
+  "de_DE": "Fehler beim Skalieren des Volumens: {}"
+ },
+ "Não foi possível escalar o volume:\n{}": {
+  "en_US": "Could not scale the volume:\n{}",
+  "de_DE": "Das Volumen konnte nicht skaliert werden:\n{}"
+ },
+ "Editor - Sistema Trigonal (Romboédrico) - {} ({})": {
+  "en_US": "Editor - Trigonal System (Rhombohedral) - {} ({})",
+  "de_DE": "Editor - Trigonales System (rhomboedrisch) - {} ({})"
+ },
+ "Editor - Sistema Trigonal (Romboédrico)": {
+  "en_US": "Editor - Trigonal System (Rhombohedral)",
+  "de_DE": "Editor - Trigonales System (rhomboedrisch)"
+ },
+ "Editor - Sistema Trigonal (Hexagonal) - {} ({})": {
+  "en_US": "Editor - Trigonal System (Hexagonal) - {} ({})",
+  "de_DE": "Editor - Trigonales System (hexagonal) - {} ({})"
+ },
+ "Editor - Sistema Trigonal (Hexagonal)": {
+  "en_US": "Editor - Trigonal System (Hexagonal)",
+  "de_DE": "Editor - Trigonales System (hexagonal)"
+ },
+ "{} picos detectados": {
+  "en_US": "{} peaks detected",
+  "de_DE": "{} Peaks erkannt"
+ },
+ "Ocorreu um erro durante o ajuste:\n{}": {
+  "en_US": "An error occurred during fitting:\n{}",
+  "de_DE": "Beim Anpassen ist ein Fehler aufgetreten:\n{}"
+ },
+ "Normalizar apenas '{}' por este pico": {
+  "en_US": "Normalize only '{}' by this peak",
+  "de_DE": "Nur '{}' nach diesem Peak normalisieren"
+ },
+ "Normalizar TODOS os experimentais pelo pico em 2θ = {:.3f}°": {
+  "en_US": "Normalize ALL experimental data by the peak at 2θ = {:.3f}°",
+  "de_DE": "ALLE experimentellen Daten nach dem Peak bei 2θ = {:.3f}° normalisieren"
+ },
+ "Reflexões - {}": {
+  "en_US": "Reflections - {}",
+  "de_DE": "Reflexe - {}"
+ },
+ "<b>Reflexões calculadas para:</b> {}": {
+  "en_US": "<b>Reflections calculated for:</b> {}",
+  "de_DE": "<b>Berechnete Reflexe für:</b> {}"
+ },
+ "Erro ao aplicar configurações: {}": {
+  "en_US": "Error applying settings: {}",
+  "de_DE": "Fehler beim Anwenden der Einstellungen: {}"
+ },
+ "'{}' foi resetado para o original.": {
+  "en_US": "'{}' was reset to the original.",
+  "de_DE": "'{}' wurde auf das Original zurückgesetzt."
+ },
+ "Projeto salvo com sucesso em:\n{}": {
+  "en_US": "Project saved successfully at:\n{}",
+  "de_DE": "Projekt erfolgreich gespeichert unter:\n{}"
+ },
+ "O arquivo CIF '{}' já está na lista.": {
+  "en_US": "The CIF file '{}' is already in the list.",
+  "de_DE": "Die CIF-Datei '{}' ist bereits in der Liste."
+ },
+ "CIF modificado salvo com sucesso em:\n{}": {
+  "en_US": "Modified CIF saved successfully at:\n{}",
+  "de_DE": "Geänderte CIF erfolgreich gespeichert unter:\n{}"
+ },
+ "Não foi possível detectar os picos do CIF inicial:\n{}": {
+  "en_US": "Could not detect the peaks of the initial CIF:\n{}",
+  "de_DE": "Die Peaks der ursprünglichen CIF konnten nicht erkannt werden:\n{}"
+ },
+ "O item '{}' não é um CIF e não pode ser combinado.": {
+  "en_US": "The item '{}' is not a CIF and cannot be combined.",
+  "de_DE": "Das Element '{}' ist keine CIF und kann nicht kombiniert werden."
+ },
+ "Não foi possível salvar o arquivo de projeto:\n{}": {
+  "en_US": "Could not save the project file:\n{}",
+  "de_DE": "Die Projektdatei konnte nicht gespeichert werden:\n{}"
+ },
+ "O conteúdo do CIF recebido para '{}' é inválido.\n\nErro: {}": {
+  "en_US": "The CIF content received for '{}' is invalid.\n\nError: {}",
+  "de_DE": "Der für '{}' empfangene CIF-Inhalt ist ungültig.\n\nFehler: {}"
+ },
+ "{} arquivo(s) normalizado(s) com sucesso usando:\n{}": {
+  "en_US": "{} file(s) normalized successfully using:\n{}",
+  "de_DE": "{} Datei(en) erfolgreich normalisiert mit:\n{}"
+ },
+ "{} arquivo(s) normalizado(s), {} com erro.": {
+  "en_US": "{} file(s) normalized, {} with error.",
+  "de_DE": "{} Datei(en) normalisiert, {} mit Fehler."
+ },
+ "Valor inválido: {}": {
+  "en_US": "Invalid value: {}",
+  "de_DE": "Ungültiger Wert: {}"
+ },
+ "Ocorreu um erro ao calcular para {}:\n{}": {
+  "en_US": "An error occurred while calculating for {}:\n{}",
+  "de_DE": "Beim Berechnen für {} ist ein Fehler aufgetreten:\n{}"
+ },
+ "Ocorreu um erro: {}": {
+  "en_US": "An error occurred: {}",
+  "de_DE": "Ein Fehler ist aufgetreten: {}"
+ },
+ "Gráfico salvo em:\n{}": {
+  "en_US": "Plot saved at:\n{}",
+  "de_DE": "Diagramm gespeichert unter:\n{}"
+ },
+ "Ocorreu um erro ao exportar para .xlsx:\n{}": {
+  "en_US": "An error occurred while exporting to .xlsx:\n{}",
+  "de_DE": "Beim Exportieren nach .xlsx ist ein Fehler aufgetreten:\n{}"
+ },
+ "Não foi possível normalizar pelo pico:\n{}": {
+  "en_US": "Could not normalize by the peak:\n{}",
+  "de_DE": "Konnte nicht nach dem Peak normalisieren:\n{}"
+ },
+ "A pasta existe, mas o arquivo de projeto '{}' não foi encontrado.": {
+  "en_US": "The folder exists, but the project file '{}' was not found.",
+  "de_DE": "Der Ordner existiert, aber die Projektdatei '{}' wurde nicht gefunden."
+ },
+ "Não foi possível carregar o arquivo de projeto:\n{}": {
+  "en_US": "Could not load the project file:\n{}",
+  "de_DE": "Die Projektdatei konnte nicht geladen werden:\n{}"
+ },
+ "Não foi possível processar o arquivo {}:\n{}": {
+  "en_US": "Could not process the file {}:\n{}",
+  "de_DE": "Die Datei {} konnte nicht verarbeitet werden:\n{}"
+ },
+ "Não foi possível carregar ou processar o arquivo '{}'.\n\nErro: {}": {
+  "en_US": "Could not load or process the file '{}'.\n\nError: {}",
+  "de_DE": "Die Datei '{}' konnte nicht geladen oder verarbeitet werden.\n\nFehler: {}"
+ },
+ "Não foi possível normalizar '{}':\n{}": {
+  "en_US": "Could not normalize '{}':\n{}",
+  "de_DE": "Konnte '{}' nicht normalisieren:\n{}"
+ },
+ "Não foi possível salvar o gráfico:\n{}": {
+  "en_US": "Could not save the plot:\n{}",
+  "de_DE": "Das Diagramm konnte nicht gespeichert werden:\n{}"
+ },
+ "Não foi possível carregar a paleta '{}':\n{}": {
+  "en_US": "Could not load the palette '{}':\n{}",
+  "de_DE": "Die Palette '{}' konnte nicht geladen werden:\n{}"
+ },
+ "Não foi possível criar a estrutura de pastas do projeto:\n{}": {
+  "en_US": "Could not create the project folder structure:\n{}",
+  "de_DE": "Die Projektordnerstruktur konnte nicht erstellt werden:\n{}"
+ },
+ "Não foi possível apagar o arquivo modificado:\n{}": {
+  "en_US": "Could not delete the modified file:\n{}",
+  "de_DE": "Die geänderte Datei konnte nicht gelöscht werden:\n{}"
+ },
+ "Pontos selecionados: {}": {
+  "en_US": "Selected points: {}",
+  "de_DE": "Ausgewählte Punkte: {}"
+ },
+ "Não foi possível carregar o módulo de remoção de background:\n{}": {
+  "en_US": "Could not load the background removal module:\n{}",
+  "de_DE": "Das Modul zur Hintergrundentfernung konnte nicht geladen werden:\n{}"
+ },
+ "2θ (Graus)": {
+  "en_US": "2θ (Degrees)",
+  "de_DE": "2θ (Grad)"
+ },
+ "Adicionar\nRange →": {
+  "en_US": "Add\nRange →",
+  "de_DE": "Bereich\nhinzufügen →"
+ },
+ "Altura:": {
+  "en_US": "Height:",
+  "de_DE": "Höhe:"
+ },
+ "Antes": {
+  "en_US": "Before",
+  "de_DE": "Vorher"
+ },
+ "Cor": {
+  "en_US": "Color",
+  "de_DE": "Farbe"
+ },
+ "De:": {
+  "en_US": "From:",
+  "de_DE": "Von:"
+ },
+ "Depois": {
+  "en_US": "After",
+  "de_DE": "Nachher"
+ },
+ "Deslocamento Global:": {
+  "en_US": "Global Offset:",
+  "de_DE": "Globaler Versatz:"
+ },
+ "Direção:": {
+  "en_US": "Direction:",
+  "de_DE": "Richtung:"
+ },
+ "Eixo X:": {
+  "en_US": "X Axis:",
+  "de_DE": "X-Achse:"
+ },
+ "Eixo Y:": {
+  "en_US": "Y Axis:",
+  "de_DE": "Y-Achse:"
+ },
+ "Espaçamento entre Grupos:": {
+  "en_US": "Spacing Between Groups:",
+  "de_DE": "Abstand zwischen Gruppen:"
+ },
+ "Espaçamento no Grupo {}:": {
+  "en_US": "Spacing in Group {}:",
+  "de_DE": "Abstand in Gruppe {}:"
+ },
+ "Espessura": {
+  "en_US": "Thickness",
+  "de_DE": "Dicke"
+ },
+ "Espessura das Linhas dos Eixos:": {
+  "en_US": "Axis Line Thickness:",
+  "de_DE": "Achsenlinienstärke:"
+ },
+ "Estilo": {
+  "en_US": "Style",
+  "de_DE": "Stil"
+ },
+ "Estilo:": {
+  "en_US": "Style:",
+  "de_DE": "Stil:"
+ },
+ "Fonte de Radiação Padrão:": {
+  "en_US": "Default Radiation Source:",
+  "de_DE": "Standard-Strahlungsquelle:"
+ },
+ "Fonte do Rótulo:": {
+  "en_US": "Label Font:",
+  "de_DE": "Schriftart der Beschriftung:"
+ },
+ "Formato:": {
+  "en_US": "Format:",
+  "de_DE": "Format:"
+ },
+ "Gaussiana": {
+  "en_US": "Gaussian",
+  "de_DE": "Gauß"
+ },
+ "Grau do Polinômio:": {
+  "en_US": "Polynomial Degree:",
+  "de_DE": "Polynomgrad:"
+ },
+ "Grupo": {
+  "en_US": "Group",
+  "de_DE": "Gruppe"
+ },
+ "Intensidade": {
+  "en_US": "Intensity",
+  "de_DE": "Intensität"
+ },
+ "Intensidade (Unid. arb.)": {
+  "en_US": "Intensity (arb. units)",
+  "de_DE": "Intensität (willk. Einh.)"
+ },
+ "Iterações:": {
+  "en_US": "Iterations:",
+  "de_DE": "Iterationen:"
+ },
+ "Largura Mínima (pontos):": {
+  "en_US": "Minimum Width (points):",
+  "de_DE": "Mindestbreite (Punkte):"
+ },
+ "Largura:": {
+  "en_US": "Width:",
+  "de_DE": "Breite:"
+ },
+ "Legenda": {
+  "en_US": "Legend",
+  "de_DE": "Legende"
+ },
+ "Localização Inicial:": {
+  "en_US": "Initial Location:",
+  "de_DE": "Anfangsposition:"
+ },
+ "Lorentziana": {
+  "en_US": "Lorentzian",
+  "de_DE": "Lorentz"
+ },
+ "Major Ticks:": {
+  "en_US": "Major Ticks:",
+  "de_DE": "Hauptstriche:"
+ },
+ "Máximo 2θ:": {
+  "en_US": "Maximum 2θ:",
+  "de_DE": "Maximales 2θ:"
+ },
+ "Nome do Gráfico": {
+  "en_US": "Plot Name",
+  "de_DE": "Diagrammname"
+ },
+ "Nome do Projeto:": {
+  "en_US": "Project Name:",
+  "de_DE": "Projektname:"
+ },
+ "Nível de Limiar (Threshold):": {
+  "en_US": "Threshold Level:",
+  "de_DE": "Schwellenwert (Threshold):"
+ },
+ "Número de Colunas:": {
+  "en_US": "Number of Columns:",
+  "de_DE": "Anzahl der Spalten:"
+ },
+ "Opacidade da Borda:": {
+  "en_US": "Border Opacity:",
+  "de_DE": "Randdeckkraft:"
+ },
+ "Ordem do Polinômio:": {
+  "en_US": "Polynomial Order:",
+  "de_DE": "Polynomordnung:"
+ },
+ "Outro": {
+  "en_US": "Other",
+  "de_DE": "Andere"
+ },
+ "Padrão Inteiro": {
+  "en_US": "Whole Pattern",
+  "de_DE": "Ganzes Muster"
+ },
+ "Padrão MatFinder": {
+  "en_US": "MatFinder Default",
+  "de_DE": "MatFinder-Standard"
+ },
+ "Paired (Qualitativa)": {
+  "en_US": "Paired (Qualitative)",
+  "de_DE": "Paired (Qualitativ)"
+ },
+ "Para Dentro": {
+  "en_US": "Inward",
+  "de_DE": "Nach innen"
+ },
+ "Para Fora": {
+  "en_US": "Outward",
+  "de_DE": "Nach außen"
+ },
+ "Para:": {
+  "en_US": "To:",
+  "de_DE": "Bis:"
+ },
+ "Parâmetro": {
+  "en_US": "Parameter",
+  "de_DE": "Parameter"
+ },
+ "Plasma (Perceptual)": {
+  "en_US": "Plasma (Perceptual)",
+  "de_DE": "Plasma (Perzeptuell)"
+ },
+ "Polynomial (Manual)": {
+  "en_US": "Polynomial (Manual)",
+  "de_DE": "Polynom (Manuell)"
+ },
+ "Proeminência (0-1):": {
+  "en_US": "Prominence (0-1):",
+  "de_DE": "Prominenz (0-1):"
+ },
+ "Pseudo-Voigt": {
+  "en_US": "Pseudo-Voigt",
+  "de_DE": "Pseudo-Voigt"
+ },
+ "Qualidade (DPI):": {
+  "en_US": "Quality (DPI):",
+  "de_DE": "Qualität (DPI):"
+ },
+ "Ranges Selecionados": {
+  "en_US": "Selected Ranges",
+  "de_DE": "Ausgewählte Bereiche"
+ },
+ "SNIP (Automático)": {
+  "en_US": "SNIP (Automatic)",
+  "de_DE": "SNIP (Automatisch)"
+ },
+ "Salvar em:": {
+  "en_US": "Save to:",
+  "de_DE": "Speichern in:"
+ },
+ "Sem Ticks": {
+  "en_US": "No Ticks",
+  "de_DE": "Keine Striche"
+ },
+ "Set1 (Qualitativa)": {
+  "en_US": "Set1 (Qualitative)",
+  "de_DE": "Set1 (Qualitativ)"
+ },
+ "Suavidade (λ):": {
+  "en_US": "Smoothness (λ):",
+  "de_DE": "Glätte (λ):"
+ },
+ "Tab10 (Qualitativa)": {
+  "en_US": "Tab10 (Qualitative)",
+  "de_DE": "Tab10 (Qualitativ)"
+ },
+ "Tamanho da Fonte:": {
+  "en_US": "Font Size:",
+  "de_DE": "Schriftgröße:"
+ },
+ "Tamanho da Janela (ímpar):": {
+  "en_US": "Window Size (odd):",
+  "de_DE": "Fenstergröße (ungerade):"
+ },
+ "Tipo de Wavelet:": {
+  "en_US": "Wavelet Type:",
+  "de_DE": "Wavelet-Typ:"
+ },
+ "Todos": {
+  "en_US": "All",
+  "de_DE": "Alle"
+ },
+ "Valor": {
+  "en_US": "Value",
+  "de_DE": "Wert"
+ },
+ "Viridis (Perceptual)": {
+  "en_US": "Viridis (Perceptual)",
+  "de_DE": "Viridis (Perzeptuell)"
+ },
+ "Visível": {
+  "en_US": "Visible",
+  "de_DE": "Sichtbar"
+ },
+ "arPLS (Automático)": {
+  "en_US": "arPLS (Automatic)",
+  "de_DE": "arPLS (Automatisch)"
+ },
+ "← Remover\nRange": {
+  "en_US": "← Remove\nRange",
+  "de_DE": "← Bereich\nentfernen"
+ },
+ "Sessão Anônima": {
+  "en_US": "Anonymous Session",
+  "de_DE": "Anonyme Sitzung"
+ },
+ "BRML: Arquivo nao e um ZIP valido": {
+  "en_US": "BRML: File is not a valid ZIP",
+  "de_DE": "BRML: Datei ist kein gültiges ZIP"
+ },
+ "BRML: Dados de 2theta/intensidade nao encontrados no XML": {
+  "en_US": "BRML: 2theta/intensity data not found in the XML",
+  "de_DE": "BRML: 2theta-/Intensitätsdaten im XML nicht gefunden"
+ },
+ "BRML: Erro ao ler: {}": {
+  "en_US": "BRML: Error reading: {}",
+  "de_DE": "BRML: Fehler beim Lesen: {}"
+ },
+ "BRML: Nenhum XML encontrado dentro do arquivo": {
+  "en_US": "BRML: No XML found inside the file",
+  "de_DE": "BRML: Kein XML in der Datei gefunden"
+ },
+ "CSV: Nao foi possivel decodificar o arquivo": {
+  "en_US": "CSV: Could not decode the file",
+  "de_DE": "CSV: Datei konnte nicht dekodiert werden"
+ },
+ "CSV: Nenhum dado numerico encontrado": {
+  "en_US": "CSV: No numeric data found",
+  "de_DE": "CSV: Keine numerischen Daten gefunden"
+ },
+ "Formato RAW v1 nao reconhecido: {}": {
+  "en_US": "RAW v1 format not recognized: {}",
+  "de_DE": "RAW-v1-Format nicht erkannt: {}"
+ },
+ "Header RAW v2 nao reconhecido: {}": {
+  "en_US": "RAW v2 header not recognized: {}",
+  "de_DE": "RAW-v2-Header nicht erkannt: {}"
+ },
+ "Nao foi possivel decodificar o arquivo": {
+  "en_US": "Could not decode the file",
+  "de_DE": "Datei konnte nicht dekodiert werden"
+ },
+ "Nenhum dado numerico encontrado": {
+  "en_US": "No numeric data found",
+  "de_DE": "Keine numerischen Daten gefunden"
+ },
+ "RAS: Erro ao ler: {}": {
+  "en_US": "RAS: Error reading: {}",
+  "de_DE": "RAS: Fehler beim Lesen: {}"
+ },
+ "RAS: Nao foi possivel decodificar o arquivo": {
+  "en_US": "RAS: Could not decode the file",
+  "de_DE": "RAS: Datei konnte nicht dekodiert werden"
+ },
+ "RAS: Nenhum dado encontrado": {
+  "en_US": "RAS: No data found",
+  "de_DE": "RAS: Keine Daten gefunden"
+ },
+ "RAW v1: Muito poucos pontos de dados": {
+  "en_US": "RAW v1: Too few data points",
+  "de_DE": "RAW v1: Zu wenige Datenpunkte"
+ },
+ "RAW v1: Numero de pontos invalido": {
+  "en_US": "RAW v1: Invalid number of points",
+  "de_DE": "RAW v1: Ungültige Punktanzahl"
+ },
+ "RAW v1: Parametros de 2theta invalidos": {
+  "en_US": "RAW v1: Invalid 2theta parameters",
+  "de_DE": "RAW v1: Ungültige 2theta-Parameter"
+ },
+ "RAW v2: Nenhum dado encontrado": {
+  "en_US": "RAW v2: No data found",
+  "de_DE": "RAW v2: Keine Daten gefunden"
+ },
+ "RAW v3: Arquivo muito pequeno": {
+  "en_US": "RAW v3: File too small",
+  "de_DE": "RAW v3: Datei zu klein"
+ },
+ "RAW v3: Erro ao ler: {}": {
+  "en_US": "RAW v3: Error reading: {}",
+  "de_DE": "RAW v3: Fehler beim Lesen: {}"
+ },
+ "RAW v3: Nenhum dado extraido": {
+  "en_US": "RAW v3: No data extracted",
+  "de_DE": "RAW v3: Keine Daten extrahiert"
+ },
+ "RAW v4: Erro ao ler: {}": {
+  "en_US": "RAW v4: Error reading: {}",
+  "de_DE": "RAW v4: Fehler beim Lesen: {}"
+ },
+ "RAW v4: Nenhum dado extraido": {
+  "en_US": "RAW v4: No data extracted",
+  "de_DE": "RAW v4: Keine Daten extrahiert"
+ },
+ "RAW2: Numero de pontos invalido: {}": {
+  "en_US": "RAW2: Invalid number of points: {}",
+  "de_DE": "RAW2: Ungültige Punktanzahl: {}"
+ },
+ "RAW2: Parametros invalidos: start={}, step={}": {
+  "en_US": "RAW2: Invalid parameters: start={}, step={}",
+  "de_DE": "RAW2: Ungültige Parameter: start={}, step={}"
+ },
+ "Shimadzu XRD: Angulos invalidos: start={}, end={}": {
+  "en_US": "Shimadzu XRD: Invalid angles: start={}, end={}",
+  "de_DE": "Shimadzu XRD: Ungültige Winkel: start={}, end={}"
+ },
+ "Shimadzu XRD: Arquivo muito pequeno": {
+  "en_US": "Shimadzu XRD: File too small",
+  "de_DE": "Shimadzu XRD: Datei zu klein"
+ },
+ "Shimadzu XRD: Muito poucos pontos ({})": {
+  "en_US": "Shimadzu XRD: Too few points ({})",
+  "de_DE": "Shimadzu XRD: Zu wenige Punkte ({})"
+ },
+ "Shimadzu XRD: Numero de pontos invalido: {}": {
+  "en_US": "Shimadzu XRD: Invalid number of points: {}",
+  "de_DE": "Shimadzu XRD: Ungültige Punktanzahl: {}"
+ },
+ "Shimadzu XRD: Offset de dados invalido: {}": {
+  "en_US": "Shimadzu XRD: Invalid data offset: {}",
+  "de_DE": "Shimadzu XRD: Ungültiger Daten-Offset: {}"
+ },
+ "XRDML: Dados de 2theta/intensidade nao encontrados": {
+  "en_US": "XRDML: 2theta/intensity data not found",
+  "de_DE": "XRDML: 2theta-/Intensitätsdaten nicht gefunden"
+ },
+ "XRDML: Erro ao ler: {}": {
+  "en_US": "XRDML: Error reading: {}",
+  "de_DE": "XRDML: Fehler beim Lesen: {}"
+ },
+ "XRDML: Erro de parsing XML: {}": {
+  "en_US": "XRDML: XML parsing error: {}",
+  "de_DE": "XRDML: XML-Parsing-Fehler: {}"
+ },
+ "A conexão demorou muito para responder.\n\nDetalhes: {}\n\nVerifique sua conexão ou tente novamente mais tarde.": {
+  "en_US": "The connection took too long to respond.\n\nDetails: {}\n\nCheck your connection or try again later.",
+  "de_DE": "Die Verbindung hat zu lange zum Antworten gebraucht.\n\nDetails: {}\n\nÜberprüfen Sie Ihre Verbindung oder versuchen Sie es später erneut."
+ },
+ "Falha ao estabelecer conexão.\n\nDetalhes: {}\n\nVerifique sua conexão com a internet e as configurações de proxy.": {
+  "en_US": "Failed to establish a connection.\n\nDetails: {}\n\nCheck your internet connection and proxy settings.",
+  "de_DE": "Verbindung konnte nicht hergestellt werden.\n\nDetails: {}\n\nÜberprüfen Sie Ihre Internetverbindung und die Proxy-Einstellungen."
+ },
+ "Falha ao conectar através do proxy.\n\nDetalhes: {}\n\nVerifique as configurações do proxy e a sua conexão.": {
+  "en_US": "Failed to connect through the proxy.\n\nDetails: {}\n\nCheck the proxy settings and your connection.",
+  "de_DE": "Verbindung über den Proxy fehlgeschlagen.\n\nDetails: {}\n\nÜberprüfen Sie die Proxy-Einstellungen und Ihre Verbindung."
+ },
+ "O servidor retornou um erro.\n\nStatus: {}\nDetalhes: {}\n\nVerifique os parâmetros da busca ou tente mais tarde.": {
+  "en_US": "The server returned an error.\n\nStatus: {}\nDetails: {}\n\nCheck the search parameters or try later.",
+  "de_DE": "Der Server hat einen Fehler zurückgegeben.\n\nStatus: {}\nDetails: {}\n\nÜberprüfen Sie die Suchparameter oder versuchen Sie es später."
+ },
+ "Ocorreu um problema com a requisição de rede.\n\nDetalhes: {}\n\nTente novamente ou verifique sua conexão.": {
+  "en_US": "A network request problem occurred.\n\nDetails: {}\n\nTry again or check your connection.",
+  "de_DE": "Bei der Netzwerkanfrage ist ein Problem aufgetreten.\n\nDetails: {}\n\nVersuchen Sie es erneut oder überprüfen Sie Ihre Verbindung."
+ },
+ "Falha ao ler os dados recebidos do servidor (formato JSON inválido).\n\nDetalhes: {}": {
+  "en_US": "Failed to read the data received from the server (invalid JSON format).\n\nDetails: {}",
+  "de_DE": "Die vom Server empfangenen Daten konnten nicht gelesen werden (ungültiges JSON-Format).\n\nDetails: {}"
+ },
+ "Timeout de Conexão ({})": {
+  "en_US": "Connection Timeout ({})",
+  "de_DE": "Verbindungs-Timeout ({})"
+ },
+ "Erro de Conexão ({})": {
+  "en_US": "Connection Error ({})",
+  "de_DE": "Verbindungsfehler ({})"
+ },
+ "Erro de Proxy ({})": {
+  "en_US": "Proxy Error ({})",
+  "de_DE": "Proxy-Fehler ({})"
+ },
+ "Erro HTTP ({})": {
+  "en_US": "HTTP Error ({})",
+  "de_DE": "HTTP-Fehler ({})"
+ },
+ "Erro de Requisição ({})": {
+  "en_US": "Request Error ({})",
+  "de_DE": "Anfragefehler ({})"
+ },
+ "Erro ao Processar Dados ({})": {
+  "en_US": "Error Processing Data ({})",
+  "de_DE": "Fehler beim Verarbeiten der Daten ({})"
+ },
+ "Chave API Materials Project Necessária": {
+  "en_US": "Materials Project API Key Required",
+  "de_DE": "Materials-Project-API-Schlüssel erforderlich"
+ },
+ "A chave da API do Materials Project não foi configurada ou é inválida.\nPor favor, configure-a em 'Configuração > Chave Materials Project...'.": {
+  "en_US": "The Materials Project API key is not configured or is invalid.\nPlease configure it in 'Settings > Materials Project Key...'.",
+  "de_DE": "Der Materials-Project-API-Schlüssel ist nicht konfiguriert oder ungültig.\nBitte konfigurieren Sie ihn unter 'Einstellungen > Materials-Project-Schlüssel...'."
+ },
+ "Tarefa Desconhecida": {
+  "en_US": "Unknown Task",
+  "de_DE": "Unbekannte Aufgabe"
+ },
+ "Busca CIF (MP)": {
+  "en_US": "CIF Search (MP)",
+  "de_DE": "CIF-Suche (MP)"
+ },
+ "Busca de DOI (CCDC)": {
+  "en_US": "DOI Search (CCDC)",
+  "de_DE": "DOI-Suche (CCDC)"
+ },
+ "Busca CIF (COD - {})": {
+  "en_US": "CIF Search (COD - {})",
+  "de_DE": "CIF-Suche (COD - {})"
+ },
+ "Busca Arquivo .rod (ROD - {})": {
+  "en_US": ".rod File Search (ROD - {})",
+  "de_DE": ".rod-Dateisuche (ROD - {})"
+ },
+ "Biblioteca 'cloudscraper' não instalada. Execute 'pip install cloudscraper' no seu terminal.": {
+  "en_US": "The 'cloudscraper' library is not installed. Run 'pip install cloudscraper' in your terminal.",
+  "de_DE": "Die Bibliothek 'cloudscraper' ist nicht installiert. Führen Sie 'pip install cloudscraper' im Terminal aus."
+ },
+ "Biblioteca 'cloudscraper' não instalada. Execute 'pip install cloudscraper'.": {
+  "en_US": "The 'cloudscraper' library is not installed. Run 'pip install cloudscraper'.",
+  "de_DE": "Die Bibliothek 'cloudscraper' ist nicht installiert. Führen Sie 'pip install cloudscraper' aus."
+ },
+ "A biblioteca 'pymatgen' não foi encontrada.": {
+  "en_US": "The 'pymatgen' library was not found.",
+  "de_DE": "Die Bibliothek 'pymatgen' wurde nicht gefunden."
+ },
+ "A biblioteca 'pymatgen' é necessária para manipular arquivos CIF.": {
+  "en_US": "The 'pymatgen' library is required to handle CIF files.",
+  "de_DE": "Die Bibliothek 'pymatgen' wird zum Verarbeiten von CIF-Dateien benötigt."
+ },
+ "Buscando PDF para DOI: {} via Sci-Hub...": {
+  "en_US": "Searching PDF for DOI: {} via Sci-Hub...",
+  "de_DE": "Suche PDF für DOI: {} über Sci-Hub..."
+ },
+ "Não foi possível encontrar ou baixar o PDF do Sci-Hub após todas as tentativas.": {
+  "en_US": "Could not find or download the PDF from Sci-Hub after all attempts.",
+  "de_DE": "Das PDF konnte nach allen Versuchen nicht von Sci-Hub gefunden oder heruntergeladen werden."
+ },
+ "Não foi possível encontrar ou descarregar o PDF após todas as tentativas.": {
+  "en_US": "Could not find or download the PDF after all attempts.",
+  "de_DE": "Das PDF konnte nach allen Versuchen nicht gefunden oder heruntergeladen werden."
+ },
+ "Estrutura não encontrada para material_id (MP): {}": {
+  "en_US": "Structure not found for material_id (MP): {}",
+  "de_DE": "Struktur für material_id (MP) nicht gefunden: {}"
+ },
+ "ID da ROD '{}' inválido para busca de arquivo.": {
+  "en_US": "ROD ID '{}' invalid for file search.",
+  "de_DE": "ROD-ID '{}' ungültig für die Dateisuche."
+ },
+ "ID da ROD '{}' inválido para busca de ficheiro.": {
+  "en_US": "ROD ID '{}' invalid for file search.",
+  "de_DE": "ROD-ID '{}' ungültig für die Dateisuche."
+ },
+ "A base de dados '{}' do histórico não é mais uma opção válida. Usando a seleção atual.": {
+  "en_US": "The database '{}' from history is no longer a valid option. Using the current selection.",
+  "de_DE": "Die Datenbank '{}' aus dem Verlauf ist keine gültige Option mehr. Es wird die aktuelle Auswahl verwendet."
+ },
+ "A pasta '{}' já existe.\nDeseja abri-la como um projeto existente?": {
+  "en_US": "The folder '{}' already exists.\nDo you want to open it as an existing project?",
+  "de_DE": "Der Ordner '{}' existiert bereits.\nMöchten Sie ihn als vorhandenes Projekt öffnen?"
+ },
+ "Não foi possível abrir o arquivo CIF automaticamente.\nO sistema pode não ter um programa associado para arquivos .cif.\nVocê pode encontrá-lo em: {}": {
+  "en_US": "Could not open the CIF file automatically.\nThe system may not have a program associated with .cif files.\nYou can find it at: {}",
+  "de_DE": "Die CIF-Datei konnte nicht automatisch geöffnet werden.\nDem System ist möglicherweise kein Programm für .cif-Dateien zugeordnet.\nSie finden sie unter: {}"
+ },
+ "Não foi possível abrir a Calculadora Estequiométrica:\n{}\n\nVerifique se os arquivos 'calculadora_esteq_pyside.py' e 'quimica_calc.py' estão corretos.": {
+  "en_US": "Could not open the Stoichiometric Calculator:\n{}\n\nCheck that the files 'calculadora_esteq_pyside.py' and 'quimica_calc.py' are correct.",
+  "de_DE": "Der stöchiometrische Rechner konnte nicht geöffnet werden:\n{}\n\nPrüfen Sie, ob die Dateien 'calculadora_esteq_pyside.py' und 'quimica_calc.py' korrekt sind."
+ },
+ "Não foi possível abrir a ferramenta de análise de DRX:\n{}\n\nVerifique se o arquivo 'xrd.py' e suas dependências (matplotlib, pymatgen) estão corretos.": {
+  "en_US": "Could not open the XRD analysis tool:\n{}\n\nCheck that the file 'xrd.py' and its dependencies (matplotlib, pymatgen) are correct.",
+  "de_DE": "Das XRD-Analysewerkzeug konnte nicht geöffnet werden:\n{}\n\nPrüfen Sie, ob die Datei 'xrd.py' und ihre Abhängigkeiten (matplotlib, pymatgen) korrekt sind."
+ },
+ "Não foi possível abrir a janela de Histórico de Busca:\n{}\n\nVerifique se o arquivo 'historico_dialog_pyside.py' está correto.": {
+  "en_US": "Could not open the Search History window:\n{}\n\nCheck that the file 'historico_dialog_pyside.py' is correct.",
+  "de_DE": "Das Suchverlauf-Fenster konnte nicht geöffnet werden:\n{}\n\nPrüfen Sie, ob die Datei 'historico_dialog_pyside.py' korrekt ist."
+ },
+ "Não foi possível abrir o arquivo de instruções ('{}').\nPor favor, procure o arquivo 'Leiame.txt' na pasta 'doc' da aplicação.\n\nErro: {}": {
+  "en_US": "Could not open the instructions file ('{}').\nPlease look for the 'Leiame.txt' file in the application's 'doc' folder.\n\nError: {}",
+  "de_DE": "Die Anleitungsdatei ('{}') konnte nicht geöffnet werden.\nBitte suchen Sie die Datei 'Leiame.txt' im Ordner 'doc' der Anwendung.\n\nFehler: {}"
+ },
+ "Download do CIF ({}) cancelado.": {
+  "en_US": "CIF download ({}) cancelled.",
+  "de_DE": "CIF-Download ({}) abgebrochen."
+ },
+ "Arquivo CIF ({}) salvo em: {}": {
+  "en_US": "CIF file ({}) saved at: {}",
+  "de_DE": "CIF-Datei ({}) gespeichert unter: {}"
+ },
+ "Arquivo .rod (ROD {}) salvo como .txt em: {}": {
+  "en_US": ".rod file (ROD {}) saved as .txt at: {}",
+  "de_DE": ".rod-Datei (ROD {}) als .txt gespeichert unter: {}"
+ },
+ "Dados exportados com sucesso para:\n{}\n\nArraste este ficheiro para o Origin para importar.": {
+  "en_US": "Data exported successfully to:\n{}\n\nDrag this file into Origin to import.",
+  "de_DE": "Daten erfolgreich exportiert nach:\n{}\n\nZiehen Sie diese Datei in Origin, um sie zu importieren."
+ },
+ "PDF não disponível. Salvo como TXT: {}": {
+  "en_US": "PDF not available. Saved as TXT: {}",
+  "de_DE": "PDF nicht verfügbar. Als TXT gespeichert: {}"
+ },
+ "Arquivo: {} | Tamanho: {} | Modificado: {}": {
+  "en_US": "File: {} | Size: {} | Modified: {}",
+  "de_DE": "Datei: {} | Größe: {} | Geändert: {}"
+ },
+ "2θ máximo": {
+  "en_US": "2θ maximum",
+  "de_DE": "2θ Maximum"
+ },
+ "Comprimento de onda (λ)": {
+  "en_US": "Wavelength (λ)",
+  "de_DE": "Wellenlänge (λ)"
+ },
+ "Grupo espacial": {
+  "en_US": "Space group",
+  "de_DE": "Raumgruppe"
+ },
+ "Sistema cristalino": {
+  "en_US": "Crystal system",
+  "de_DE": "Kristallsystem"
+ },
+ "Parâmetro a": {
+  "en_US": "Parameter a",
+  "de_DE": "Parameter a"
+ },
+ "Parâmetro b": {
+  "en_US": "Parameter b",
+  "de_DE": "Parameter b"
+ },
+ "Parâmetro c": {
+  "en_US": "Parameter c",
+  "de_DE": "Parameter c"
+ },
+ "Ângulo α": {
+  "en_US": "Angle α",
+  "de_DE": "Winkel α"
+ },
+ "Ângulo β": {
+  "en_US": "Angle β",
+  "de_DE": "Winkel β"
+ },
+ "Ângulo γ": {
+  "en_US": "Angle γ",
+  "de_DE": "Winkel γ"
+ },
+ "Volume": {
+  "en_US": "Volume",
+  "de_DE": "Volumen"
+ },
+ "Erro ao calcular reflexões: ": {
+  "en_US": "Error calculating reflections: ",
+  "de_DE": "Fehler beim Berechnen der Reflexe: "
+ },
+ "Pymatgen não disponível": {
+  "en_US": "Pymatgen not available",
+  "de_DE": "Pymatgen nicht verfügbar"
+ },
+ "Método de normalização inválido: {}": {
+  "en_US": "Invalid normalization method: {}",
+  "de_DE": "Ungültige Normalisierungsmethode: {}"
+ },
+ "Método de normalização inválido: ": {
+  "en_US": "Invalid normalization method: ",
+  "de_DE": "Ungültige Normalisierungsmethode: "
+ },
+ "Nenhum dado encontrado na região do pico (2θ = {:.2f}°)": {
+  "en_US": "No data found in the peak region (2θ = {:.2f}°)",
+  "de_DE": "Keine Daten im Peak-Bereich gefunden (2θ = {:.2f}°)"
+ },
+ "Intensidade do pico é zero ou negativa (2θ = {:.2f}°)": {
+  "en_US": "Peak intensity is zero or negative (2θ = {:.2f}°)",
+  "de_DE": "Peak-Intensität ist null oder negativ (2θ = {:.2f}°)"
+ },
+ "Os dados não podem ser normalizados [0,1]: máximo igual ao mínimo (dados constantes).": {
+  "en_US": "The data cannot be normalized [0,1]: maximum equals minimum (constant data).",
+  "de_DE": "Die Daten können nicht [0,1]-normalisiert werden: Maximum gleich Minimum (konstante Daten)."
+ },
+ "Os dados não podem ser normalizados: máximo é essencialmente zero.": {
+  "en_US": "The data cannot be normalized: maximum is essentially zero.",
+  "de_DE": "Die Daten können nicht normalisiert werden: Maximum ist praktisch null."
+ },
+ "Os dados não podem ser normalizados: mínimo é essencialmente zero.": {
+  "en_US": "The data cannot be normalized: minimum is essentially zero.",
+  "de_DE": "Die Daten können nicht normalisiert werden: Minimum ist praktisch null."
+ },
+ "Os dados não podem ser normalizados: mediana é essencialmente zero.": {
+  "en_US": "The data cannot be normalized: median is essentially zero.",
+  "de_DE": "Die Daten können nicht normalisiert werden: Median ist praktisch null."
+ },
+ "{} arquivo(s) normalizado(s) com sucesso!\n\nPico de referência: 2θ = {:.3f}°\nIntensidade do pico: {:.2f}": {
+  "en_US": "{} file(s) normalized successfully!\n\nReference peak: 2θ = {:.3f}°\nPeak intensity: {:.2f}",
+  "de_DE": "{} Datei(en) erfolgreich normalisiert!\n\nReferenz-Peak: 2θ = {:.3f}°\nPeak-Intensität: {:.2f}"
+ },
+ "<b>Arquivo selecionado:</b> {}<br><b>Posição do pico:</b> 2θ = {:.3f}°<br><br>O arquivo selecionado será normalizado dividindo todas as intensidades pela intensidade deste pico.": {
+  "en_US": "<b>Selected file:</b> {}<br><b>Peak position:</b> 2θ = {:.3f}°<br><br>The selected file will be normalized by dividing all intensities by the intensity of this peak.",
+  "de_DE": "<b>Ausgewählte Datei:</b> {}<br><b>Peak-Position:</b> 2θ = {:.3f}°<br><br>Die ausgewählte Datei wird normalisiert, indem alle Intensitäten durch die Intensität dieses Peaks geteilt werden."
+ },
+ "<b>Existem {} outro(s) arquivo(s) experimental(is) carregado(s).</b><br>Deseja normalizar todos eles usando o mesmo pico como referência?": {
+  "en_US": "<b>There are {} other experimental file(s) loaded.</b><br>Do you want to normalize all of them using the same peak as reference?",
+  "de_DE": "<b>Es sind {} weitere experimentelle Datei(en) geladen.</b><br>Möchten Sie alle mit demselben Peak als Referenz normalisieren?"
+ },
+ "Modo de seleção de pico ativado para: {}\n\nClique no gráfico na posição do pico de interesse.\nO programa irá buscar o máximo na região próxima ao clique.\n\nPressione ESC para cancelar.": {
+  "en_US": "Peak selection mode activated for: {}\n\nClick on the plot at the position of the peak of interest.\nThe program will look for the maximum in the region near the click.\n\nPress ESC to cancel.",
+  "de_DE": "Peak-Auswahlmodus aktiviert für: {}\n\nKlicken Sie im Diagramm auf die Position des gewünschten Peaks.\nDas Programm sucht das Maximum im Bereich um den Klick.\n\nDrücken Sie ESC zum Abbrechen."
+ },
+ "Normalização [0, 1]": {
+  "en_US": "Normalization [0, 1]",
+  "de_DE": "Normalisierung [0, 1]"
+ },
+ "Divisão pelo Máximo": {
+  "en_US": "Division by Maximum",
+  "de_DE": "Division durch Maximum"
+ },
+ "Divisão pelo Mínimo": {
+  "en_US": "Division by Minimum",
+  "de_DE": "Division durch Minimum"
+ },
+ "Divisão pela Mediana": {
+  "en_US": "Division by Median",
+  "de_DE": "Division durch Median"
+ },
+ "Método Desconhecido": {
+  "en_US": "Unknown Method",
+  "de_DE": "Unbekannte Methode"
+ },
+ "Método desconhecido": {
+  "en_US": "Unknown method",
+  "de_DE": "Unbekannte Methode"
+ },
+ "SNIP (Statistics-sensitive Non-linear Iterative Peak-clipping)\n\n⭐ RECOMENDADO - Método mais usado em XRD profissional\n\n✅ Totalmente automático\n✅ Muito robusto e confiável\n✅ Rápido\n✅ Funciona bem com backgrounds complexos\n\nUsado em: HighScore, BGMN, PyMca, etc.": {
+  "en_US": "SNIP (Statistics-sensitive Non-linear Iterative Peak-clipping)\n\n⭐ RECOMMENDED - Most used method in professional XRD\n\n✅ Fully automatic\n✅ Very robust and reliable\n✅ Fast\n✅ Works well with complex backgrounds\n\nUsed in: HighScore, BGMN, PyMca, etc.",
+  "de_DE": "SNIP (Statistics-sensitive Non-linear Iterative Peak-clipping)\n\n⭐ EMPFOHLEN - Meistgenutzte Methode in der professionellen XRD\n\n✅ Vollautomatisch\n✅ Sehr robust und zuverlässig\n✅ Schnell\n✅ Funktioniert gut mit komplexen Untergründen\n\nVerwendet in: HighScore, BGMN, PyMca, usw."
+ },
+ "arPLS (Asymmetrically Reweighted Penalized Least Squares)\n\n🥈 Excelente método automático\n\n✅ Muito eficaz para backgrounds variáveis\n✅ Automático\n✅ Usado em espectroscopia Raman/IR/XRD\n⚠️ Requer ajuste de lambda\n\nMelhor para: Backgrounds ondulados complexos": {
+  "en_US": "arPLS (Asymmetrically Reweighted Penalized Least Squares)\n\n🥈 Excellent automatic method\n\n✅ Very effective for variable backgrounds\n✅ Automatic\n✅ Used in Raman/IR/XRD spectroscopy\n⚠️ Requires lambda tuning\n\nBest for: Complex wavy backgrounds",
+  "de_DE": "arPLS (Asymmetrically Reweighted Penalized Least Squares)\n\n🥈 Ausgezeichnete automatische Methode\n\n✅ Sehr wirksam bei variablen Untergründen\n✅ Automatisch\n✅ Verwendet in Raman-/IR-/XRD-Spektroskopie\n⚠️ Erfordert Lambda-Anpassung\n\nAm besten für: Komplexe wellige Untergründe"
+ },
+ "Polynomial Fitting (Ajuste Polinomial)\n\n🎯 Método com controle manual\n\n✅ Controle total do usuário\n✅ Simples e intuitivo\n⚠️ Requer seleção manual de pontos\n\nMelhor para: Backgrounds suaves e previsíveis": {
+  "en_US": "Polynomial Fitting\n\n🎯 Method with manual control\n\n✅ Full user control\n✅ Simple and intuitive\n⚠️ Requires manual point selection\n\nBest for: Smooth and predictable backgrounds",
+  "de_DE": "Polynom-Anpassung\n\n🎯 Methode mit manueller Steuerung\n\n✅ Volle Kontrolle des Benutzers\n✅ Einfach und intuitiv\n⚠️ Erfordert manuelle Punktauswahl\n\nAm besten für: Glatte und vorhersehbare Untergründe"
+ },
+ "Spline Interpolation (Interpolação Spline)\n\n📊 Método manual com suavidade\n\n✅ Interpolação suave entre pontos\n✅ Flexível\n⚠️ Requer seleção manual de pontos\n\nMelhor para: Backgrounds curvados": {
+  "en_US": "Spline Interpolation\n\n📊 Manual method with smoothness\n\n✅ Smooth interpolation between points\n✅ Flexible\n⚠️ Requires manual point selection\n\nBest for: Curved backgrounds",
+  "de_DE": "Spline-Interpolation\n\n📊 Manuelle Methode mit Glättung\n\n✅ Glatte Interpolation zwischen Punkten\n✅ Flexibel\n⚠️ Erfordert manuelle Punktauswahl\n\nAm besten für: Gekrümmte Untergründe"
+ },
+ "Sólida": {
+  "en_US": "Solid",
+  "de_DE": "Durchgezogen"
+ },
+ "Tracejada": {
+  "en_US": "Dashed",
+  "de_DE": "Gestrichelt"
+ },
+ "Pontilhada": {
+  "en_US": "Dotted",
+  "de_DE": "Gepunktet"
+ },
+ "Ponto-Traço": {
+  "en_US": "Dash-Dot",
+  "de_DE": "Strich-Punkt"
+ },
+ "<span style='color:green;'><b>Boa</b></span>": {
+  "en_US": "<span style='color:green;'><b>Good</b></span>",
+  "de_DE": "<span style='color:green;'><b>Gut</b></span>"
+ },
+ "<span style='color:green;'><b>Rápida</b></span>": {
+  "en_US": "<span style='color:green;'><b>Fast</b></span>",
+  "de_DE": "<span style='color:green;'><b>Schnell</b></span>"
+ },
+ "<span style='color:orange;'><b>Moderada</b></span>": {
+  "en_US": "<span style='color:orange;'><b>Moderate</b></span>",
+  "de_DE": "<span style='color:orange;'><b>Mäßig</b></span>"
+ },
+ "<span style='color:red;'><b>Lenta</b></span>": {
+  "en_US": "<span style='color:red;'><b>Slow</b></span>",
+  "de_DE": "<span style='color:red;'><b>Langsam</b></span>"
+ },
+ "Erro ao visualizar estrutura 3D: {}": {
+  "en_US": "Error displaying 3D structure: {}",
+  "de_DE": "Fehler beim Anzeigen der 3D-Struktur: {}"
+ },
+ "Expansão: <b>{}x{}x{}</b> | Átomos: <b>{}</b>": {
+  "en_US": "Expansion: <b>{}x{}x{}</b> | Atoms: <b>{}</b>",
+  "de_DE": "Erweiterung: <b>{}x{}x{}</b> | Atome: <b>{}</b>"
+ },
+ "<b>Nova Configuração: {}x{}x{}</b><br><b>Átomos Totais:</b> {} ({} células)<br><b>Ligações:</b> ~{}<br><b>Memória:</b> ~{:.1f} MB<br><b>Performance:</b> {} - {}": {
+  "en_US": "<b>New Configuration: {}x{}x{}</b><br><b>Total Atoms:</b> {} ({} cells)<br><b>Bonds:</b> ~{}<br><b>Memory:</b> ~{:.1f} MB<br><b>Performance:</b> {} - {}",
+  "de_DE": "<b>Neue Konfiguration: {}x{}x{}</b><br><b>Atome gesamt:</b> {} ({} Zellen)<br><b>Bindungen:</b> ~{}<br><b>Speicher:</b> ~{:.1f} MB<br><b>Leistung:</b> {} - {}"
+ },
+ "Renderização instantânea": {
+  "en_US": "Instant rendering",
+  "de_DE": "Sofortiges Rendern"
+ },
+ "Pode apresentar lentidão": {
+  "en_US": "May be slow",
+  "de_DE": "Kann langsam sein"
+ },
+ "Renderização pode travar": {
+  "en_US": "Rendering may freeze",
+  "de_DE": "Rendern kann einfrieren"
+ },
+ "Editor - Sistema {}": {
+  "en_US": "Editor - System {}",
+  "de_DE": "Editor - System {}"
+ },
+ "Editor - Sistema {} - {} ({})": {
+  "en_US": "Editor - System {} - {} ({})",
+  "de_DE": "Editor - System {} - {} ({})"
+ },
+ "Erro ao carregar CIF: {}": {
+  "en_US": "Error loading CIF: {}",
+  "de_DE": "Fehler beim Laden der CIF: {}"
+ },
+ "Erro ao ler '{}': {}": {
+  "en_US": "Error reading '{}': {}",
+  "de_DE": "Fehler beim Lesen von '{}': {}"
+ },
+ "Erro ao salvar CIF ({}).": {
+  "en_US": "Error saving CIF ({}).",
+  "de_DE": "Fehler beim Speichern der CIF ({})."
+ },
+ "Não foi possível analisar o conteúdo do CIF. Erro: {}": {
+  "en_US": "Could not parse the CIF content. Error: {}",
+  "de_DE": "Der CIF-Inhalt konnte nicht analysiert werden. Fehler: {}"
+ },
+ "O CIF '{}' ainda não foi calculado.\n\nClique em 'Calcular Selecionado(s)' para gerar o difratograma e habilitar a visualização 3D.": {
+  "en_US": "The CIF '{}' has not been calculated yet.\n\nClick 'Calculate Selected' to generate the diffractogram and enable 3D visualization.",
+  "de_DE": "Die CIF '{}' wurde noch nicht berechnet.\n\nKlicken Sie auf 'Ausgewählte berechnen', um das Diffraktogramm zu erzeugen und die 3D-Ansicht zu aktivieren."
+ },
+ "O CIF '{}' ainda não foi simulado.\nPor favor, calcule todos os CIFs selecionados antes de combinar.": {
+  "en_US": "The CIF '{}' has not been simulated yet.\nPlease calculate all selected CIFs before combining.",
+  "de_DE": "Die CIF '{}' wurde noch nicht simuliert.\nBitte berechnen Sie alle ausgewählten CIFs vor dem Kombinieren."
+ },
+ "O conteúdo do CIF fornecido é inválido ou está vazio.": {
+  "en_US": "The provided CIF content is invalid or empty.",
+  "de_DE": "Der angegebene CIF-Inhalt ist ungültig oder leer."
+ },
+ "Tem certeza que deseja resetar '{}' para o seu estado original?\nTodas as modificações de rede e parâmetros de simulação serão perdidos.": {
+  "en_US": "Are you sure you want to reset '{}' to its original state?\nAll lattice modifications and simulation parameters will be lost.",
+  "de_DE": "Möchten Sie '{}' wirklich auf den ursprünglichen Zustand zurücksetzen?\nAlle Gitteränderungen und Simulationsparameter gehen verloren."
+ },
+ "O novo volume deve ser um número positivo.": {
+  "en_US": "The new volume must be a positive number.",
+  "de_DE": "Das neue Volumen muss eine positive Zahl sein."
+ },
+ "Parâmetros de rede inválidos. Erro: {}": {
+  "en_US": "Invalid lattice parameters. Error: {}",
+  "de_DE": "Ungültige Gitterparameter. Fehler: {}"
+ },
+ "O nome do projeto não pode conter os seguintes caracteres:\n\\ / : * ? \" < > |": {
+  "en_US": "The project name cannot contain the following characters:\n\\ / : * ? \" < > |",
+  "de_DE": "Der Projektname darf die folgenden Zeichen nicht enthalten:\n\\ / : * ? \" < > |"
+ },
+ "Não foi possível formatar a equação (coeficientes em falta).": {
+  "en_US": "Could not format the equation (missing coefficients).",
+  "de_DE": "Die Gleichung konnte nicht formatiert werden (fehlende Koeffizienten)."
+ },
+ "Sem operações de simetria": {
+  "en_US": "No symmetry operations",
+  "de_DE": "Keine Symmetrieoperationen"
+ },
+ "Ajuste concluido: {}/{} picos correspondidos. Erro reduzido em {:.1f}%.": {
+  "en_US": "Fit complete: {}/{} peaks matched. Error reduced by {:.1f}%.",
+  "de_DE": "Anpassung abgeschlossen: {}/{} Peaks zugeordnet. Fehler um {:.1f}% reduziert."
+ },
+ "{}/{} picos correspondidos\nErro: {:.4f} → {:.4f}": {
+  "en_US": "{}/{} peaks matched\nError: {:.4f} → {:.4f}",
+  "de_DE": "{}/{} Peaks zugeordnet\nFehler: {:.4f} → {:.4f}"
+ },
+ "Erro: quimica_calc.py não carregado.": {
+  "en_US": "Error: quimica_calc.py not loaded.",
+  "de_DE": "Fehler: quimica_calc.py nicht geladen."
+ },
+ "ERRO CRÍTICO: Função de 'quimica_calc.py' não encontrada: ": {
+  "en_US": "CRITICAL ERROR: Function from 'quimica_calc.py' not found: ",
+  "de_DE": "KRITISCHER FEHLER: Funktion aus 'quimica_calc.py' nicht gefunden: "
+ },
+ "Nenhum dado numérico válido foi encontrado.": {
+  "en_US": "No valid numeric data was found.",
+  "de_DE": "Es wurden keine gültigen numerischen Daten gefunden."
+ },
+ "As bibliotecas 'pymatgen' ou 'pyobjcryst' são necessárias.": {
+  "en_US": "The 'pymatgen' or 'pyobjcryst' libraries are required.",
+  "de_DE": "Die Bibliotheken 'pymatgen' oder 'pyobjcryst' werden benötigt."
+ },
+ "Erro: Biblioteca PyWavelets não instalada.": {
+  "en_US": "Error: PyWavelets library not installed.",
+  "de_DE": "Fehler: PyWavelets-Bibliothek nicht installiert."
+ },
+ "Histórico salvo em: ": {
+  "en_US": "History saved at: ",
+  "de_DE": "Verlauf gespeichert in: "
+ },
+ "Erro ao carregar histórico '": {
+  "en_US": "Error loading history '",
+  "de_DE": "Fehler beim Laden des Verlaufs '"
+ },
+ "Erro ao salvar histórico: ": {
+  "en_US": "Error saving history: ",
+  "de_DE": "Fehler beim Speichern des Verlaufs: "
+ },
+ "Melhor Posição (Automático)": {
+  "en_US": "Best Position (Automatic)",
+  "de_DE": "Beste Position (Automatisch)"
+ },
+ "Não é um dicionário": {
+  "en_US": "Not a dictionary",
+  "de_DE": "Kein Dictionary"
+ },
+ "Comprimento de onda inválido": {
+  "en_US": "Invalid wavelength",
+  "de_DE": "Ungültige Wellenlänge"
  }
 }

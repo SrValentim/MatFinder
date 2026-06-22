@@ -180,7 +180,7 @@ class AutoFitDialog(QDialog):
         peaks_layout = QVBoxLayout(peaks_group)
         self.peaks_table = QTableWidget()
         self.peaks_table.setColumnCount(3)
-        self.peaks_table.setHorizontalHeaderLabels(["2θ (°)", "Intensidade", ""])
+        self.peaks_table.setHorizontalHeaderLabels([ptr("2θ (°)"), ptr("Intensidade"), ""])
         self.peaks_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
         self.peaks_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
         self.peaks_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
@@ -202,9 +202,7 @@ class AutoFitDialog(QDialog):
         self.max_var_spin.setDecimals(1)
         self.max_var_spin.setSingleStep(0.5)
         self.max_var_spin.setToolTip(
-            "Variacao maxima permitida para cada parametro de rede.\n"
-            "Valores menores = ajuste mais conservador.\n"
-            "Recomendado: 3-5% para ajuste fino.")
+            ptr("Variacao maxima permitida para cada parametro de rede.\nValores menores = ajuste mais conservador.\nRecomendado: 3-5% para ajuste fino."))
         var_layout.addWidget(self.max_var_spin)
         fit_layout.addLayout(var_layout)
 
@@ -224,7 +222,7 @@ class AutoFitDialog(QDialog):
 
         self.result_table = QTableWidget()
         self.result_table.setColumnCount(4)
-        self.result_table.setHorizontalHeaderLabels(["Param", "Antes", "Depois", "Var (%)"])
+        self.result_table.setHorizontalHeaderLabels([ptr("Param"), ptr("Antes"), ptr("Depois"), ptr("Var (%)")])
         self.result_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         self.result_table.setMaximumHeight(200)
         self.result_table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
@@ -287,11 +285,11 @@ class AutoFitDialog(QDialog):
         self.peaks_table.setRowCount(len(self.detected_peaks))
 
         for i, peak in enumerate(self.detected_peaks):
-            tt_item = QTableWidgetItem(f"{peak['two_theta']:.4f}")
+            tt_item = QTableWidgetItem(ptr("{:.4f}").format(peak['two_theta']))
             tt_item.setFlags(tt_item.flags() & ~Qt.ItemFlag.ItemIsEditable)
             self.peaks_table.setItem(i, 0, tt_item)
 
-            int_item = QTableWidgetItem(f"{peak['intensity']:.1f}")
+            int_item = QTableWidgetItem(ptr("{:.1f}").format(peak['intensity']))
             int_item.setFlags(int_item.flags() & ~Qt.ItemFlag.ItemIsEditable)
             self.peaks_table.setItem(i, 1, int_item)
 
@@ -300,7 +298,7 @@ class AutoFitDialog(QDialog):
             status_item.setFlags(status_item.flags() & ~Qt.ItemFlag.ItemIsEditable)
             self.peaks_table.setItem(i, 2, status_item)
 
-        self.peaks_count_label.setText(f"{len(self.detected_peaks)} picos detectados")
+        self.peaks_count_label.setText(ptr("{} picos detectados").format(len(self.detected_peaks)))
 
     def _toggle_add_peak_mode(self, checked):
         """Alterna modo de adição manual de pico."""
@@ -414,8 +412,8 @@ class AutoFitDialog(QDialog):
 
             self.ax.plot([], [], 'r-', alpha=0.6, linewidth=1.2, label='Reflexoes ajustadas')
 
-        self.ax.set_xlabel('2\u03b8 (\u00b0)', fontsize=12)
-        self.ax.set_ylabel('Intensidade', fontsize=12)
+        self.ax.set_xlabel(ptr('2\u03b8 (\u00b0)'), fontsize=12)
+        self.ax.set_ylabel(ptr('Intensidade'), fontsize=12)
         self.ax.legend(fontsize=8, loc='upper right')
 
         x_min = int(np.min(self.exp_2theta)) if len(self.exp_2theta) > 0 else 0
@@ -433,8 +431,7 @@ class AutoFitDialog(QDialog):
 
         if len(self.detected_peaks) < 3:
             QMessageBox.warning(self, ptr("Poucos Picos"),
-                                "Recomenda-se pelo menos 3 picos para um ajuste confiavel.\n"
-                                "Adicione mais picos ou aumente a sensibilidade.")
+                                ptr("Recomenda-se pelo menos 3 picos para um ajuste confiavel.\nAdicione mais picos ou aumente a sensibilidade."))
             return
 
         params = self.cif_handler.get_lattice_params()
@@ -453,7 +450,7 @@ class AutoFitDialog(QDialog):
             )
         except Exception as e:
             QMessageBox.critical(self, ptr("Erro no Ajuste"),
-                                 f"Ocorreu um erro durante o ajuste:\n{e}")
+                                 ptr("Ocorreu um erro durante o ajuste:\n{}").format(e))
             logger.error(f"Erro no auto-ajuste: {e}", exc_info=True)
             return
 
@@ -502,7 +499,7 @@ class AutoFitDialog(QDialog):
 
             # Variação %
             change_val = changes.get(key, 0.0)
-            change_item = QTableWidgetItem(f"{change_val:+.3f}%")
+            change_item = QTableWidgetItem(ptr("{:+.3f}%").format(change_val))
 
             # Colorir baseado na magnitude da mudança
             if abs(change_val) < 0.1:
@@ -522,8 +519,7 @@ class AutoFitDialog(QDialog):
             color = '#F44336'
             self.accept_btn.setEnabled(False)
 
-        msg = (f"{r['n_peaks_matched']}/{r['n_peaks_total']} picos correspondidos\n"
-               f"Erro: {r['cost_before']:.4f} → {r['cost_after']:.4f}")
+        msg = (ptr("{}/{} picos correspondidos\nErro: {:.4f} → {:.4f}").format(r['n_peaks_matched'], r['n_peaks_total'], r['cost_before'], r['cost_after']))
         self.result_label.setText(msg)
         self.result_label.setStyleSheet(f"color: {color}; padding: 4px; font-weight: bold;")
 
@@ -546,7 +542,7 @@ class AutoFitDialog(QDialog):
             else:
                 hkl_str = ""
 
-            status_text = f"Δ={delta:.3f}° {hkl_str}"
+            status_text = ptr("Δ={:.3f}° {}").format(delta, hkl_str)
             status_item = QTableWidgetItem(status_text)
 
             if delta < 0.1:

@@ -303,7 +303,7 @@ class CalculadoraProporcaoMassaDialog(QDialog):
         else:
             for simbolo in self.selected_elements_symbols:
                 massa_atomica = MASSAS_ATOMICAS.get(simbolo, 0.0)
-                label_text = f"{simbolo} (MM: {massa_atomica:.3f}):"
+                label_text = ptr("{} (MM: {:.3f}):").format(simbolo, massa_atomica)
                 entry = QLineEdit()
                 entry.setValidator(QDoubleValidator(0.0001, 1000.0, 4))
                 entry.setPlaceholderText(tr('calculators.mass_proportion.proportion_placeholder'))
@@ -501,7 +501,7 @@ class BackgroundCorrectionDialog(QDialog):
         except Exception as e:
             logging.error(f"Erro ao importar background_removal: {e}")
             QMessageBox.critical(self, ptr("Erro"),
-                               f"Não foi possível carregar o módulo de remoção de background:\n{e}")
+                               ptr("Não foi possível carregar o módulo de remoção de background:\n{}").format(e))
             self.bg_module = None
 
         self.x_data = np.array(x_data)
@@ -531,9 +531,9 @@ class BackgroundCorrectionDialog(QDialog):
         method_layout.addWidget(QLabel(ptr("<b>Método:</b>")))
         self.method_combo = QComboBox()
         self.method_combo.addItems([
-            "SNIP (Automático)",
-            "arPLS (Automático)",
-            "Polynomial (Manual)"
+            ptr("SNIP (Automático)"),
+            ptr("arPLS (Automático)"),
+            ptr("Polynomial (Manual)")
         ])
         method_layout.addWidget(self.method_combo)
         method_layout.addStretch()
@@ -553,7 +553,7 @@ class BackgroundCorrectionDialog(QDialog):
         self.snip_iterations_spin.setRange(10, 100)
         self.snip_iterations_spin.setValue(40)
         snip_iter_widget = self._create_slider_spinbox(self.snip_iterations_slider, self.snip_iterations_spin)
-        snip_layout.addRow("Iterações:", snip_iter_widget)
+        snip_layout.addRow(ptr("Iterações:"), snip_iter_widget)
         snip_layout.addRow(QLabel(ptr("<i>Mais iterações = background mais baixo (20-60 típico)</i>")))
 
         self.snip_smooth_check = QCheckBox(ptr("Aplicar suavização (recomendado para dados ruidosos)"))
@@ -571,7 +571,7 @@ class BackgroundCorrectionDialog(QDialog):
         self.arpls_lam_label = QLabel()
         arpls_lam_widget = self._create_slider_label(self.arpls_lam_slider, self.arpls_lam_label,
                                                      lambda v: f"10^{v/10:.1f} = {10**(v/10):.1e}")
-        arpls_layout.addRow("Suavidade (λ):", arpls_lam_widget)
+        arpls_layout.addRow(ptr("Suavidade (λ):"), arpls_lam_widget)
         arpls_layout.addRow(QLabel(ptr("<i>Valores maiores = background mais suave</i>")))
 
         self.params_stack.addWidget(arpls_widget)
@@ -584,15 +584,11 @@ class BackgroundCorrectionDialog(QDialog):
         self.poly_degree_spin = QSpinBox()
         self.poly_degree_spin.setRange(2, 6)
         self.poly_degree_spin.setValue(3)
-        poly_degree_layout.addRow("Grau do Polinômio:", self.poly_degree_spin)
+        poly_degree_layout.addRow(ptr("Grau do Polinômio:"), self.poly_degree_spin)
         poly_layout.addLayout(poly_degree_layout)
 
         poly_instructions = QLabel(
-            "<b>Como usar:</b><br>"
-            "1. Clique no gráfico em <b>regiões de background</b> (sem picos)<br>"
-            "2. Continue clicando para adicionar mais pontos<br>"
-            "3. Mínimo de pontos necessários = Grau + 1<br>"
-            "4. Clique em 'Limpar Pontos' para recomeçar"
+            ptr("<b>Como usar:</b><br>1. Clique no gráfico em <b>regiões de background</b> (sem picos)<br>2. Continue clicando para adicionar mais pontos<br>3. Mínimo de pontos necessários = Grau + 1<br>4. Clique em 'Limpar Pontos' para recomeçar")
         )
         poly_instructions.setWordWrap(True)
         poly_layout.addWidget(poly_instructions)
@@ -712,7 +708,7 @@ class BackgroundCorrectionDialog(QDialog):
         if event.button == 1:  # Clique esquerdo
             x_clicked = event.xdata
             self.manual_points_x.append(x_clicked)
-            self.poly_points_label.setText(f"Pontos selecionados: {len(self.manual_points_x)}")
+            self.poly_points_label.setText(ptr("Pontos selecionados: {}").format(len(self.manual_points_x)))
             self._update_plot()
 
     def _clear_manual_points(self):
@@ -792,8 +788,8 @@ class BackgroundCorrectionDialog(QDialog):
                 self.axes.plot(px, py, 'ro', markersize=8,
                               markeredgecolor='darkred', markeredgewidth=1.5)
 
-        self.axes.set_xlabel("2θ (Graus)", fontsize=11, fontweight='bold')
-        self.axes.set_ylabel("Intensidade (Unid. arb.)", fontsize=11, fontweight='bold')
+        self.axes.set_xlabel(ptr("2θ (Graus)"), fontsize=11, fontweight='bold')
+        self.axes.set_ylabel(ptr("Intensidade (Unid. arb.)"), fontsize=11, fontweight='bold')
         self.axes.legend(loc='best', framealpha=0.9)
         self.axes.grid(True, linestyle=':', alpha=0.4)
         self.plot_canvas.figure.tight_layout()
@@ -847,7 +843,7 @@ class PhaseDRXProjectDialog(QDialog):
         new_project_layout.setSpacing(10)
         self.project_name_edit = QLineEdit()
         self.project_name_edit.setPlaceholderText(ptr("Ex: Analise_Amostra_X"))
-        new_project_layout.addRow("Nome do Projeto:", self.project_name_edit)
+        new_project_layout.addRow(ptr("Nome do Projeto:"), self.project_name_edit)
         path_layout = QHBoxLayout()
         self.project_path_edit = QLineEdit()
         self.project_path_edit.setReadOnly(True)
@@ -857,7 +853,7 @@ class PhaseDRXProjectDialog(QDialog):
         browse_button.clicked.connect(self._browse_project_path)
         path_layout.addWidget(self.project_path_edit)
         path_layout.addWidget(browse_button)
-        new_project_layout.addRow("Salvar em:", path_layout)
+        new_project_layout.addRow(ptr("Salvar em:"), path_layout)
         create_button = QPushButton(ptr("Criar Novo Projeto"))
         create_button.setStyleSheet("font-weight: bold; padding: 5px;")
         create_button.clicked.connect(self._on_create_clicked)
@@ -876,7 +872,7 @@ class PhaseDRXProjectDialog(QDialog):
         main_layout.addWidget(button_box, 0, Qt.AlignmentFlag.AlignRight)
 
     def _browse_project_path(self):
-        directory = QFileDialog.getExistingDirectory(self, "Selecionar Pasta Base para o Projeto",
+        directory = QFileDialog.getExistingDirectory(self, ptr("Selecionar Pasta Base para o Projeto"),
                                                      self.project_path_edit.text())
         if directory:
             self.project_path_edit.setText(directory)
@@ -890,8 +886,7 @@ class PhaseDRXProjectDialog(QDialog):
         invalid_chars = r'[\\/:"*?<>|]'
         if any(c in invalid_chars for c in name):
             QMessageBox.warning(self, ptr("Nome Inválido"),
-                                "O nome do projeto não pode conter os seguintes caracteres:\n"
-                                f'\\ / : * ? " < > |')
+                                ptr("O nome do projeto não pode conter os seguintes caracteres:\n\\ / : * ? \" < > |"))
             return
         if not path or not os.path.isdir(path):
             QMessageBox.warning(self, ptr("Caminho Inválido"),

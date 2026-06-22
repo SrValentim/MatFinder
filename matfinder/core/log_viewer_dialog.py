@@ -18,6 +18,7 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import Qt, QTimer, Signal
 from PySide6.QtGui import QFont, QTextCursor, QColor, QIcon, QTextCharFormat
+from matfinder.core.translator import ptr
 
 # Importar sistema de tradução
 try:
@@ -103,7 +104,7 @@ class LogViewerDialog(QDialog):
         # Filtro de nível
         controls_layout.addWidget(QLabel(tr('log_viewer.filter_level', default='Filtrar por nível:')))
         self.level_filter = QComboBox()
-        self.level_filter.addItems(['Todos', 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'])
+        self.level_filter.addItems([ptr('Todos'), ptr('DEBUG'), ptr('INFO'), ptr('WARNING'), ptr('ERROR'), ptr('CRITICAL')])
         self.level_filter.currentTextChanged.connect(self._apply_filter)
         self.level_filter.setMinimumWidth(100)
         controls_layout.addWidget(self.level_filter)
@@ -195,7 +196,7 @@ class LogViewerDialog(QDialog):
         buttons_layout.addWidget(export_label)
 
         self.export_format = QComboBox()
-        self.export_format.addItems(['TXT', 'LOG', 'HTML', 'PDF', 'CSV'])
+        self.export_format.addItems([ptr('TXT'), ptr('LOG'), ptr('HTML'), ptr('PDF'), ptr('CSV')])
         self.export_format.setMinimumWidth(80)
         buttons_layout.addWidget(self.export_format)
 
@@ -289,15 +290,15 @@ class LogViewerDialog(QDialog):
         """Atualiza as estatísticas de log."""
         if isinstance(counts, dict):
             total = sum(counts.values())
-            self.stats_label.setText(f"Total: {total} entradas")
-            self.error_count_label.setText(f"Erros: {counts.get('ERROR', 0) + counts.get('CRITICAL', 0)}")
-            self.warning_count_label.setText(f"Avisos: {counts.get('WARNING', 0)}")
-            self.info_count_label.setText(f"Info: {counts.get('INFO', 0)}")
+            self.stats_label.setText(ptr("Total: {} entradas").format(total))
+            self.error_count_label.setText(ptr("Erros: {}").format(counts.get('ERROR', 0) + counts.get('CRITICAL', 0)))
+            self.warning_count_label.setText(ptr("Avisos: {}").format(counts.get('WARNING', 0)))
+            self.info_count_label.setText(ptr("Info: {}").format(counts.get('INFO', 0)))
         else:
-            self.stats_label.setText("Total: 0 entradas")
-            self.error_count_label.setText("Erros: 0")
-            self.warning_count_label.setText("Avisos: 0")
-            self.info_count_label.setText("Info: 0")
+            self.stats_label.setText(ptr("Total: 0 entradas"))
+            self.error_count_label.setText(ptr("Erros: 0"))
+            self.warning_count_label.setText(ptr("Avisos: 0"))
+            self.info_count_label.setText(ptr("Info: 0"))
 
     def _update_file_info(self):
         """Atualiza informações do arquivo."""
@@ -314,9 +315,7 @@ class LogViewerDialog(QDialog):
                     size_str = f"{size / (1024 * 1024):.1f} MB"
 
                 self.file_info_label.setText(
-                    f"Arquivo: {os.path.basename(self.log_file_path)} | "
-                    f"Tamanho: {size_str} | "
-                    f"Modificado: {mtime.strftime('%d/%m/%Y %H:%M:%S')}"
+                    ptr("Arquivo: {} | Tamanho: {} | Modificado: {}").format(os.path.basename(self.log_file_path), size_str, mtime.strftime('%d/%m/%Y %H:%M:%S'))
                 )
         except Exception:
             self.file_info_label.setText("")
@@ -369,7 +368,7 @@ class LogViewerDialog(QDialog):
                 QMessageBox.critical(
                     self,
                     tr('log_viewer.clear_error_title', default='Erro'),
-                    f"Erro ao limpar log: {str(e)}"
+                    ptr("Erro ao limpar log: {}").format(str(e))
                 )
 
     def _export_log(self):
@@ -424,7 +423,7 @@ class LogViewerDialog(QDialog):
             QMessageBox.critical(
                 self,
                 tr('log_viewer.export_error_title', default='Erro na Exportação'),
-                f"Erro ao exportar log: {str(e)}"
+                ptr("Erro ao exportar log: {}").format(str(e))
             )
 
     def _export_html(self, file_path, content):
@@ -591,7 +590,7 @@ class LogViewerDialog(QDialog):
                 f.write(f"Exportado em: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}\n")
                 f.write("=" * 60 + "\n\n")
                 f.write(content)
-            raise Exception(f"PDF não disponível. Salvo como TXT: {e}")
+            raise Exception(ptr("PDF não disponível. Salvo como TXT: {}").format(e))
 
     def _export_csv(self, file_path, content):
         """Exporta log em formato CSV."""

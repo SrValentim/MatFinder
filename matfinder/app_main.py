@@ -58,7 +58,7 @@ def _ensure_cloudscraper():
         except ImportError:
             CLOUDSRAPER_AVAILABLE = False
             cloudscraper = None
-            logging.warning("Biblioteca 'cloudscraper' não encontrada. O download do Sci-Hub pode falhar.")
+            logging.warning(ptr("Biblioteca 'cloudscraper' não encontrada. O download do Sci-Hub pode falhar."))
     return cloudscraper, CLOUDSRAPER_AVAILABLE
 
 
@@ -105,6 +105,7 @@ from PySide6.QtCore import (
     Qt, QUrl, QTimer, QSize, QPoint, Signal, Slot, QObject, QStandardPaths
 )
 from PySide6.QtSvg import QSvgRenderer
+from matfinder.core.translator import ptr
 
 # --- ALTERAÇÃO DE REATORAÇÃO: Importações de Módulos Locais ---
 # Os caminhos de importação foram atualizados para refletir a nova estrutura de pacotes
@@ -191,7 +192,7 @@ class Worker(QObject):
         # Carregar requests para tratamento de exceções de rede
         import requests as _requests
 
-        context_for_error = "Tarefa Desconhecida"
+        context_for_error = ptr("Tarefa Desconhecida")
         try:
             if self.task_type == "material_search":
                 context_for_error = (
@@ -202,15 +203,15 @@ class Worker(QObject):
                     results_raw, db_choice_from_func
                 )
             elif self.task_type == "scihub_pdf":
-                context_for_error = "Sci-Hub"
+                context_for_error = ptr("Sci-Hub")
                 pdf_content, suggested_filename = self.task_callable(*self.args)
                 self.scihub_pdf_downloaded.emit(pdf_content, suggested_filename)
             elif self.task_type == "fetch_doi_from_ccdc":
-                context_for_error = "Busca de DOI (CCDC)"
+                context_for_error = ptr("Busca de DOI (CCDC)")
                 doi = self.task_callable(*self.args)
                 self.doi_from_ccdc_ready.emit(doi)
             elif self.task_type == "fetch_cif_mp":
-                context_for_error = "Busca CIF (MP)"
+                context_for_error = ptr("Busca CIF (MP)")
                 cif_string, suggested_filename = self.task_callable(*self.args)
                 self.cif_data_ready.emit(cif_string, suggested_filename)
             elif self.task_type == "fetch_cif_cod":
@@ -218,7 +219,7 @@ class Worker(QObject):
                 formula_for_filename = (
                     self.args[1] if len(self.args) > 1 else cod_id
                 )
-                context_for_error = f"Busca CIF (COD - {cod_id})"
+                context_for_error = ptr("Busca CIF (COD - {})").format(cod_id)
                 cif_string = self.task_callable(cod_id)
                 if cif_string:
                     safe_formula = "".join(
@@ -236,7 +237,7 @@ class Worker(QObject):
             elif self.task_type == "fetch_rod_file":
                 rod_id = self.args[0]
                 formula_for_filename = self.args[1] if len(self.args) > 1 else rod_id
-                context_for_error = f"Busca Arquivo .rod (ROD - {rod_id})"
+                context_for_error = ptr("Busca Arquivo .rod (ROD - {})").format(rod_id)
                 rod_file_content = self.task_callable(rod_id)
                 if rod_file_content:
                     self.rod_file_data_ready.emit(rod_file_content, rod_id, formula_for_filename)
@@ -254,63 +255,54 @@ class Worker(QObject):
                 )
                 return
         except _requests.exceptions.Timeout as timeout_err:
-            error_title = f"Timeout de Conexão ({context_for_error})"
+            error_title = ptr("Timeout de Conexão ({})").format(context_for_error)
             user_message = (
-                f"A conexão demorou muito para responder.\n\nDetalhes: {timeout_err}\n\n"
-                "Verifique sua conexão ou tente novamente mais tarde."
+                ptr("A conexão demorou muito para responder.\n\nDetalhes: {}\n\nVerifique sua conexão ou tente novamente mais tarde.").format(timeout_err)
             )
             logging.error(f"{error_title}: {timeout_err}")
             self.task_error.emit(error_title, user_message)
         except _requests.exceptions.ConnectionError as conn_err:
-            error_title = f"Erro de Conexão ({context_for_error})"
+            error_title = ptr("Erro de Conexão ({})").format(context_for_error)
             user_message = (
-                f"Falha ao estabelecer conexão.\n\nDetalhes: {conn_err}\n\n"
-                "Verifique sua conexão com a internet e as configurações de proxy."
+                ptr("Falha ao estabelecer conexão.\n\nDetalhes: {}\n\nVerifique sua conexão com a internet e as configurações de proxy.").format(conn_err)
             )
             logging.error(f"{error_title}: {conn_err}")
             self.task_error.emit(error_title, user_message)
         except _requests.exceptions.ProxyError as proxy_err:
-            error_title = f"Erro de Proxy ({context_for_error})"
+            error_title = ptr("Erro de Proxy ({})").format(context_for_error)
             user_message = (
-                f"Falha ao conectar através do proxy.\n\nDetalhes: {proxy_err}\n\n"
-                "Verifique as configurações do proxy e a sua conexão."
+                ptr("Falha ao conectar através do proxy.\n\nDetalhes: {}\n\nVerifique as configurações do proxy e a sua conexão.").format(proxy_err)
             )
             logging.error(f"{error_title}: {proxy_err}")
             self.task_error.emit(error_title, user_message)
         except _requests.exceptions.HTTPError as http_err:
-            error_title = f"Erro HTTP ({context_for_error})"
+            error_title = ptr("Erro HTTP ({})").format(context_for_error)
             user_message = (
-                f"O servidor retornou um erro.\n\nStatus: {http_err.response.status_code}\n"
-                f"Detalhes: {http_err}\n\n"
-                "Verifique os parâmetros da busca ou tente mais tarde."
+                ptr("O servidor retornou um erro.\n\nStatus: {}\nDetalhes: {}\n\nVerifique os parâmetros da busca ou tente mais tarde.").format(http_err.response.status_code, http_err)
             )
             logging.error(
                 f"{error_title} - Status {http_err.response.status_code}: {http_err}"
             )
             self.task_error.emit(error_title, user_message)
         except _requests.exceptions.RequestException as req_err:
-            error_title = f"Erro de Requisição ({context_for_error})"
+            error_title = ptr("Erro de Requisição ({})").format(context_for_error)
             user_message = (
-                "Ocorreu um problema com a requisição de rede.\n\n"
-                f"Detalhes: {req_err}\n\n"
-                "Tente novamente ou verifique sua conexão."
+                ptr("Ocorreu um problema com a requisição de rede.\n\nDetalhes: {}\n\nTente novamente ou verifique sua conexão.").format(req_err)
             )
             logging.error(f"{error_title}: {req_err}")
             self.task_error.emit(error_title, user_message)
         except json.JSONDecodeError as json_err:
-            error_title = f"Erro ao Processar Dados ({context_for_error})"
+            error_title = ptr("Erro ao Processar Dados ({})").format(context_for_error)
             user_message = (
-                "Falha ao ler os dados recebidos do servidor (formato JSON inválido).\n\n"
-                f"Detalhes: {json_err}"
+                ptr("Falha ao ler os dados recebidos do servidor (formato JSON inválido).\n\nDetalhes: {}").format(json_err)
             )
             logging.error(f"{error_title}: {json_err}")
             self.task_error.emit(error_title, user_message)
         except Exception as e_thread:
             if "API_KEY_MISSING_MP_THREAD" in str(e_thread):
-                error_title = "Chave API Materials Project Necessária"
+                error_title = ptr("Chave API Materials Project Necessária")
                 user_message = (
-                    "A chave da API do Materials Project não foi configurada ou é inválida.\n"
-                    "Por favor, configure-a em 'Configuração > Chave Materials Project...'."
+                    ptr("A chave da API do Materials Project não foi configurada ou é inválida.\nPor favor, configure-a em 'Configuração > Chave Materials Project...'.")
                 )
                 logging.error(f"{error_title} (detectado na thread): {e_thread}")
                 self.task_error.emit(error_title, user_message)
@@ -486,7 +478,7 @@ class MaterialsApp(QMainWindow):
             except Exception as e:
                 logging.error(f"Erro ao ler chave de API de '{config_path}': {e}")
 
-        logging.warning("Chave API MP não encontrada ou inválida.")
+        logging.warning(ptr("Chave API MP não encontrada ou inválida."))
         return None
 
     def save_api_key_to_config(self, api_key):
@@ -500,8 +492,8 @@ class MaterialsApp(QMainWindow):
             logging.error(f"Erro ao salvar a chave da API em '{config_path}': {e}")
             QMessageBox.critical(
                 self,
-                "Erro ao Salvar Chave",
-                f"Não foi possível salvar a chave da API em '{config_path}':\n{e}",
+                ptr("Erro ao Salvar Chave"),
+                ptr("Não foi possível salvar a chave da API em '{}':\n{}").format(config_path, e),
             )
         return False
 
@@ -529,8 +521,7 @@ class MaterialsApp(QMainWindow):
         lay.addWidget(help_lbl)
 
         link = QLabel(
-            '<a href="https://legacy.materialsproject.org/dashboard">'
-            + tr('dialogs.api_key.open_dashboard') + '</a>'
+            ptr("<a href=\"https://legacy.materialsproject.org/dashboard\">{}</a>").format(tr('dialogs.api_key.open_dashboard'))
         )
         link.setOpenExternalLinks(True)
         link.setTextInteractionFlags(Qt.TextInteractionFlag.TextBrowserInteraction)
@@ -899,14 +890,14 @@ class MaterialsApp(QMainWindow):
         else:
             self.clear_results_display()
             if self._current_selected_database == "COD" or self._current_selected_database == "ROD":
-                self.entry_elementos.setPlaceholderText("Elementos (ex: C, H, O)")
+                self.entry_elementos.setPlaceholderText(ptr("Elementos (ex: C, H, O)"))
                 self.entry_elementos.setToolTip(
-                    f"Para {self._current_selected_database}, insira elementos separados por vírgula."
+                    ptr("Para {}, insira elementos separados por vírgula.").format(self._current_selected_database)
                 )
             else:
-                self.entry_elementos.setPlaceholderText("Elementos (ex: Sm, Fe, O)")
+                self.entry_elementos.setPlaceholderText(ptr("Elementos (ex: Sm, Fe, O)"))
                 self.entry_elementos.setToolTip(
-                    "Para OQMD/MP, insira elementos separados por vírgula."
+                    ptr("Para OQMD/MP, insira elementos separados por vírgula.")
                 )
             if hasattr(self, "entry_elementos") and self.entry_elementos.text().strip():
                 logging.info("Refazendo a busca para a nova base de dados selecionada (sem cache).")
@@ -941,7 +932,7 @@ class MaterialsApp(QMainWindow):
         if self.logo_original_pixmap:
             self.logo_label.setPixmap(self.logo_original_pixmap)
         else:
-            self.logo_label.setText("Logo")
+            self.logo_label.setText(ptr("Logo"))
         self.logo_label.setFixedSize(50, 50)
         search_layout.addWidget(self.logo_label)
 
@@ -1354,7 +1345,7 @@ class MaterialsApp(QMainWindow):
 
         logging.info(f"Iniciando busca de PDF no Sci-Hub para DOI: {doi}")
         self.statusBar().showMessage(
-            f"Buscando PDF para DOI: {doi} via Sci-Hub...", 3000
+            ptr("Buscando PDF para DOI: {} via Sci-Hub...").format(doi), 3000
         )
         self.btn_scihub_ref.setEnabled(False)
         self.doi_entry_ref.setEnabled(False)
@@ -1377,8 +1368,7 @@ class MaterialsApp(QMainWindow):
 
         if not CLOUDSRAPER_AVAILABLE:
             raise Exception(
-                "Biblioteca 'cloudscraper' não instalada. "
-                "Execute 'pip install cloudscraper' no seu terminal."
+                ptr("Biblioteca 'cloudscraper' não instalada. Execute 'pip install cloudscraper' no seu terminal.")
             )
         # ... (lógica interna de scraping)
         scraper = cloudscraper.create_scraper()
@@ -1493,7 +1483,7 @@ class MaterialsApp(QMainWindow):
             return pdf_content_bytes, suggested_filename
         else:
             raise Exception(
-                "Não foi possível encontrar ou baixar o PDF do Sci-Hub após todas as tentativas."
+                ptr("Não foi possível encontrar ou baixar o PDF do Sci-Hub após todas as tentativas.")
             )
 
     @Slot(bytes, str)
@@ -1513,9 +1503,9 @@ class MaterialsApp(QMainWindow):
 
         filePath, _ = QFileDialog.getSaveFileName(
             self,
-            "Salvar PDF do Artigo",
+            ptr("Salvar PDF do Artigo"),
             os.path.join(downloads_path, suggested_filename),
-            "PDF Files (*.pdf)",
+            ptr("PDF Files (*.pdf)"),
         )
         if filePath:
             try:
@@ -1696,14 +1686,14 @@ class MaterialsApp(QMainWindow):
             if results_raw is None:
                 results_raw = []
                 logging.warning(
-                    "Busca JSON no COD falhou ou retornou None na função principal."
+                    ptr("Busca JSON no COD falhou ou retornou None na função principal.")
                 )
         elif db_choice == "ROD":
             results_raw = self._query_rod(elements_list, proxies=proxies)
             if results_raw is None:
                 results_raw = []
                 logging.warning(
-                    "Busca JSON na ROD falhou ou retornou None."
+                    ptr("Busca JSON na ROD falhou ou retornou None.")
                 )
         return results_raw, db_choice
 
@@ -1850,7 +1840,7 @@ class MaterialsApp(QMainWindow):
         import requests as _requests
 
         if not elements_list:
-            logging.warning("ROD API: A lista de elementos não pode ser vazia.")
+            logging.warning(ptr("ROD API: A lista de elementos não pode ser vazia."))
             return []
 
         params = {}
@@ -2271,7 +2261,7 @@ class MaterialsApp(QMainWindow):
                         )
                 else:
                     btn_link.setEnabled(False)
-                    btn_link.setText("N/D")
+                    btn_link.setText(ptr("N/D"))
                 self.table_cod_rod.setCellWidget(row, 2, btn_link)
 
                 # Coluna 3: Fórmula (centralizada, com fonte destaque)
@@ -2432,7 +2422,7 @@ class MaterialsApp(QMainWindow):
 
         if not compound_data or not isinstance(compound_data, dict):
             logging.warning(
-                "Dados não encontrados ou em formato incorreto para o item no menu de contexto."
+                ptr("Dados não encontrados ou em formato incorreto para o item no menu de contexto.")
             )
             return
 
@@ -2459,7 +2449,15 @@ class MaterialsApp(QMainWindow):
             )
 
         can_export_cif = source_db in ["Materials Project", "COD"]
-        phasedrx_is_open = self.phasedrx_window_ref and self.phasedrx_window_ref.isVisible()
+        # PhaseDRX aberto: no mesmo processo (referência direta) OU em processo
+        # separado (PhaseDRX.exe), detectado pelo bridge IPC.
+        phasedrx_is_open = bool(self.phasedrx_window_ref and self.phasedrx_window_ref.isVisible())
+        if not phasedrx_is_open:
+            try:
+                from matfinder.core.phasedrx_bridge import is_phasedrx_running
+                phasedrx_is_open = is_phasedrx_running()
+            except Exception:
+                pass
 
         if can_export_cif:
             action_export_phasedrx = menu.addAction(tr('context_menu.export_cif_phasedrx'))
@@ -2583,7 +2581,15 @@ class MaterialsApp(QMainWindow):
         id_original = compound_data.get("id_display", "N/A")
         name_display = compound_data.get("name_display", "N/A")
 
-        if not self.phasedrx_window_ref or not self.phasedrx_window_ref.isVisible():
+        in_process = bool(self.phasedrx_window_ref and self.phasedrx_window_ref.isVisible())
+        bridge_open = False
+        if not in_process:
+            try:
+                from matfinder.core.phasedrx_bridge import is_phasedrx_running
+                bridge_open = is_phasedrx_running()
+            except Exception:
+                bridge_open = False
+        if not in_process and not bridge_open:
             QMessageBox.warning(self, tr('cif.phasedrx_closed_title'), tr('cif.phasedrx_closed_msg'))
             return
 
@@ -2596,6 +2602,18 @@ class MaterialsApp(QMainWindow):
             self.trigger_baixar_cif_mp(name_display, id_original)
         elif source_db == "COD":
             self.trigger_baixar_cif_cod(id_original, name_display)
+
+    def _send_cif_via_bridge(self, cif_string: str, suggested_filename: str) -> bool:
+        """Envia o CIF a um PhaseDRX aberto em OUTRO processo (PhaseDRX.exe) via o
+        bridge IPC. Retorna True se entregue."""
+        try:
+            from matfinder.core.phasedrx_bridge import is_phasedrx_running, send_cif_to_phasedrx
+            if is_phasedrx_running() and send_cif_to_phasedrx(cif_string, suggested_filename):
+                self.statusBar().showMessage(tr('cif.sent_to_phasedrx', filename=suggested_filename), 4000)
+                return True
+        except Exception:
+            logging.exception("Falha ao enviar CIF ao PhaseDRX via bridge.")
+        return False
 
     def trigger_baixar_cif_mp(self, formula_pretty: str, material_id: str, mode: str = "symmetrized"):
         if self.get_api_key_on_demand() is None:
@@ -2683,7 +2701,7 @@ class MaterialsApp(QMainWindow):
                     return cif_string, suggested_filename
                 else:
                     raise Exception(
-                        f"Estrutura não encontrada para material_id (MP): {material_id}"
+                        ptr("Estrutura não encontrada para material_id (MP): {}").format(material_id)
                     )
         except Exception as e:
             logging.exception(f"Erro ao buscar CIF do MP para ID {material_id}:")
@@ -2718,6 +2736,8 @@ class MaterialsApp(QMainWindow):
             if self.phasedrx_window_ref and self.phasedrx_window_ref.isVisible():
                 self.phasedrx_window_ref.load_cif_from_data(cif_string, suggested_filename)
                 self.statusBar().showMessage(tr('cif.sent_to_phasedrx', filename=suggested_filename), 4000)
+            elif self._send_cif_via_bridge(cif_string, suggested_filename):
+                pass
             else:
                 QMessageBox.warning(self, tr('cif.window_closed_title'), tr('cif.window_closed_saving'))
                 self._save_cif_file_dialog(cif_string, suggested_filename, "MP")
@@ -2763,6 +2783,8 @@ class MaterialsApp(QMainWindow):
             if self.phasedrx_window_ref and self.phasedrx_window_ref.isVisible():
                 self.phasedrx_window_ref.load_cif_from_data(cif_string, suggested_filename)
                 self.statusBar().showMessage(tr('cif.sent_to_phasedrx', filename=suggested_filename), 4000)
+            elif self._send_cif_via_bridge(cif_string, suggested_filename):
+                pass
             else:
                 QMessageBox.warning(self, tr('cif.window_closed_title'), tr('cif.window_closed_saving'))
                 self._save_cif_file_dialog(cif_string, suggested_filename, f"COD ({cod_id})")
@@ -2811,29 +2833,29 @@ class MaterialsApp(QMainWindow):
             self,
             f"Salvar Arquivo .rod como .txt (ROD ID: {rod_id})",
             os.path.join(downloads_path, suggested_filename),
-            "Text Files (*.txt);;All Files (*)",
+            ptr("Text Files (*.txt);;All Files (*)"),
         )
 
         if filePath:
             try:
                 with open(filePath, "w", encoding="utf-8") as f:
                     f.write(rod_file_content)
-                self.statusBar().showMessage(f"Arquivo .rod (ROD {rod_id}) salvo como .txt em: {filePath}", 7000)
+                self.statusBar().showMessage(ptr("Arquivo .rod (ROD {}) salvo como .txt em: {}").format(rod_id, filePath), 7000)
                 QMessageBox.information(
                     self,
-                    f"Arquivo .rod Salvo como .txt (ROD {rod_id})",
-                    f"Arquivo .rod salvo com sucesso como .txt em:\n{filePath}",
+                    ptr("Arquivo .rod Salvo como .txt (ROD {})").format(rod_id),
+                    ptr("Arquivo .rod salvo com sucesso como .txt em:\n{}").format(filePath),
                 )
                 logging.info(f"Arquivo .rod (ROD {rod_id}) salvo como .txt em: {filePath}")
             except IOError as ioe:
-                QMessageBox.critical(self, "Erro ao Salvar Arquivo",
-                                     f"Não foi possível salvar o arquivo (erro de E/S):\n{ioe}")
+                QMessageBox.critical(self, ptr("Erro ao Salvar Arquivo"),
+                                     ptr("Não foi possível salvar o arquivo (erro de E/S):\n{}").format(ioe))
                 logging.exception(f"Erro de E/S ao salvar arquivo .rod (ROD {rod_id}) em {filePath}:")
             except Exception as e:
-                QMessageBox.critical(self, "Erro ao Salvar Arquivo", f"Não foi possível salvar o arquivo:\n{e}")
+                QMessageBox.critical(self, ptr("Erro ao Salvar Arquivo"), ptr("Não foi possível salvar o arquivo:\n{}").format(e))
                 logging.exception(f"Erro inesperado ao salvar arquivo .rod (ROD {rod_id}) em {filePath}:")
         else:
-            QMessageBox.information(self, "Download Cancelado", "O download do arquivo .rod foi cancelado.")
+            QMessageBox.information(self, ptr("Download Cancelado"), ptr("O download do arquivo .rod foi cancelado."))
             logging.info(f"Download do arquivo .rod (ROD {rod_id}) cancelado pelo usuário.")
 
     @Slot(str, str)
@@ -2855,28 +2877,26 @@ class MaterialsApp(QMainWindow):
             self,
             f"Salvar Arquivo CIF ({source_info})",
             os.path.join(downloads_path, suggested_filename),
-            "CIF Files (*.cif);;All Files (*)",
+            ptr("CIF Files (*.cif);;All Files (*)"),
         )
         if filePath:
             try:
                 with open(filePath, "w", encoding="utf-8") as f:
                     f.write(cif_string)
                 self.statusBar().showMessage(
-                    f"Arquivo CIF ({source_info}) salvo em: {filePath}", 7000
+                    ptr("Arquivo CIF ({}) salvo em: {}").format(source_info, filePath), 7000
                 )
                 QMessageBox.information(
                     self,
-                    f"CIF Salvo ({source_info})",
-                    f"Arquivo CIF salvo com sucesso em:\n{filePath}",
+                    ptr("CIF Salvo ({})").format(source_info),
+                    ptr("Arquivo CIF salvo com sucesso em:\n{}").format(filePath),
                 )
                 logging.info(f"Arquivo CIF ({source_info}) salvo em: {filePath}")
                 if not QDesktopServices.openUrl(QUrl.fromLocalFile(filePath)):
                     QMessageBox.warning(
                         self,
-                        "Abrir Arquivo",
-                        f"Não foi possível abrir o arquivo CIF automaticamente.\n"
-                        "O sistema pode não ter um programa associado para arquivos .cif.\n"
-                        f"Você pode encontrá-lo em: {filePath}",
+                        ptr("Abrir Arquivo"),
+                        ptr("Não foi possível abrir o arquivo CIF automaticamente.\nO sistema pode não ter um programa associado para arquivos .cif.\nVocê pode encontrá-lo em: {}").format(filePath),
                     )
                     logging.warning(
                         f"Não foi possível abrir automaticamente o arquivo CIF: {filePath}"
@@ -2884,35 +2904,35 @@ class MaterialsApp(QMainWindow):
             except IOError as ioe:
                 QMessageBox.critical(
                     self,
-                    f"Erro ao Salvar CIF ({source_info})",
-                    f"Não foi possível salvar o arquivo CIF (erro de E/S):\n{ioe}",
+                    ptr("Erro ao Salvar CIF ({})").format(source_info),
+                    ptr("Não foi possível salvar o arquivo CIF (erro de E/S):\n{}").format(ioe),
                 )
                 logging.exception(
                     f"Erro de E/S ao salvar CIF ({source_info}) em {filePath}:"
                 )
                 self.statusBar().showMessage(
-                    f"Erro ao salvar CIF ({source_info}).", 5000
+                    ptr("Erro ao salvar CIF ({}).").format(source_info), 5000
                 )
             except Exception as e:
                 QMessageBox.critical(
                     self,
-                    f"Erro ao Salvar CIF ({source_info})",
-                    f"Não foi possível salvar o arquivo CIF:\n{e}",
+                    ptr("Erro ao Salvar CIF ({})").format(source_info),
+                    ptr("Não foi possível salvar o arquivo CIF:\n{}").format(e),
                 )
                 logging.exception(
                     f"Erro inesperado ao salvar CIF ({source_info}) em {filePath}:"
                 )
                 self.statusBar().showMessage(
-                    f"Erro ao salvar CIF ({source_info}).", 5000
+                    ptr("Erro ao salvar CIF ({}).").format(source_info), 5000
                 )
         else:
             QMessageBox.information(
                 self,
-                "Download Cancelado",
-                f"O download do arquivo CIF ({source_info}) foi cancelado.",
+                ptr("Download Cancelado"),
+                ptr("O download do arquivo CIF ({}) foi cancelado.").format(source_info),
             )
             self.statusBar().showMessage(
-                f"Download do CIF ({source_info}) cancelado.", 3000
+                ptr("Download do CIF ({}) cancelado.").format(source_info), 3000
             )
             logging.info(f"Download do CIF ({source_info}) cancelado pelo usuário.")
 
@@ -2963,7 +2983,7 @@ class MaterialsApp(QMainWindow):
             )
         else:
             logging.warning(
-                "Não foi possível abrir a página para o material (ID não encontrado ou dados insuficientes)."
+                ptr("Não foi possível abrir a página para o material (ID não encontrado ou dados insuficientes).")
             )
 
     def open_material_page(self, material_id: str, source_db: str):
@@ -2980,15 +3000,15 @@ class MaterialsApp(QMainWindow):
             if not QDesktopServices.openUrl(QUrl(url_to_open)):
                 QMessageBox.warning(
                     self,
-                    "Erro ao Abrir URL",
-                    f"Não foi possível abrir o URL no navegador:\n{url_to_open}",
+                    ptr("Erro ao Abrir URL"),
+                    ptr("Não foi possível abrir o URL no navegador:\n{}").format(url_to_open),
                 )
                 logging.error(f"Falha ao abrir URL: {url_to_open}")
         else:
             QMessageBox.critical(
                 self,
-                "Erro de URL",
-                f"Fonte de base de dados '{source_db}' desconhecida ou ID '{material_id}' inválido.",
+                ptr("Erro de URL"),
+                ptr("Fonte de base de dados '{}' desconhecida ou ID '{}' inválido.").format(source_db, material_id),
             )
             logging.error(
                 f"Fonte de DB '{source_db}' ou ID '{material_id}' inválido para URL."
@@ -3000,7 +3020,7 @@ class MaterialsApp(QMainWindow):
 
         if not rod_id or not rod_id.isdigit():
             logging.error(f"ROD File Fetch: ID da ROD '{rod_id}' inválido.")
-            raise ValueError(f"ID da ROD '{rod_id}' inválido para busca de arquivo.")
+            raise ValueError(ptr("ID da ROD '{}' inválido para busca de arquivo.").format(rod_id))
 
         url = f"{ROD_ENTRY_BASE_URL}{rod_id}.rod"
         logging.info(f"ROD File Fetch: Buscando conteúdo de {url} ...")
@@ -3210,9 +3230,8 @@ class MaterialsApp(QMainWindow):
             except Exception as e:
                 QMessageBox.critical(
                     self,
-                    "Erro ao Abrir Calculadora",
-                    f"Não foi possível abrir a Calculadora Estequiométrica:\n{e}\n\n"
-                    "Verifique se os arquivos 'calculadora_esteq_pyside.py' e 'quimica_calc.py' estão corretos.",
+                    ptr("Erro ao Abrir Calculadora"),
+                    ptr("Não foi possível abrir a Calculadora Estequiométrica:\n{}\n\nVerifique se os arquivos 'calculadora_esteq_pyside.py' e 'quimica_calc.py' estão corretos.").format(e),
                 )
                 logging.exception("Erro ao abrir Calculadora Estequiométrica:")
         else:
@@ -3235,8 +3254,8 @@ class MaterialsApp(QMainWindow):
             except Exception as e:
                 QMessageBox.critical(
                     self,
-                    "Erro ao Abrir Calculadora",
-                    f"Não foi possível abrir a Calculadora de Proporção de Massa:\n{e}",
+                    ptr("Erro ao Abrir Calculadora"),
+                    ptr("Não foi possível abrir a Calculadora de Proporção de Massa:\n{}").format(e),
                 )
                 logging.exception("Erro ao abrir Calculadora de Proporção de Massa:")
         else:
@@ -3294,8 +3313,8 @@ class MaterialsApp(QMainWindow):
                     return
 
         elif choice == dialog.OPEN_PROJECT:
-            path, _ = QFileDialog.getOpenFileName(self, "Abrir Projeto PhaseDRX", "",
-                                                  "Projetos MatFinder (*.mfpx);;Todos os Arquivos (*)")
+            path, _ = QFileDialog.getOpenFileName(self, ptr("Abrir Projeto PhaseDRX"), "",
+                                                  ptr("Projetos MatFinder (*.mfpx);;Todos os Arquivos (*)"))
             if not path:
                 return
             project_path_to_open = path
@@ -3313,9 +3332,8 @@ class MaterialsApp(QMainWindow):
         except Exception as e:
             QMessageBox.critical(
                 self,
-                "Erro ao Abrir PhaseDRX",
-                f"Não foi possível abrir a ferramenta de análise de DRX:\n{e}\n\n"
-                "Verifique se o arquivo 'xrd.py' e suas dependências (matplotlib, pymatgen) estão corretos.",
+                ptr("Erro ao Abrir PhaseDRX"),
+                ptr("Não foi possível abrir a ferramenta de análise de DRX:\n{}\n\nVerifique se o arquivo 'xrd.py' e suas dependências (matplotlib, pymatgen) estão corretos.").format(e),
             )
             logging.exception("Erro ao abrir PhaseDRX:")
 
@@ -3402,9 +3420,8 @@ class MaterialsApp(QMainWindow):
             except Exception as e:
                 QMessageBox.critical(
                     self,
-                    "Erro ao Abrir Histórico",
-                    f"Não foi possível abrir a janela de Histórico de Busca:\n{e}\n\n"
-                    "Verifique se o arquivo 'historico_dialog_pyside.py' está correto.",
+                    ptr("Erro ao Abrir Histórico"),
+                    ptr("Não foi possível abrir a janela de Histórico de Busca:\n{}\n\nVerifique se o arquivo 'historico_dialog_pyside.py' está correto.").format(e),
                 )
                 logging.exception("Erro ao abrir janela de Histórico de Busca:")
         else:
@@ -3424,7 +3441,7 @@ class MaterialsApp(QMainWindow):
             QMessageBox.critical(
                 self,
                 tr('log_viewer.error_title', default='Erro ao Abrir Log'),
-                f"Não foi possível abrir o visualizador de log:\n{e}"
+                ptr("Não foi possível abrir o visualizador de log:\n{}").format(e)
             )
             logging.exception("Erro ao abrir visualizador de log:")
 
@@ -3445,9 +3462,8 @@ class MaterialsApp(QMainWindow):
         else:
             QMessageBox.warning(
                 self,
-                "Base de Dados Desconhecida",
-                f"A base de dados '{base_dados}' do histórico não é mais uma opção válida. "
-                "Usando a seleção atual.",
+                ptr("Base de Dados Desconhecida"),
+                ptr("A base de dados '{}' do histórico não é mais uma opção válida. Usando a seleção atual.").format(base_dados),
             )
             logging.warning(
                 f"Base de dados '{base_dados}' do histórico não é mais uma opção válida."
@@ -3472,8 +3488,8 @@ class MaterialsApp(QMainWindow):
             except FileNotFoundError:
                 QMessageBox.warning(
                     self,
-                    "Erro ao Abrir Instruções",
-                    f"Não foi possível encontrar o arquivo de instruções ('{abs_readme_path}').",
+                    ptr("Erro ao Abrir Instruções"),
+                    ptr("Não foi possível encontrar o arquivo de instruções ('{}').").format(abs_readme_path),
                 )
                 logging.error(
                     f"Arquivo Leiame.txt não encontrado em: {abs_readme_path}"
@@ -3481,10 +3497,8 @@ class MaterialsApp(QMainWindow):
             except Exception as e:
                 QMessageBox.warning(
                     self,
-                    "Erro ao Abrir Instruções",
-                    f"Não foi possível abrir o arquivo de instruções ('{abs_readme_path}').\n"
-                    "Por favor, procure o arquivo 'Leiame.txt' na pasta 'doc' da aplicação.\n\n"
-                    f"Erro: {e}",
+                    ptr("Erro ao Abrir Instruções"),
+                    ptr("Não foi possível abrir o arquivo de instruções ('{}').\nPor favor, procure o arquivo 'Leiame.txt' na pasta 'doc' da aplicação.\n\nErro: {}").format(abs_readme_path, e),
                 )
                 logging.error(f"Erro ao abrir Leiame.txt ({abs_readme_path}): {e}")
 
@@ -3493,8 +3507,8 @@ class MaterialsApp(QMainWindow):
         if not os.path.exists(license_path):
             QMessageBox.warning(
                 self,
-                "Arquivo Não Encontrado",
-                f"O arquivo de licença não foi encontrado em:\n{os.path.abspath(license_path)}"
+                ptr("Arquivo Não Encontrado"),
+                ptr("O arquivo de licença não foi encontrado em:\n{}").format(os.path.abspath(license_path))
             )
             return
         try:
@@ -3503,8 +3517,8 @@ class MaterialsApp(QMainWindow):
         except Exception as e:
             QMessageBox.critical(
                 self,
-                "Erro ao Ler Licença",
-                f"Não foi possível ler o arquivo de licença:\n{e}"
+                ptr("Erro ao Ler Licença"),
+                ptr("Não foi possível ler o arquivo de licença:\n{}").format(e)
             )
             logging.error(f"Erro ao ler LICENSE_FULL.txt: {e}")
             return

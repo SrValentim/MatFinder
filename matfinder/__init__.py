@@ -1,3 +1,4 @@
+from matfinder.core.translator import ptr
 """
 MatFinder - Ferramenta de busca de materiais cristalográficos
 Copyright (C) 2025 Raynner Valentim (UFAM)
@@ -20,4 +21,4 @@ def get_version():
 
 def get_full_title():
     """Retorna o título completo com versão."""
-    return f"MatFinder Ver. {__version__}"
+    return ptr("MatFinder Ver. {}").format(__version__)

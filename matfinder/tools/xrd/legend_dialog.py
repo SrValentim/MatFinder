@@ -111,7 +111,7 @@ class LegendDialog(QDialog):
         self.fontsize_spin.setRange(6, 72)
         self.fontsize_spin.setValue(10)
         self.fontsize_spin.setSuffix(ptr(" pt"))
-        layout.addRow("Tamanho da Fonte:", self.fontsize_spin)
+        layout.addRow(ptr("Tamanho da Fonte:"), self.fontsize_spin)
 
         # Negrito e Itálico
         style_layout = QHBoxLayout()
@@ -120,7 +120,7 @@ class LegendDialog(QDialog):
         style_layout.addWidget(self.bold_check)
         style_layout.addWidget(self.italic_check)
         style_layout.addStretch()
-        layout.addRow("Estilo:", style_layout)
+        layout.addRow(ptr("Estilo:"), style_layout)
 
         return group
 
@@ -140,7 +140,7 @@ class LegendDialog(QDialog):
         self.framealpha_spin.setSingleStep(0.1)
         self.framealpha_spin.setValue(0.9)
         self.framealpha_spin.setDecimals(2)
-        layout.addRow("Opacidade da Borda:", self.framealpha_spin)
+        layout.addRow(ptr("Opacidade da Borda:"), self.framealpha_spin)
 
         # Cantos arredondados
         self.fancybox_check = QCheckBox(ptr("Cantos arredondados"))
@@ -175,14 +175,13 @@ class LegendDialog(QDialog):
         ]
         for label, value in locations:
             self.location_combo.addItem(label, value)
-        layout.addRow("Localização Inicial:", self.location_combo)
+        layout.addRow(ptr("Localização Inicial:"), self.location_combo)
 
         # Travar posição
         self.draggable_check = QCheckBox(ptr("Permitir mover legenda com o mouse"))
         self.draggable_check.setChecked(True)
         self.draggable_check.setToolTip(
-            "Se ativado, você pode clicar e arrastar a legenda para qualquer posição no gráfico.\n"
-            "Se desativado, a legenda fica fixa na posição selecionada acima."
+            ptr("Se ativado, você pode clicar e arrastar a legenda para qualquer posição no gráfico.\nSe desativado, a legenda fica fixa na posição selecionada acima.")
         )
         layout.addRow(self.draggable_check)
 
@@ -197,8 +196,7 @@ class LegendDialog(QDialog):
         # Botão para resetar posição customizada
         self.reset_position_btn = QPushButton(ptr("Resetar Posição Customizada"))
         self.reset_position_btn.setToolTip(
-            "Clique para remover qualquer posição customizada (arrastada) "
-            "e usar a localização selecionada acima."
+            ptr("Clique para remover qualquer posição customizada (arrastada) e usar a localização selecionada acima.")
         )
         self.reset_position_btn.clicked.connect(self._reset_custom_position)
         layout.addRow(self.reset_position_btn)
@@ -212,9 +210,7 @@ class LegendDialog(QDialog):
             QMessageBox.information(
                 self,
                 ptr("Posição Resetada"),
-                "A posição customizada foi removida.\n"
-                "A legenda agora usará a localização selecionada acima.\n\n"
-                "Clique em 'Aplicar' ou 'Aceitar' para ver o resultado."
+                ptr("A posição customizada foi removida.\nA legenda agora usará a localização selecionada acima.\n\nClique em 'Aplicar' ou 'Aceitar' para ver o resultado.")
             )
             logging.debug("Posição customizada da legenda removida")
 
@@ -228,18 +224,15 @@ class LegendDialog(QDialog):
         self.ncol_spin.setRange(1, 10)
         self.ncol_spin.setValue(1)
         self.ncol_spin.setToolTip(
-            "Número de colunas para organizar os itens da legenda.\n"
-            "1 coluna = vertical (padrão)\n"
-            "2+ colunas = itens organizados horizontalmente"
+            ptr("Número de colunas para organizar os itens da legenda.\n1 coluna = vertical (padrão)\n2+ colunas = itens organizados horizontalmente")
         )
-        layout.addRow("Número de Colunas:", self.ncol_spin)
+        layout.addRow(ptr("Número de Colunas:"), self.ncol_spin)
 
         # Inverter ordem
         self.reverse_check = QCheckBox(ptr("Inverter ordem dos itens"))
         self.reverse_check.setChecked(False)
         self.reverse_check.setToolTip(
-            "Inverte a ordem em que os itens aparecem na legenda.\n"
-            "Útil para ajustar a ordem de visualização."
+            ptr("Inverte a ordem em que os itens aparecem na legenda.\nÚtil para ajustar a ordem de visualização.")
         )
         layout.addRow(self.reverse_check)
 

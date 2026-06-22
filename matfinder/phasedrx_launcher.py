@@ -14,15 +14,31 @@ import os
 from PySide6.QtWidgets import QMessageBox, QFileDialog
 
 from matfinder.core.translator import tr
+from matfinder.core.translator import ptr
 
 
-def open_phasedrx(parent=None):
+def open_phasedrx(parent=None, splash=None):
     """Mostra o diálogo de projeto e retorna uma instância de PhaseDRXTool pronta
-    para .show(), ou None se o usuário cancelar."""
+    para .show(), ou None se o usuário cancelar.
+
+    `splash` (opcional): a splash screen do PhaseDRX Suite. Ela cobre o import
+    pesado (pymatgen/matplotlib) e é fechada AQUI, no instante em que a caixa de
+    diálogo de projeto aparece — para não ficar sobreposta a ela."""
     from matfinder.tools.xrd.xrd import PhaseDRXTool
     from matfinder.ui_dialogs import PhaseDRXProjectDialog
 
     dialog = PhaseDRXProjectDialog(parent)
+
+    # Fecha a splash assim que o diálogo vai aparecer (evita sobreposição).
+    if splash is not None:
+        try:
+            splash.finish(dialog)
+            splash.close()
+            from PySide6.QtWidgets import QApplication
+            QApplication.processEvents()
+        except Exception:
+            pass
+
     if not dialog.exec():
         return None
 
@@ -65,8 +81,8 @@ def open_phasedrx(parent=None):
 
     elif choice == dialog.OPEN_PROJECT:
         path, _ = QFileDialog.getOpenFileName(
-            parent, "Abrir Projeto PhaseDRX", "",
-            "Projetos MatFinder (*.mfpx);;Todos os Arquivos (*)")
+            parent, ptr("Abrir Projeto PhaseDRX"), "",
+            ptr("Projetos MatFinder (*.mfpx);;Todos os Arquivos (*)"))
         if not path:
             return None
         project_path_to_open = path

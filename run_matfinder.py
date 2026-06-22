@@ -258,14 +258,13 @@ def _run_phasedrx():
         logging.error(f"Falha no splash do PhaseDRX: {e}")
 
     from matfinder.phasedrx_launcher import open_phasedrx
-    tool = open_phasedrx(parent=None)
+    # A splash fecha dentro de open_phasedrx, quando o diálogo de projeto aparece.
+    tool = open_phasedrx(parent=None, splash=splash)
     if tool is None:
         if splash:
             splash.close()
         return 0
     tool.show()
-    if splash:
-        splash.finish(tool)
     return app.exec()
 
 

@@ -8,13 +8,14 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtGui import QColor, QPalette, QFont, QIcon, QCursor
 from PySide6.QtCore import Qt, Signal, QTimer, QSize
+from matfinder.core.translator import ptr
 
 # Importar sistema de tradução
 try:
     from matfinder.core.translator import tr, get_current_language
 except ImportError:
     def tr(key, **kwargs): return key
-    def get_current_language(): return 'pt_BR'
+    def get_current_language(): return ptr("pt_BR")
 
 # Função para obter nome traduzido do elemento
 def get_element_name(symbol):
@@ -466,10 +467,7 @@ class TabelaPeriodicaDialog(QDialog):
             categoria_traduzida = tr(f'periodic_table.categories.{categoria.replace(" ", "_").replace("-", "_")}')
 
             tooltip_text = (
-                f"<b>{nome_traduzido} ({simbolo})</b><br>"
-                f"{tr('periodic_table.atomic_number')}: {el_data['numero']}<br>"
-                f"{tr('periodic_table.atomic_mass')}: {el_data['massa']:.4f}<br>"
-                f"{tr('periodic_table.category')}: {categoria_traduzida}"
+                ptr("<b>{} ({})</b><br>{}: {}<br>{}: {:.4f}<br>{}: {}").format(nome_traduzido, simbolo, tr('periodic_table.atomic_number'), el_data['numero'], tr('periodic_table.atomic_mass'), el_data['massa'], tr('periodic_table.category'), categoria_traduzida)
             )
             btn.setToolTip(tooltip_text)
 

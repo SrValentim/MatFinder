@@ -17,6 +17,7 @@ from PySide6.QtCore import Qt, Signal
 # Como 'cif_handler.py' está na mesma pasta 'data/',
 # usamos um '.' para importá-lo.
 from .cif_handler import CifHandler, PYMATGEN_AVAILABLE
+from matfinder.core.translator import ptr
 # --- FIM DA ALTERAÇÃO ---
 
 
@@ -52,7 +53,7 @@ class CifEditorDialog(QDialog):
     def __init__(self, cif_content: str, initial_pattern: tuple, simulation_params: dict,
                  parent=None, experimental_data=None, wavelength=1.5406, max_2theta=100.0):
         super().__init__(parent)
-        self.setWindowTitle("Editor de Parâmetros Cristalográficos")
+        self.setWindowTitle(ptr("Editor de Parâmetros Cristalográficos"))
         self.setMinimumWidth(550)
 
         self.original_cif_content = cif_content
@@ -72,7 +73,7 @@ class CifEditorDialog(QDialog):
 
         try:
             if not PYMATGEN_AVAILABLE:
-                raise ImportError("A biblioteca 'pymatgen' não foi encontrada.")
+                raise ImportError(ptr("A biblioteca 'pymatgen' não foi encontrada."))
             self.cif_handler = CifHandler(cif_content)
             # Propagar o comprimento de onda do usuário para o CIF handler
             # para que µ, f'/f'' e λ sejam escritos corretamente no CIF
@@ -86,9 +87,9 @@ class CifEditorDialog(QDialog):
             if self._experimental_data is None:
                 self.auto_fit_btn.setEnabled(False)
                 self.auto_fit_btn.setToolTip(
-                    "Carregue um dado experimental no PhaseDRX para habilitar o auto-ajuste.")
+                    ptr("Carregue um dado experimental no PhaseDRX para habilitar o auto-ajuste."))
         except (ImportError, ValueError) as e:
-            QMessageBox.critical(self, "Erro ao Carregar CIF", f"Não foi possível processar o arquivo CIF:\n{e}")
+            QMessageBox.critical(self, ptr("Erro ao Carregar CIF"), ptr("Não foi possível processar o arquivo CIF:\n{}").format(e))
             self.main_widget.setEnabled(False)
 
     def _init_ui(self):
@@ -96,7 +97,7 @@ class CifEditorDialog(QDialog):
         self.main_widget = QWidget()
         main_layout = QVBoxLayout(self.main_widget)
 
-        params_group = QGroupBox("Parâmetros da Célula Unitária")
+        params_group = QGroupBox(ptr("Parâmetros da Célula Unitária"))
         params_grid = QGridLayout(params_group)
 
         self.a_spin = self._create_spinbox(step=0.01, wheel_step=0.05)
@@ -108,26 +109,25 @@ class CifEditorDialog(QDialog):
                                                180, step=0.01, wheel_step=0.05)
         self.volume_spin = self._create_spinbox(min_val=0 ,max_val=5000.0, decimals=4, step=1.0, wheel_step=0.2)
 
-        params_grid.addWidget(QLabel("a (Å)"), 0, 0);
+        params_grid.addWidget(QLabel(ptr("a (Å)")), 0, 0);
         params_grid.addWidget(self.a_spin, 0, 1)
-        params_grid.addWidget(QLabel("b (Å)"), 0, 2);
+        params_grid.addWidget(QLabel(ptr("b (Å)")), 0, 2);
         params_grid.addWidget(self.b_spin, 0, 3)
-        params_grid.addWidget(QLabel("c (Å)"), 0, 4);
+        params_grid.addWidget(QLabel(ptr("c (Å)")), 0, 4);
         params_grid.addWidget(self.c_spin, 0, 5)
-        params_grid.addWidget(QLabel("α (°)"), 1, 0);
+        params_grid.addWidget(QLabel(ptr("α (°)")), 1, 0);
         params_grid.addWidget(self.alpha_spin, 1, 1)
-        params_grid.addWidget(QLabel("β (°)"), 1, 2);
+        params_grid.addWidget(QLabel(ptr("β (°)")), 1, 2);
         params_grid.addWidget(self.beta_spin, 1, 3)
-        params_grid.addWidget(QLabel("γ (°)"), 1, 4);
+        params_grid.addWidget(QLabel(ptr("γ (°)")), 1, 4);
         params_grid.addWidget(self.gamma_spin, 1, 5)
-        params_grid.addWidget(QLabel("Volume (Å³)"), 2, 0);
+        params_grid.addWidget(QLabel(ptr("Volume (Å³)")), 2, 0);
         params_grid.addWidget(self.volume_spin, 2, 1, 1, 3)
 
         # Botão Auto-Ajuste
-        self.auto_fit_btn = QPushButton("Auto-Ajuste")
+        self.auto_fit_btn = QPushButton(ptr("Auto-Ajuste"))
         self.auto_fit_btn.setToolTip(
-            "Ajusta automaticamente os parametros de rede\n"
-            "para alinhar os picos calculados com o experimental.")
+            ptr("Ajusta automaticamente os parametros de rede\npara alinhar os picos calculados com o experimental."))
         self.auto_fit_btn.setStyleSheet(
             "QPushButton { background-color: #2196F3; color: white; "
             "font-weight: bold; padding: 5px 12px; border-radius: 3px; }"
@@ -138,32 +138,34 @@ class CifEditorDialog(QDialog):
 
         main_layout.addWidget(params_group)
 
-        sim_group = QGroupBox("Parâmetros de Simulação de Pico")
+        sim_group = QGroupBox(ptr("Parâmetros de Simulação de Pico"))
         sim_layout = QVBoxLayout(sim_group)
 
         profile_layout = QHBoxLayout()
-        profile_layout.addWidget(QLabel("Função de Perfil:"))
+        profile_layout.addWidget(QLabel(ptr("Função de Perfil:")))
         self.convolution_combo = QComboBox()
-        self.convolution_combo.addItems(["Pseudo-Voigt", "Gaussiana", "Lorentziana"])
+        for _lbl, _v in ((ptr("Pseudo-Voigt"), "pseudovoigt"), (ptr("Gaussiana"), "gaussiana"), (ptr("Lorentziana"), "lorentziana")):
+            self.convolution_combo.addItem(_lbl, _v)
         profile_layout.addWidget(self.convolution_combo)
-        profile_layout.addWidget(QLabel("FWHM (°):"))
+        profile_layout.addWidget(QLabel(ptr("FWHM (°):")))
         self.fwhm_spin = self._create_spinbox(min_val=0.001, max_val=5.0, decimals=3, step=0.01)
         profile_layout.addWidget(self.fwhm_spin)
         sim_layout.addLayout(profile_layout)
 
         apply_mode_layout = QHBoxLayout()
-        apply_mode_layout.addWidget(QLabel("Aplicar em:"))
+        apply_mode_layout.addWidget(QLabel(ptr("Aplicar em:")))
         self.apply_mode_combo = QComboBox()
-        self.apply_mode_combo.addItems(["Padrão Inteiro", "Ranges Selecionados"])
+        for _lbl, _v in ((ptr("Padrão Inteiro"), "Padrão Inteiro"), (ptr("Ranges Selecionados"), "Ranges Selecionados")):
+            self.apply_mode_combo.addItem(_lbl, _v)
         apply_mode_layout.addWidget(self.apply_mode_combo)
-        self.apply_button = QPushButton("Aplicar Função")
+        self.apply_button = QPushButton(ptr("Aplicar Função"))
         apply_mode_layout.addWidget(self.apply_button)
         sim_layout.addLayout(apply_mode_layout)
 
         self.range_widget = QWidget()
         range_layout = QHBoxLayout(self.range_widget)
 
-        peak_list_group = QGroupBox("Picos Detectados (2θ)")
+        peak_list_group = QGroupBox(ptr("Picos Detectados (2θ)"))
         peak_list_layout = QVBoxLayout(peak_list_group)
         self.peak_list_widget = QListWidget()
         self.peak_list_widget.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
@@ -171,14 +173,14 @@ class CifEditorDialog(QDialog):
         range_layout.addWidget(peak_list_group)
 
         range_buttons_layout = QVBoxLayout()
-        self.add_range_button = QPushButton("Adicionar\nRange →")
-        self.remove_range_button = QPushButton("← Remover\nRange")
+        self.add_range_button = QPushButton(ptr("Adicionar\nRange →"))
+        self.remove_range_button = QPushButton(ptr("← Remover\nRange"))
         range_buttons_layout.addWidget(self.add_range_button)
         range_buttons_layout.addWidget(self.remove_range_button)
         range_buttons_layout.addStretch()
         range_layout.addLayout(range_buttons_layout)
 
-        selected_ranges_group = QGroupBox("Ranges para Convolução")
+        selected_ranges_group = QGroupBox(ptr("Ranges para Convolução"))
         selected_ranges_layout = QVBoxLayout(selected_ranges_group)
         self.selected_ranges_list = QListWidget()
         selected_ranges_layout.addWidget(self.selected_ranges_list)
@@ -237,8 +239,8 @@ class CifEditorDialog(QDialog):
     def _open_auto_fit(self):
         """Abre o diálogo de Auto-Ajuste de parâmetros de rede."""
         if self._experimental_data is None or self.cif_handler is None:
-            QMessageBox.warning(self, "Auto-Ajuste",
-                                "Carregue um dado experimental para usar o auto-ajuste.")
+            QMessageBox.warning(self, ptr("Auto-Ajuste"),
+                                ptr("Carregue um dado experimental para usar o auto-ajuste."))
             return
 
         try:
@@ -255,12 +257,12 @@ class CifEditorDialog(QDialog):
             dialog.exec()
 
         except ImportError as e:
-            QMessageBox.critical(self, "Erro",
-                                 f"Modulo de auto-ajuste nao encontrado:\n{e}")
+            QMessageBox.critical(self, ptr("Erro"),
+                                 ptr("Modulo de auto-ajuste nao encontrado:\n{}").format(e))
             logging.error(f"Erro ao importar auto_fit_dialog: {e}")
         except Exception as e:
-            QMessageBox.critical(self, "Erro",
-                                 f"Erro ao abrir auto-ajuste:\n{e}")
+            QMessageBox.critical(self, ptr("Erro"),
+                                 ptr("Erro ao abrir auto-ajuste:\n{}").format(e))
             logging.error(f"Erro no auto-ajuste: {e}", exc_info=True)
 
     def _apply_auto_fit_result(self, new_params: dict):
@@ -277,7 +279,7 @@ class CifEditorDialog(QDialog):
             logging.info(f"Auto-ajuste aplicado: a={new_params['a']:.5f}, "
                          f"b={new_params['b']:.5f}, c={new_params['c']:.5f}")
         except Exception as e:
-            QMessageBox.critical(self, "Erro", f"Erro ao aplicar auto-ajuste:\n{e}")
+            QMessageBox.critical(self, ptr("Erro"), ptr("Erro ao aplicar auto-ajuste:\n{}").format(e))
             logging.error(f"Erro ao aplicar auto-ajuste: {e}", exc_info=True)
 
     def _populate_simulation_fields(self):
@@ -286,18 +288,19 @@ class CifEditorDialog(QDialog):
             fwhm = self.simulation_params.get('fwhm', 0.120)
             self.fwhm_spin.setValue(fwhm)
 
-            profile = self.simulation_params.get('profile', 'pseudo-voigt').capitalize()
-            if profile == "Pseudo-voigt": profile = "Pseudo-Voigt"
-            self.convolution_combo.setCurrentText(profile)
+            profile_raw = str(self.simulation_params.get('profile', 'pseudovoigt')).lower().replace("-", "")
+            _i = self.convolution_combo.findData(profile_raw)
+            self.convolution_combo.setCurrentIndex(_i if _i >= 0 else 0)
 
             apply_mode = self.simulation_params.get('apply_mode', 'Padrão Inteiro')
-            self.apply_mode_combo.setCurrentText(apply_mode)
+            _im = self.apply_mode_combo.findData(apply_mode)
+            self.apply_mode_combo.setCurrentIndex(_im if _im >= 0 else 0)
             self._toggle_range_selection_ui(self.apply_mode_combo.currentIndex())
 
             self.selected_ranges = self.simulation_params.get('ranges', [])
             self.selected_ranges_list.clear()
             for r_min, r_max in self.selected_ranges:
-                self.selected_ranges_list.addItem(f"Range: {r_min:.2f}° - {r_max:.2f}°")
+                self.selected_ranges_list.addItem(ptr("Range: {:.2f}° - {:.2f}°").format(r_min, r_max))
 
         finally:
             self._block_signals = False
@@ -314,9 +317,9 @@ class CifEditorDialog(QDialog):
 
         # Criar título com número do grupo espacial
         if sg_number:
-            title = f"Editor - Sistema {system.capitalize()} - {sg_symbol} ({sg_number})"
+            title = ptr("Editor - Sistema {} - {} ({})").format(system.capitalize(), sg_symbol, sg_number)
         else:
-            title = f"Editor - Sistema {system.capitalize()}"
+            title = ptr("Editor - Sistema {}").format(system.capitalize())
 
         self.setWindowTitle(title)
 
@@ -357,9 +360,9 @@ class CifEditorDialog(QDialog):
             if is_rhombohedral or system == 'rhombohedral':
                 # Romboédrico: a = b = c, α = β = γ ≠ 90° (apenas 'a' e 'alpha' editáveis)
                 if sg_number:
-                    self.setWindowTitle(f"Editor - Sistema Trigonal (Romboédrico) - {sg_symbol} ({sg_number})")
+                    self.setWindowTitle(ptr("Editor - Sistema Trigonal (Romboédrico) - {} ({})").format(sg_symbol, sg_number))
                 else:
-                    self.setWindowTitle(f"Editor - Sistema Trigonal (Romboédrico)")
+                    self.setWindowTitle(ptr("Editor - Sistema Trigonal (Romboédrico)"))
                 self.b_spin.setEnabled(False)
                 self.c_spin.setEnabled(False)
                 self.beta_spin.setEnabled(False)
@@ -367,9 +370,9 @@ class CifEditorDialog(QDialog):
             else:
                 # Hexagonal: a = b ≠ c, α = β = 90°, γ = 120° (apenas 'a' e 'c' editáveis)
                 if sg_number:
-                    self.setWindowTitle(f"Editor - Sistema Trigonal (Hexagonal) - {sg_symbol} ({sg_number})")
+                    self.setWindowTitle(ptr("Editor - Sistema Trigonal (Hexagonal) - {} ({})").format(sg_symbol, sg_number))
                 else:
-                    self.setWindowTitle(f"Editor - Sistema Trigonal (Hexagonal)")
+                    self.setWindowTitle(ptr("Editor - Sistema Trigonal (Hexagonal)"))
                 self.b_spin.setEnabled(False)
                 self.alpha_spin.setEnabled(False)
                 self.beta_spin.setEnabled(False)
@@ -443,9 +446,9 @@ class CifEditorDialog(QDialog):
             )
             self._send_update(lattice_changed=True)
         except (ValueError, TypeError) as e:
-            QMessageBox.warning(self, "Valor Inválido", f"Erro ao atualizar: {e}")
+            QMessageBox.warning(self, ptr("Valor Inválido"), ptr("Erro ao atualizar: {}").format(e))
         except Exception as e:
-            QMessageBox.critical(self, "Erro de Atualização", f"Não foi possível atualizar a estrutura:\n{e}")
+            QMessageBox.critical(self, ptr("Erro de Atualização"), ptr("Não foi possível atualizar a estrutura:\n{}").format(e))
 
     def _update_from_volume(self):
         if self._block_signals or not self.cif_handler: return
@@ -453,9 +456,9 @@ class CifEditorDialog(QDialog):
             self.cif_handler.scale_volume(self.volume_spin.value())
             self._send_update(lattice_changed=True)
         except (ValueError, TypeError) as e:
-            QMessageBox.warning(self, "Valor Inválido", f"Erro ao escalar volume: {e}")
+            QMessageBox.warning(self, ptr("Valor Inválido"), ptr("Erro ao escalar volume: {}").format(e))
         except Exception as e:
-            QMessageBox.critical(self, "Erro de Atualização", f"Não foi possível escalar o volume:\n{e}")
+            QMessageBox.critical(self, ptr("Erro de Atualização"), ptr("Não foi possível escalar o volume:\n{}").format(e))
 
     def _toggle_range_selection_ui(self, index):
         self.range_widget.setVisible(index == 1)
@@ -463,12 +466,12 @@ class CifEditorDialog(QDialog):
     def _populate_peak_list(self):
         self.peak_list_widget.clear()
         for peak_2theta in self.initial_pattern_peaks:
-            self.peak_list_widget.addItem(f"{peak_2theta:.4f}")
+            self.peak_list_widget.addItem(ptr("{:.4f}").format(peak_2theta))
 
     def _add_range(self):
         selected_items = self.peak_list_widget.selectedItems()
         if not selected_items:
-            QMessageBox.warning(self, "Nenhuma Seleção", "Selecione um ou mais picos para criar um range.")
+            QMessageBox.warning(self, ptr("Nenhuma Seleção"), ptr("Selecione um ou mais picos para criar um range."))
             return
 
         selected_peaks = sorted([float(item.text()) for item in selected_items])
@@ -479,7 +482,7 @@ class CifEditorDialog(QDialog):
 
         new_range = (range_min, range_max)
         self.selected_ranges.append(new_range)
-        self.selected_ranges_list.addItem(f"Range: {range_min:.2f}° - {range_max:.2f}°")
+        self.selected_ranges_list.addItem(ptr("Range: {:.2f}° - {:.2f}°").format(range_min, range_max))
 
     def _remove_range(self):
         selected_items = self.selected_ranges_list.selectedItems()
@@ -501,10 +504,10 @@ class CifEditorDialog(QDialog):
         new_cif_content = self.cif_handler.get_cif_string()
 
         sim_params = {
-            "profile": self.convolution_combo.currentText().lower().replace("-", ""),
+            "profile": self.convolution_combo.currentData(),
             "fwhm": self.fwhm_spin.value(),
-            "apply_mode": self.apply_mode_combo.currentText(),
-            "ranges": self.selected_ranges if self.apply_mode_combo.currentText() == "Ranges Selecionados" else []
+            "apply_mode": self.apply_mode_combo.currentData(),
+            "ranges": self.selected_ranges if self.apply_mode_combo.currentData() == "Ranges Selecionados" else []
         }
 
         self.simulationParametersModified.emit(new_cif_content, sim_params)
@@ -524,7 +527,7 @@ class MultiphaseEditorDialog(QDialog):
 
     def __init__(self, multiphase_item: dict, component_info: list, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("Editor de Combinação Multifásica")
+        self.setWindowTitle(ptr("Editor de Combinação Multifásica"))
         self.setMinimumWidth(450)
 
         self.item_id = multiphase_item.get("id")
@@ -541,7 +544,7 @@ class MultiphaseEditorDialog(QDialog):
         main_layout = QVBoxLayout(self)
 
         # --- Grupo de Proporções de Fase ---
-        proportions_group = QGroupBox(f"Proporções de Fase")
+        proportions_group = QGroupBox(ptr("Proporções de Fase"))
         form_layout = QFormLayout(proportions_group)
         form_layout.setFieldGrowthPolicy(QFormLayout.FieldGrowthPolicy.AllNonFixedFieldsGrow)
 
@@ -556,19 +559,20 @@ class MultiphaseEditorDialog(QDialog):
             self.spinboxes.append(spinbox)
         main_layout.addWidget(proportions_group)
 
-        self.total_label = QLabel("Total: 100.0%")
+        self.total_label = QLabel(ptr("Total: 100.0%"))
         self.total_label.setStyleSheet("font-weight: bold;")
         main_layout.addWidget(self.total_label, 0, Qt.AlignmentFlag.AlignRight)
 
         # --- Grupo de Simulação de Pico ---
-        sim_group = QGroupBox("Parâmetros de Simulação de Pico (para a combinação)")
+        sim_group = QGroupBox(ptr("Parâmetros de Simulação de Pico (para a combinação)"))
         sim_layout = QVBoxLayout(sim_group)
         profile_layout = QHBoxLayout()
-        profile_layout.addWidget(QLabel("Função de Perfil:"))
+        profile_layout.addWidget(QLabel(ptr("Função de Perfil:")))
         self.convolution_combo = QComboBox()
-        self.convolution_combo.addItems(["Pseudo-Voigt", "Gaussiana", "Lorentziana"])
+        for _lbl, _v in ((ptr("Pseudo-Voigt"), "pseudovoigt"), (ptr("Gaussiana"), "gaussiana"), (ptr("Lorentziana"), "lorentziana")):
+            self.convolution_combo.addItem(_lbl, _v)
         profile_layout.addWidget(self.convolution_combo)
-        profile_layout.addWidget(QLabel("FWHM (°):"))
+        profile_layout.addWidget(QLabel(ptr("FWHM (°):")))
         self.fwhm_spin = QDoubleSpinBox()
         self.fwhm_spin.setRange(0.001, 5.0)
         self.fwhm_spin.setDecimals(3)
@@ -593,9 +597,9 @@ class MultiphaseEditorDialog(QDialog):
         self._block_signals = True
         fwhm = self.simulation_params.get('fwhm', 0.120)
         self.fwhm_spin.setValue(fwhm)
-        profile = self.simulation_params.get('profile', 'pseudo-voigt').capitalize()
-        if profile == "Pseudo-voigt": profile = "Pseudo-Voigt"
-        self.convolution_combo.setCurrentText(profile)
+        profile_raw = str(self.simulation_params.get('profile', 'pseudovoigt')).lower().replace("-", "")
+        _i = self.convolution_combo.findData(profile_raw)
+        self.convolution_combo.setCurrentIndex(_i if _i >= 0 else 0)
         self._block_signals = False
 
     def _update_weights(self, changed_value):
@@ -620,7 +624,7 @@ class MultiphaseEditorDialog(QDialog):
 
     def _update_total_label(self):
         total = sum(s.value() for s in self.spinboxes)
-        self.total_label.setText(f"Total: {total * 100:.1f}%")
+        self.total_label.setText(ptr("Total: {:.1f}%").format(total * 100))
         if abs(total - 1.0) > 0.01:
             self.total_label.setStyleSheet("font-weight: bold; color: red;")
         else:
@@ -635,7 +639,7 @@ class MultiphaseEditorDialog(QDialog):
             normalized_weights = weights
 
         sim_params = {
-            "profile": self.convolution_combo.currentText().lower().replace("-", ""),
+            "profile": self.convolution_combo.currentData(),
             "fwhm": self.fwhm_spin.value()
         }
         return normalized_weights, sim_params
@@ -643,7 +647,7 @@ class MultiphaseEditorDialog(QDialog):
     def accept(self):
         weights, sim_params = self.get_parameters()
         if abs(sum(weights) - 1.0) > 0.01:
-            QMessageBox.warning(self, "Soma Inválida", "A soma das proporções deve ser 100%. Por favor, ajuste os valores.")
+            QMessageBox.warning(self, ptr("Soma Inválida"), ptr("A soma das proporções deve ser 100%. Por favor, ajuste os valores."))
             return
         self.parametersChanged.emit(self.item_id, weights, sim_params)
         super().accept()

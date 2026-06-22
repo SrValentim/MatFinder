@@ -650,8 +650,7 @@ class StructureViewer3D(QWidget):
             QMessageBox.warning(
                 self,
                 ptr("Dependência Ausente"),
-                "A biblioteca 'pymatgen' não está instalada.\n\n"
-                "Para instalar, execute:\npip install pymatgen"
+                ptr("A biblioteca 'pymatgen' não está instalada.\n\nPara instalar, execute:\npip install pymatgen")
             )
             logging.error("pymatgen não está instalado")
             return False
@@ -696,7 +695,7 @@ class StructureViewer3D(QWidget):
             return True
 
         except Exception as e:
-            error_msg = f"Erro ao carregar CIF: {str(e)}"
+            error_msg = ptr("Erro ao carregar CIF: {}").format(str(e))
             logging.error(error_msg)
             QMessageBox.critical(self, ptr("Erro"), error_msg)
             self.info_label.setText(ptr("Erro ao carregar estrutura"))
@@ -1930,9 +1929,7 @@ class Viewer3DToolsDialog(QDialog):
         self.merge_cells_check = QCheckBox(ptr("Mesclar Células (Caixa Única)"))
         self.merge_cells_check.setChecked(getattr(viewer, '_merge_cells', False))
         self.merge_cells_check.setToolTip(
-            "Mostra apenas uma caixa englobando toda a supercélula\n"
-            "ao invés de mostrar cada célula unitária individualmente.\n"
-            "Útil para visualização mais limpa e didática."
+            ptr("Mostra apenas uma caixa englobando toda a supercélula\nao invés de mostrar cada célula unitária individualmente.\nÚtil para visualização mais limpa e didática.")
         )
         visibility_layout.addWidget(self.merge_cells_check)
 
@@ -1954,7 +1951,7 @@ class Viewer3DToolsDialog(QDialog):
         self.bonds_slider.valueChanged.connect(self._update_bonds_label)
         bonds_controls.addWidget(self.bonds_slider)
 
-        self.bonds_label = QLabel(f"{current_radius:.2f} Å")
+        self.bonds_label = QLabel(ptr("{:.2f} Å").format(current_radius))
         self.bonds_label.setMinimumWidth(60)
         bonds_controls.addWidget(self.bonds_label)
 
@@ -1978,7 +1975,7 @@ class Viewer3DToolsDialog(QDialog):
 
     def _update_bonds_label(self, value):
         radius = value / 100.0
-        self.bonds_label.setText(f"{radius:.2f} Å")
+        self.bonds_label.setText(ptr("{:.2f} Å").format(radius))
 
     def _apply_settings(self):
         """Aplica as configurações sem fechar o diálogo."""
@@ -2034,7 +2031,7 @@ class Viewer3DToolsDialog(QDialog):
             QMessageBox.critical(
                 self,
                 ptr("Erro"),
-                f"Erro ao aplicar configurações: {e}"
+                ptr("Erro ao aplicar configurações: {}").format(e)
             )
 
     def _apply_visibility(self):
@@ -2124,7 +2121,7 @@ class Viewer3DAnimationDialog(QDialog):
         self.vib_label.setMinimumWidth(60)
         vib_controls.addWidget(self.vib_label)
 
-        self.vib_slider.valueChanged.connect(lambda v: self.vib_label.setText(f"{v/100:.2f} Å"))
+        self.vib_slider.valueChanged.connect(lambda v: self.vib_label.setText(ptr("{:.2f} Å").format(v / 100)))
 
         vibration_layout.addLayout(vib_controls)
 
@@ -2347,7 +2344,7 @@ class SupercellDialog(QDialog):
         hlayout.addStretch()
 
         # Label de multiplicador
-        mult_label = QLabel(f"x{initial_value}")
+        mult_label = QLabel(ptr("x{}").format(initial_value))
         mult_label.setStyleSheet("font-weight: bold; color: #555;")
         mult_label.setMinimumWidth(35)
         hlayout.addWidget(mult_label)
@@ -2355,7 +2352,7 @@ class SupercellDialog(QDialog):
         # Conectar botões
         minus_btn.clicked.connect(lambda: spinbox.setValue(max(1, spinbox.value() - 1)))
         plus_btn.clicked.connect(lambda: spinbox.setValue(min(10, spinbox.value() + 1)))
-        spinbox.valueChanged.connect(lambda v: mult_label.setText(f"x{v}"))
+        spinbox.valueChanged.connect(lambda v: mult_label.setText(ptr("x{}").format(v)))
 
         parent_layout.addWidget(container)
         return spinbox
@@ -2388,8 +2385,7 @@ class SupercellDialog(QDialog):
         n_current = n_unit * self.current_expansion[0] * self.current_expansion[1] * self.current_expansion[2]
 
         current_text = (
-            f"Expansão: <b>{self.current_expansion[0]}x{self.current_expansion[1]}x{self.current_expansion[2]}</b> | "
-            f"Átomos: <b>{n_current}</b>"
+            ptr("Expansão: <b>{}x{}x{}</b> | Átomos: <b>{}</b>").format(self.current_expansion[0], self.current_expansion[1], self.current_expansion[2], n_current)
         )
         self.current_info_label.setText(current_text)
 
@@ -2408,25 +2404,21 @@ class SupercellDialog(QDialog):
 
         # Status de performance
         if n_new <= 50:
-            perf_status = "<span style='color:green;'><b>Rápida</b></span>"
+            perf_status = ptr("<span style='color:green;'><b>Rápida</b></span>")
             perf_detail = "Renderização instantânea"
         elif n_new <= 200:
-            perf_status = "<span style='color:green;'><b>Boa</b></span>"
+            perf_status = ptr("<span style='color:green;'><b>Boa</b></span>")
             perf_detail = "Performance adequada"
         elif n_new <= 500:
-            perf_status = "<span style='color:orange;'><b>Moderada</b></span>"
+            perf_status = ptr("<span style='color:orange;'><b>Moderada</b></span>")
             perf_detail = "Pode apresentar lentidão"
         else:
-            perf_status = "<span style='color:red;'><b>Lenta</b></span>"
+            perf_status = ptr("<span style='color:red;'><b>Lenta</b></span>")
             perf_detail = "Renderização pode travar"
 
         # Texto informativo
         info_text = (
-            f"<b>Nova Configuração: {na}x{nb}x{nc}</b><br>"
-            f"<b>Átomos Totais:</b> {n_new} ({n_cells} células)<br>"
-            f"<b>Ligações:</b> ~{est_bonds}<br>"
-            f"<b>Memória:</b> ~{mem_mb:.1f} MB<br>"
-            f"<b>Performance:</b> {perf_status} - {perf_detail}"
+            ptr("<b>Nova Configuração: {}x{}x{}</b><br><b>Átomos Totais:</b> {} ({} células)<br><b>Ligações:</b> ~{}<br><b>Memória:</b> ~{:.1f} MB<br><b>Performance:</b> {} - {}").format(na, nb, nc, n_new, n_cells, est_bonds, mem_mb, perf_status, perf_detail)
         )
 
         self.info_label.setText(info_text)

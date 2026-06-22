@@ -14,6 +14,7 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import Qt, Signal, QSize, Slot
 from PySide6.QtGui import QIcon, QColor, QPixmap, QPainter
+from matfinder.core.translator import ptr
 
 # Importar sistema de tradução
 try:
@@ -145,7 +146,7 @@ class HistoricoDialog(QDialog):
             print(f"Histórico salvo em: {filepath}")
         except IOError as e:
             print(f"Erro ao salvar histórico: {e}")
-            QMessageBox.warning(self, "Erro ao Salvar", f"Não foi possível salvar o histórico: {e}")
+            QMessageBox.warning(self, ptr("Erro ao Salvar"), ptr("Não foi possível salvar o histórico: {}").format(e))
 
     def ordenar_e_popular_tabela(self):
         try:

@@ -35,7 +35,7 @@ class ReflectionDialog(QDialog):
         self.max_2theta = max_2theta
         self.item_label = item_label
 
-        self.setWindowTitle(f"Reflexões - {item_label}")
+        self.setWindowTitle(ptr("Reflexões - {}").format(item_label))
         self.resize(800, 600)
 
         # Configurar ícone do polvo
@@ -69,7 +69,7 @@ class ReflectionDialog(QDialog):
 
         # Título e informações
         info_layout = QHBoxLayout()
-        info_label = QLabel(f"<b>Reflexões calculadas para:</b> {self.item_label}")
+        info_label = QLabel(ptr("<b>Reflexões calculadas para:</b> {}").format(self.item_label))
         info_label.setStyleSheet("font-size: 12pt; padding: 5px;")
         info_layout.addWidget(info_label)
         info_layout.addStretch()
@@ -108,7 +108,7 @@ class ReflectionDialog(QDialog):
         # Tabela de condições
         self.conditions_table = QTableWidget()
         self.conditions_table.setColumnCount(2)
-        self.conditions_table.setHorizontalHeaderLabels(["Parâmetro", "Valor"])
+        self.conditions_table.setHorizontalHeaderLabels([ptr("Parâmetro"), ptr("Valor")])
         self.conditions_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
         self.conditions_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
         self.conditions_table.verticalHeader().setVisible(False)
@@ -124,7 +124,7 @@ class ReflectionDialog(QDialog):
         self.reflections_table = QTableWidget()
         self.reflections_table.setColumnCount(10)
         self.reflections_table.setHorizontalHeaderLabels([
-            "No.", "h", "k", "l", "d (Å)", "F(real)", "F(imag)", "|F|", "2θ", "I"
+            ptr("No."), "h", "k", "l", ptr("d (Å)"), ptr("F(real)"), ptr("F(imag)"), ptr("|F|"), ptr("2θ"), "I"
         ])
 
         # Configurar larguras das colunas
@@ -178,17 +178,17 @@ class ReflectionDialog(QDialog):
 
             # Dados para a tabela de condições
             conditions_data = [
-                ("Comprimento de onda (λ)", f"{self.wavelength:.5f} Å"),
-                ("2θ máximo", f"{self.max_2theta:.2f}°"),
-                ("Grupo espacial", f"{spacegroup} (No. {spacegroup_number})"),
-                ("Sistema cristalino", analyzer.get_crystal_system()),
-                ("Parâmetro a", f"{lattice.a:.4f} Å"),
-                ("Parâmetro b", f"{lattice.b:.4f} Å"),
-                ("Parâmetro c", f"{lattice.c:.4f} Å"),
-                ("Ângulo α", f"{lattice.alpha:.2f}°"),
-                ("Ângulo β", f"{lattice.beta:.2f}°"),
-                ("Ângulo γ", f"{lattice.gamma:.2f}°"),
-                ("Volume", f"{lattice.volume:.2f} Ų"),
+                (ptr("Comprimento de onda (λ)"), f"{self.wavelength:.5f} Å"),
+                (ptr("2θ máximo"), f"{self.max_2theta:.2f}°"),
+                (ptr("Grupo espacial"), f"{spacegroup} (No. {spacegroup_number})"),
+                (ptr("Sistema cristalino"), analyzer.get_crystal_system()),
+                (ptr("Parâmetro a"), f"{lattice.a:.4f} Å"),
+                (ptr("Parâmetro b"), f"{lattice.b:.4f} Å"),
+                (ptr("Parâmetro c"), f"{lattice.c:.4f} Å"),
+                (ptr("Ângulo α"), f"{lattice.alpha:.2f}°"),
+                (ptr("Ângulo β"), f"{lattice.beta:.2f}°"),
+                (ptr("Ângulo γ"), f"{lattice.gamma:.2f}°"),
+                (ptr("Volume"), f"{lattice.volume:.2f} Ų"),
             ]
 
             self.conditions_table.setRowCount(len(conditions_data))
@@ -356,32 +356,32 @@ class ReflectionDialog(QDialog):
                 self.reflections_table.setItem(row, 3, l_item)
 
                 # d (Å)
-                d_item = QTableWidgetItem(f"{refl['d']:.5f}")
+                d_item = QTableWidgetItem(ptr("{:.5f}").format(refl['d']))
                 d_item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
                 self.reflections_table.setItem(row, 4, d_item)
 
                 # F(real)
-                f_real_item = QTableWidgetItem(f"{refl['f_real']:.2f}")
+                f_real_item = QTableWidgetItem(ptr("{:.2f}").format(refl['f_real']))
                 f_real_item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
                 self.reflections_table.setItem(row, 5, f_real_item)
 
                 # F(imag)
-                f_imag_item = QTableWidgetItem(f"{refl['f_imag']:.2f}")
+                f_imag_item = QTableWidgetItem(ptr("{:.2f}").format(refl['f_imag']))
                 f_imag_item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
                 self.reflections_table.setItem(row, 6, f_imag_item)
 
                 # |F|
-                f_mag_item = QTableWidgetItem(f"{refl['f_mag']:.2f}")
+                f_mag_item = QTableWidgetItem(ptr("{:.2f}").format(refl['f_mag']))
                 f_mag_item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
                 self.reflections_table.setItem(row, 7, f_mag_item)
 
                 # 2θ
-                two_theta_item = QTableWidgetItem(f"{refl['two_theta']:.2f}")
+                two_theta_item = QTableWidgetItem(ptr("{:.2f}").format(refl['two_theta']))
                 two_theta_item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
                 self.reflections_table.setItem(row, 8, two_theta_item)
 
                 # I (Intensidade normalizada 0-100)
-                intensity_item = QTableWidgetItem(f"{refl['intensity']:.4f}")
+                intensity_item = QTableWidgetItem(ptr("{:.4f}").format(refl['intensity']))
                 intensity_item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
                 self.reflections_table.setItem(row, 9, intensity_item)
 

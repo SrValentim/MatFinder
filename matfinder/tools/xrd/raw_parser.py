@@ -11,6 +11,7 @@ import struct
 import os
 import logging
 import numpy as np
+from matfinder.core.translator import ptr
 
 logger = logging.getLogger(__name__)
 
@@ -76,7 +77,7 @@ def _read_shimadzu_raw(f) -> tuple:
     file_size = len(data)
 
     if file_size < 968:
-        raise ValueError("Shimadzu XRD: Arquivo muito pequeno")
+        raise ValueError(ptr("Shimadzu XRD: Arquivo muito pequeno"))
 
     # Ler versão
     version_str = data[16:24].decode('ascii', errors='replace').strip('\x00').strip()
@@ -90,7 +91,7 @@ def _read_shimadzu_raw(f) -> tuple:
 
     # Validar parâmetros
     if n_points < 1 or n_points > 100000:
-        raise ValueError(f"Shimadzu XRD: Numero de pontos invalido: {n_points}")
+        raise ValueError(ptr("Shimadzu XRD: Numero de pontos invalido: {}").format(n_points))
 
     # Converter 2theta
     start_2theta = start_raw / 10000.0
@@ -107,10 +108,10 @@ def _read_shimadzu_raw(f) -> tuple:
                 end_2theta = e
                 break
         else:
-            raise ValueError(f"Shimadzu XRD: Angulos invalidos: start={start_raw}, end={end_raw}")
+            raise ValueError(ptr("Shimadzu XRD: Angulos invalidos: start={}, end={}").format(start_raw, end_raw))
 
     if end_2theta <= start_2theta:
-        raise ValueError(f"Shimadzu XRD: end_2theta ({end_2theta}) <= start_2theta ({start_2theta})")
+        raise ValueError(ptr("Shimadzu XRD: end_2theta ({}) <= start_2theta ({})").format(end_2theta, start_2theta))
 
     # Calcular offset dos dados (dados ficam no final do arquivo)
     data_offset = file_size - (n_points * 4)
@@ -123,7 +124,7 @@ def _read_shimadzu_raw(f) -> tuple:
         data_offset = alt_data_offset
 
     if data_offset < 0 or data_offset >= file_size:
-        raise ValueError(f"Shimadzu XRD: Offset de dados invalido: {data_offset}")
+        raise ValueError(ptr("Shimadzu XRD: Offset de dados invalido: {}").format(data_offset))
 
     # Recalcular n_points baseado no espaço disponível
     available_bytes = file_size - data_offset
@@ -142,7 +143,7 @@ def _read_shimadzu_raw(f) -> tuple:
         counts.append(float(val))
 
     if len(counts) < 10:
-        raise ValueError(f"Shimadzu XRD: Muito poucos pontos ({len(counts)})")
+        raise ValueError(ptr("Shimadzu XRD: Muito poucos pontos ({})").format(len(counts)))
 
     # Gerar array de 2theta
     two_theta = np.linspace(start_2theta, end_2theta, len(counts))
@@ -174,14 +175,14 @@ def _read_raw_v1(f) -> tuple:
 
         # Validar: n_points deve ser razoável (1 a 100000)
         if n_points < 1 or n_points > 100000:
-            raise ValueError("RAW v1: Numero de pontos invalido")
+            raise ValueError(ptr("RAW v1: Numero de pontos invalido"))
 
         start_2theta = struct.unpack('<f', data[4:8])[0]
         step_size = struct.unpack('<f', data[8:12])[0]
 
         # Validar: start_2theta entre -10 e 180, step entre 0.001 e 1
         if not (-10 <= start_2theta <= 180) or not (0.001 <= step_size <= 1.0):
-            raise ValueError("RAW v1: Parametros de 2theta invalidos")
+            raise ValueError(ptr("RAW v1: Parametros de 2theta invalidos"))
 
         # Ler intensidades
         offset = 12
@@ -194,7 +195,7 @@ def _read_raw_v1(f) -> tuple:
             offset += 4
 
         if len(intensities) < 10:
-            raise ValueError("RAW v1: Muito poucos pontos de dados")
+            raise ValueError(ptr("RAW v1: Muito poucos pontos de dados"))
 
         two_theta = np.array([start_2theta + i * step_size for i in range(len(intensities))])
         intensities = np.array(intensities, dtype=float)
@@ -203,7 +204,7 @@ def _read_raw_v1(f) -> tuple:
         return two_theta, intensities
 
     except (struct.error, ValueError) as e:
-        raise ValueError(f"Formato RAW v1 nao reconhecido: {e}")
+        raise ValueError(ptr("Formato RAW v1 nao reconhecido: {}").format(e))
 
 
 def _read_raw_v2(f) -> tuple:
@@ -256,7 +257,7 @@ def _read_raw_v2(f) -> tuple:
                 break
 
         if not all_two_theta:
-            raise ValueError("RAW v2: Nenhum dado encontrado")
+            raise ValueError(ptr("RAW v2: Nenhum dado encontrado"))
 
         two_theta = np.array(all_two_theta, dtype=float)
         intensities = np.array(all_intensity, dtype=float)
@@ -269,7 +270,7 @@ def _read_raw_v2(f) -> tuple:
         return _read_raw2_format(f)
 
     else:
-        raise ValueError(f"Header RAW v2 nao reconhecido: {magic}")
+        raise ValueError(ptr("Header RAW v2 nao reconhecido: {}").format(magic))
 
 
 def _read_raw2_format(f) -> tuple:
@@ -291,10 +292,10 @@ def _read_raw2_format(f) -> tuple:
 
     # Validar
     if not (0 <= start_theta <= 180) or not (0.001 <= step_size <= 1.0):
-        raise ValueError(f"RAW2: Parametros invalidos: start={start_theta}, step={step_size}")
+        raise ValueError(ptr("RAW2: Parametros invalidos: start={}, step={}").format(start_theta, step_size))
 
     if n_steps < 1 or n_steps > 100000:
-        raise ValueError(f"RAW2: Numero de pontos invalido: {n_steps}")
+        raise ValueError(ptr("RAW2: Numero de pontos invalido: {}").format(n_steps))
 
     # Ler intensidades (float32)
     intensities = []
@@ -325,7 +326,7 @@ def _read_raw_v3(f) -> tuple:
     full_header = f.read(712)
 
     if len(full_header) < 712:
-        raise ValueError("RAW v3: Arquivo muito pequeno")
+        raise ValueError(ptr("RAW v3: Arquivo muito pequeno"))
 
     # Campos do header principal RAW v3
     # Offset 12: n_steps (uint32)
@@ -391,7 +392,7 @@ def _read_raw_v3(f) -> tuple:
             pos = f.tell()
 
         if not all_two_theta:
-            raise ValueError("RAW v3: Nenhum dado extraido")
+            raise ValueError(ptr("RAW v3: Nenhum dado extraido"))
 
         two_theta = np.array(all_two_theta, dtype=float)
         intensities = np.array(all_intensity, dtype=float)
@@ -400,7 +401,7 @@ def _read_raw_v3(f) -> tuple:
         return two_theta, intensities
 
     except (struct.error, ValueError) as e:
-        raise ValueError(f"RAW v3: Erro ao ler: {e}")
+        raise ValueError(ptr("RAW v3: Erro ao ler: {}").format(e))
 
 
 def _read_raw_v4(f) -> tuple:
@@ -457,7 +458,7 @@ def _read_raw_v4(f) -> tuple:
             pos = data_start + n_steps * 4
 
         if not all_two_theta:
-            raise ValueError("RAW v4: Nenhum dado extraido")
+            raise ValueError(ptr("RAW v4: Nenhum dado extraido"))
 
         two_theta = np.array(all_two_theta, dtype=float)
         intensities = np.array(all_intensity, dtype=float)
@@ -466,7 +467,7 @@ def _read_raw_v4(f) -> tuple:
         return two_theta, intensities
 
     except (struct.error, ValueError) as e:
-        raise ValueError(f"RAW v4: Erro ao ler: {e}")
+        raise ValueError(ptr("RAW v4: Erro ao ler: {}").format(e))
 
 
 def read_brml_file(file_path: str) -> tuple:
@@ -485,7 +486,7 @@ def read_brml_file(file_path: str) -> tuple:
             xml_files = [f for f in z.namelist() if f.endswith('.xml')]
 
             if not xml_files:
-                raise ValueError("BRML: Nenhum XML encontrado dentro do arquivo")
+                raise ValueError(ptr("BRML: Nenhum XML encontrado dentro do arquivo"))
 
             # Normalmente o arquivo principal é o maior ou contém "RawData"
             target_xml = None
@@ -527,7 +528,7 @@ def read_brml_file(file_path: str) -> tuple:
                     two_theta = [start + i * step for i in range(len(intensities))]
 
                 if not two_theta:
-                    raise ValueError("BRML: Dados de 2theta/intensidade nao encontrados no XML")
+                    raise ValueError(ptr("BRML: Dados de 2theta/intensidade nao encontrados no XML"))
 
                 result_2theta = np.array(two_theta, dtype=float)
                 result_intensity = np.array(intensities, dtype=float)
@@ -537,9 +538,9 @@ def read_brml_file(file_path: str) -> tuple:
                 return result_2theta, result_intensity
 
     except zipfile.BadZipFile:
-        raise ValueError("BRML: Arquivo nao e um ZIP valido")
+        raise ValueError(ptr("BRML: Arquivo nao e um ZIP valido"))
     except Exception as e:
-        raise ValueError(f"BRML: Erro ao ler: {e}")
+        raise ValueError(ptr("BRML: Erro ao ler: {}").format(e))
 
 
 def read_xrdml_file(file_path: str) -> tuple:
@@ -600,7 +601,7 @@ def read_xrdml_file(file_path: str) -> tuple:
                 break
 
         if not two_theta:
-            raise ValueError("XRDML: Dados de 2theta/intensidade nao encontrados")
+            raise ValueError(ptr("XRDML: Dados de 2theta/intensidade nao encontrados"))
 
         result_2theta = np.array(two_theta, dtype=float)
         result_intensity = np.array(intensities, dtype=float)
@@ -610,9 +611,9 @@ def read_xrdml_file(file_path: str) -> tuple:
         return result_2theta, result_intensity
 
     except ET.ParseError as e:
-        raise ValueError(f"XRDML: Erro de parsing XML: {e}")
+        raise ValueError(ptr("XRDML: Erro de parsing XML: {}").format(e))
     except Exception as e:
-        raise ValueError(f"XRDML: Erro ao ler: {e}")
+        raise ValueError(ptr("XRDML: Erro ao ler: {}").format(e))
 
 
 def read_ras_file(file_path: str) -> tuple:
@@ -639,7 +640,7 @@ def read_ras_file(file_path: str) -> tuple:
             except (UnicodeDecodeError, UnicodeError):
                 continue
         else:
-            raise ValueError("RAS: Nao foi possivel decodificar o arquivo")
+            raise ValueError(ptr("RAS: Nao foi possivel decodificar o arquivo"))
 
         for line in lines:
             line = line.strip()
@@ -689,7 +690,7 @@ def read_ras_file(file_path: str) -> tuple:
                     continue
 
         if not two_theta or not intensities:
-            raise ValueError("RAS: Nenhum dado encontrado")
+            raise ValueError(ptr("RAS: Nenhum dado encontrado"))
 
         result_2theta = np.array(two_theta, dtype=float)
         result_intensity = np.array(intensities, dtype=float)
@@ -699,7 +700,7 @@ def read_ras_file(file_path: str) -> tuple:
         return result_2theta, result_intensity
 
     except Exception as e:
-        raise ValueError(f"RAS: Erro ao ler: {e}")
+        raise ValueError(ptr("RAS: Erro ao ler: {}").format(e))
 
 
 def read_csv_file(file_path: str) -> tuple:
@@ -721,7 +722,7 @@ def read_csv_file(file_path: str) -> tuple:
         except UnicodeDecodeError:
             continue
     else:
-        raise ValueError("CSV: Nao foi possivel decodificar o arquivo")
+        raise ValueError(ptr("CSV: Nao foi possivel decodificar o arquivo"))
 
     # Detectar separador
     for sep in [',', ';', '\t']:
@@ -772,7 +773,7 @@ def read_csv_file(file_path: str) -> tuple:
             continue
 
     if not two_theta:
-        raise ValueError("CSV: Nenhum dado numerico encontrado")
+        raise ValueError(ptr("CSV: Nenhum dado numerico encontrado"))
 
     result_2theta = np.array(two_theta, dtype=float)
     result_intensity = np.array(intensities, dtype=float)
@@ -823,7 +824,7 @@ def read_diffraction_file(file_path: str) -> tuple:
                 return read_raw_file(file_path)
 
     except Exception as e:
-        raise ValueError(f"Erro ao ler '{os.path.basename(file_path)}': {e}")
+        raise ValueError(ptr("Erro ao ler '{}': {}").format(os.path.basename(file_path), e))
 
 
 def _read_text_columns(file_path: str) -> tuple:
@@ -842,7 +843,7 @@ def _read_text_columns(file_path: str) -> tuple:
         except UnicodeDecodeError:
             continue
     else:
-        raise ValueError("Nao foi possivel decodificar o arquivo")
+        raise ValueError(ptr("Nao foi possivel decodificar o arquivo"))
 
     for line in lines:
         parts = line.replace(',', ' ').strip().split()
@@ -857,7 +858,7 @@ def _read_text_columns(file_path: str) -> tuple:
             continue
 
     if not two_theta:
-        raise ValueError("Nenhum dado numerico encontrado")
+        raise ValueError(ptr("Nenhum dado numerico encontrado"))
 
     result_2theta = np.array(two_theta, dtype=float)
     result_intensity = np.array(intensities, dtype=float)

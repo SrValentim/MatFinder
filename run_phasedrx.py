@@ -85,9 +85,11 @@ def main():
     except Exception as e:
         logging.error(f"Falha ao criar splash do PhaseDRX: {e}")
 
-    # Abre o fluxo do PhaseDRX (diálogo Novo/Abrir projeto -> ferramenta)
+    # Abre o fluxo do PhaseDRX (diálogo Novo/Abrir projeto -> ferramenta).
+    # A splash é fechada DENTRO de open_phasedrx, no instante em que o diálogo
+    # de projeto aparece (não fica sobreposta a ele).
     from matfinder.phasedrx_launcher import open_phasedrx
-    tool = open_phasedrx(parent=None)
+    tool = open_phasedrx(parent=None, splash=splash)
 
     if tool is None:
         # Usuário cancelou o diálogo de projeto -> encerra o app
@@ -97,8 +99,6 @@ def main():
         return
 
     tool.show()
-    if splash:
-        splash.finish(tool)
 
     sys.exit(app.exec())
 

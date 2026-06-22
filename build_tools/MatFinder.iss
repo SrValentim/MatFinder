@@ -53,11 +53,11 @@ Source: "..\dist\MatFinder\*"; DestDir: "{app}"; Flags: ignoreversion recursesub
 
 [Icons]
 Name: "{group}\{#AppName}"; Filename: "{app}\{#AppExe}"; WorkingDir: "{app}"
-; PhaseDRX Suite: mesmo .exe com --phasedrx, ícone próprio do PhaseDRX
-Name: "{group}\PhaseDRX Suite"; Filename: "{app}\{#AppExe}"; Parameters: "--phasedrx"; WorkingDir: "{app}"; IconFilename: "{app}\_internal\matfinder\assets\icons\PhaseDRX.ico"
+; PhaseDRX Suite: executável próprio (PhaseDRX.exe), com ícone do PhaseDRX
+Name: "{group}\PhaseDRX Suite"; Filename: "{app}\PhaseDRX.exe"; WorkingDir: "{app}"; IconFilename: "{app}\_internal\matfinder\assets\icons\PhaseDRX.ico"
 Name: "{group}\{cm:UninstallProgram,{#AppName}}"; Filename: "{uninstallexe}"
 Name: "{autodesktop}\{#AppName}"; Filename: "{app}\{#AppExe}"; WorkingDir: "{app}"; Tasks: desktopicon
-Name: "{autodesktop}\PhaseDRX Suite"; Filename: "{app}\{#AppExe}"; Parameters: "--phasedrx"; WorkingDir: "{app}"; IconFilename: "{app}\_internal\matfinder\assets\icons\PhaseDRX.ico"; Tasks: desktopicon
+Name: "{autodesktop}\PhaseDRX Suite"; Filename: "{app}\PhaseDRX.exe"; WorkingDir: "{app}"; IconFilename: "{app}\_internal\matfinder\assets\icons\PhaseDRX.ico"; Tasks: desktopicon
 
 [Run]
 Filename: "{app}\{#AppExe}"; Description: "{cm:LaunchProgram,{#AppName}}"; Flags: nowait postinstall skipifsilent unchecked

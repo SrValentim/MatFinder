@@ -52,8 +52,7 @@ class NormalizationDialog(QDialog):
         # Opção 1: Normalizar [0, 1]
         self.radio_normalize_01 = QRadioButton(ptr("Normalizar [0, 1]"))
         self.radio_normalize_01.setToolTip(
-            "Escala os dados para o intervalo [0, 1].\n"
-            "Fórmula: (y - y_min) / (y_max - y_min)"
+            ptr("Escala os dados para o intervalo [0, 1].\nFórmula: (y - y_min) / (y_max - y_min)")
         )
         self.radio_normalize_01.setChecked(True)  # Padrão
         self.button_group.addButton(self.radio_normalize_01, 0)
@@ -62,8 +61,7 @@ class NormalizationDialog(QDialog):
         # Opção 2: Dividir pelo Máximo
         self.radio_div_max = QRadioButton(ptr("Dividir pelo Máximo"))
         self.radio_div_max.setToolTip(
-            "Divide todos os valores pelo valor máximo.\n"
-            "Fórmula: y / y_max"
+            ptr("Divide todos os valores pelo valor máximo.\nFórmula: y / y_max")
         )
         self.button_group.addButton(self.radio_div_max, 1)
         options_layout.addWidget(self.radio_div_max)
@@ -71,8 +69,7 @@ class NormalizationDialog(QDialog):
         # Opção 3: Dividir pelo Mínimo
         self.radio_div_min = QRadioButton(ptr("Dividir pelo Mínimo"))
         self.radio_div_min.setToolTip(
-            "Divide todos os valores pelo valor mínimo.\n"
-            "Fórmula: y / y_min"
+            ptr("Divide todos os valores pelo valor mínimo.\nFórmula: y / y_min")
         )
         self.button_group.addButton(self.radio_div_min, 2)
         options_layout.addWidget(self.radio_div_min)
@@ -80,8 +77,7 @@ class NormalizationDialog(QDialog):
         # Opção 4: Dividir pela Mediana
         self.radio_div_median = QRadioButton(ptr("Dividir pela Mediana"))
         self.radio_div_median.setToolTip(
-            "Divide todos os valores pela mediana.\n"
-            "Fórmula: y / mediana(y)"
+            ptr("Divide todos os valores pela mediana.\nFórmula: y / mediana(y)")
         )
         self.button_group.addButton(self.radio_div_median, 3)
         options_layout.addWidget(self.radio_div_median)
@@ -141,7 +137,7 @@ def normalize_data(y_data, method="normalize_01"):
 
         # Usar tolerância numérica ao invés de comparação exata
         if range_val < 1e-10:
-            raise ValueError("Os dados não podem ser normalizados [0,1]: máximo igual ao mínimo (dados constantes).")
+            raise ValueError(ptr("Os dados não podem ser normalizados [0,1]: máximo igual ao mínimo (dados constantes)."))
 
         normalized = (y_data - min_val) / range_val
         return normalized
@@ -151,7 +147,7 @@ def normalize_data(y_data, method="normalize_01"):
         max_val = y_data.max()
 
         if abs(max_val) < 1e-10:
-            raise ValueError("Os dados não podem ser normalizados: máximo é essencialmente zero.")
+            raise ValueError(ptr("Os dados não podem ser normalizados: máximo é essencialmente zero."))
 
         normalized = y_data / max_val
         return normalized
@@ -161,7 +157,7 @@ def normalize_data(y_data, method="normalize_01"):
         min_val = y_data.min()
 
         if abs(min_val) < 1e-10:
-            raise ValueError("Os dados não podem ser normalizados: mínimo é essencialmente zero.")
+            raise ValueError(ptr("Os dados não podem ser normalizados: mínimo é essencialmente zero."))
 
         normalized = y_data / min_val
         return normalized
@@ -171,13 +167,13 @@ def normalize_data(y_data, method="normalize_01"):
         median_val = np.median(y_data)
 
         if abs(median_val) < 1e-10:
-            raise ValueError("Os dados não podem ser normalizados: mediana é essencialmente zero.")
+            raise ValueError(ptr("Os dados não podem ser normalizados: mediana é essencialmente zero."))
 
         normalized = y_data / median_val
         return normalized
 
     else:
-        raise ValueError(f"Método de normalização inválido: {method}")
+        raise ValueError(ptr("Método de normalização inválido: {}").format(method))
 
 
 def get_method_description(method):
@@ -197,7 +193,8 @@ def get_method_description(method):
         "divide_by_median": "Divisão pela Mediana"
     }
 
-    return descriptions.get(method, "Método Desconhecido")
+    from matfinder.core.translator import ptr
+    return ptr(descriptions.get(method, "Método Desconhecido"))
 
 
 def normalize_by_peak(x_data, y_data, peak_x, window_size=0.5):
@@ -223,14 +220,14 @@ def normalize_by_peak(x_data, y_data, peak_x, window_size=0.5):
     mask = (x_data >= peak_x - window_size) & (x_data <= peak_x + window_size)
 
     if not np.any(mask):
-        raise ValueError(f"Nenhum dado encontrado na região do pico (2θ = {peak_x:.2f}°)")
+        raise ValueError(ptr("Nenhum dado encontrado na região do pico (2θ = {:.2f}°)").format(peak_x))
 
     # Encontrar o máximo na janela
     y_in_window = y_data[mask]
     peak_intensity = np.max(y_in_window)
 
     if peak_intensity <= 0:
-        raise ValueError(f"Intensidade do pico é zero ou negativa (2θ = {peak_x:.2f}°)")
+        raise ValueError(ptr("Intensidade do pico é zero ou negativa (2θ = {:.2f}°)").format(peak_x))
 
     # Normalizar dividindo pela intensidade do pico
     y_normalized = y_data / peak_intensity
@@ -264,10 +261,7 @@ class NormalizeByPeakConfirmDialog(QDialog):
 
         # Informações sobre a normalização
         info_text = (
-            f"<b>Arquivo selecionado:</b> {selected_label}<br>"
-            f"<b>Posição do pico:</b> 2θ = {peak_position:.3f}°<br><br>"
-            f"O arquivo selecionado será normalizado dividindo todas as "
-            f"intensidades pela intensidade deste pico."
+            ptr("<b>Arquivo selecionado:</b> {}<br><b>Posição do pico:</b> 2θ = {:.3f}°<br><br>O arquivo selecionado será normalizado dividindo todas as intensidades pela intensidade deste pico.").format(selected_label, peak_position)
         )
         info_label = QLabel(info_text)
         info_label.setWordWrap(True)
@@ -279,8 +273,7 @@ class NormalizeByPeakConfirmDialog(QDialog):
         # Pergunta sobre os outros arquivos
         if other_count > 0:
             question_label = QLabel(
-                f"<b>Existem {other_count} outro(s) arquivo(s) experimental(is) carregado(s).</b><br>"
-                "Deseja normalizar todos eles usando o mesmo pico como referência?"
+                ptr("<b>Existem {} outro(s) arquivo(s) experimental(is) carregado(s).</b><br>Deseja normalizar todos eles usando o mesmo pico como referência?").format(other_count)
             )
             question_label.setWordWrap(True)
             layout.addWidget(question_label)
@@ -293,11 +286,10 @@ class NormalizeByPeakConfirmDialog(QDialog):
 
             # Opção 1: Normalizar apenas o selecionado
             self.radio_only_selected = QRadioButton(
-                f"Normalizar apenas '{selected_label}' por este pico"
+                ptr("Normalizar apenas '{}' por este pico").format(selected_label)
             )
             self.radio_only_selected.setToolTip(
-                "Apenas o arquivo selecionado será normalizado pelo pico.\n"
-                "Os outros arquivos permanecerão inalterados."
+                ptr("Apenas o arquivo selecionado será normalizado pelo pico.\nOs outros arquivos permanecerão inalterados.")
             )
             self.radio_only_selected.setChecked(True)
             self.button_group.addButton(self.radio_only_selected, 0)
@@ -305,11 +297,10 @@ class NormalizeByPeakConfirmDialog(QDialog):
 
             # Opção 2: Normalizar todos pelo mesmo pico
             self.radio_normalize_all = QRadioButton(
-                f"Normalizar TODOS os experimentais pelo pico em 2θ = {peak_position:.3f}°"
+                ptr("Normalizar TODOS os experimentais pelo pico em 2θ = {:.3f}°").format(peak_position)
             )
             self.radio_normalize_all.setToolTip(
-                "Todos os arquivos experimentais serão normalizados usando\n"
-                "a intensidade do pico na mesma posição 2θ de cada arquivo."
+                ptr("Todos os arquivos experimentais serão normalizados usando\na intensidade do pico na mesma posição 2θ de cada arquivo.")
             )
             self.button_group.addButton(self.radio_normalize_all, 1)
             options_layout.addWidget(self.radio_normalize_all)

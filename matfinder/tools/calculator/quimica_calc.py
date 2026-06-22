@@ -2,6 +2,7 @@ from pymatgen.core.composition import Composition
 from pymatgen.core.periodic_table import Element
 import traceback
 import re
+from matfinder.core.translator import ptr
 
 try:
     from chempy import balance_stoichiometry
@@ -124,7 +125,7 @@ def balance_chemical_equation(reactant_formulas: list[str], product_formulas: li
 def format_balanced_equation(reactant_formulas: list[str], product_formulas: list[str],
                              balanced_reac_coeffs: dict, balanced_prod_coeffs: dict) -> str:
     if not balanced_reac_coeffs or not balanced_prod_coeffs:
-        return "Não foi possível formatar a equação (coeficientes em falta)."
+        return ptr("Não foi possível formatar a equação (coeficientes em falta).")
 
     def format_side(formulas_ordered, coeffs_dict):
         terms = []

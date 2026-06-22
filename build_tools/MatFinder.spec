@@ -129,6 +129,7 @@ except Exception:
 
 # Hidden imports pontuais que não vêm por dependência óbvia.
 hiddenimports += [
+    'PySide6.QtNetwork',  # bridge IPC PhaseDRX<->MatFinder (QLocalServer/Socket)
     'PySide6.QtPrintSupport', 'PySide6.QtOpenGLWidgets', 'PySide6.QtOpenGL',
     'OpenGL.platform.win32', 'OpenGL.arrays.numpymodule',
     'pydantic.deprecated.decorator',
@@ -262,10 +263,59 @@ exe = EXE(
     icon=os.path.join(base_path, 'matfinder', 'assets', 'icons', 'polvo.ico'),
 )
 
+# -----------------------------------------------------------------------------
+# SEGUNDO EXECUTÁVEL: PhaseDRX.exe (PhaseDRX Suite standalone) na MESMA pasta,
+# compartilhando o _internal (sem duplicar os ~400MB). Entry: run_phasedrx.py.
+# Reusa datas/binaries/hiddenimports/excludes já computados (mesmo código-base).
+# -----------------------------------------------------------------------------
+b = Analysis(
+    [os.path.join(base_path, 'run_phasedrx.py')],
+    pathex=[base_path],
+    binaries=binaries,
+    datas=datas,
+    hiddenimports=sorted(set(hiddenimports)),
+    hookspath=[],
+    hooksconfig={},
+    runtime_hooks=[],
+    excludes=excludes,
+    noarchive=False,
+    optimize=1,
+)
+b.binaries = [
+    (name, path, typ) for (name, path, typ) in b.binaries
+    if not any(excl in name for excl in excluded_binaries)
+]
+pyz_b = PYZ(b.pure, b.zipped_data)
+
+exe_phasedrx = EXE(
+    pyz_b,
+    b.scripts,
+    [],
+    exclude_binaries=True,
+    name='PhaseDRX',
+    debug=False,
+    bootloader_ignore_signals=False,
+    strip=False,
+    upx=False,
+    console=False,
+    disable_windowed_traceback=False,
+    argv_emulation=False,
+    target_arch=None,
+    codesign_identity=None,
+    entitlements_file=None,
+    icon=os.path.join(base_path, 'matfinder', 'assets', 'icons', 'PhaseDRX.ico'),
+)
+
+# COLLECT único com os DOIS exes -> dist/MatFinder/{MatFinder.exe, PhaseDRX.exe}
+# + _internal compartilhado. COLLECT deduplica por destino (a e b geram os mesmos
+# binários/dados), então passar ambos é seguro.
 coll = COLLECT(
     exe,
+    exe_phasedrx,
     a.binaries,
     a.datas,
+    b.binaries,
+    b.datas,
     strip=False,
     upx=False,
     name='MatFinder',

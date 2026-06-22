@@ -12,6 +12,7 @@ from bs4 import BeautifulSoup
 from mp_api.client import MPRester
 from pymatgen.core.structure import Structure
 from pymatgen.io.cif import CifWriter
+from matfinder.core.translator import ptr
 
 try:
     import cloudscraper
@@ -19,7 +20,7 @@ try:
     CLOUDSRAPER_AVAILABLE = True
 except ImportError:
     CLOUDSRAPER_AVAILABLE = False
-    logging.warning("Biblioteca 'cloudscraper' não encontrada. O download do Sci-Hub pode falhar.")
+    logging.warning(ptr("Biblioteca 'cloudscraper' não encontrada. O download do Sci-Hub pode falhar."))
 
 # --- Constantes de API ---
 ROD_SEARCH_BASE_URL = "https://solsa.crystallography.net/rod/result"
@@ -54,7 +55,7 @@ def query_mp(elements_list: list, api_key: str, proxies=None):
     Executa uma query na API do Materials Project.
     """
     if not api_key:
-        raise Exception("API_KEY_MISSING_MP_THREAD")
+        raise Exception(ptr("API_KEY_MISSING_MP_THREAD"))
 
     old_proxies_env = {}
     if proxies:
@@ -141,7 +142,7 @@ def query_rod(elements_list: list, proxies=None):
     Executa uma query na API da Raman Open Database (ROD).
     """
     if not elements_list:
-        logging.warning("ROD API: A lista de elementos não pode ser vazia.")
+        logging.warning(ptr("ROD API: A lista de elementos não pode ser vazia."))
         return []
 
     params = {}
@@ -171,7 +172,7 @@ def fetch_cif_data_mp(material_id: str, formula_pretty: str, api_key: str, proxi
     Busca os dados de um ficheiro CIF do Materials Project.
     """
     if not api_key:
-        raise Exception("API_KEY_MISSING_MP_THREAD")
+        raise Exception(ptr("API_KEY_MISSING_MP_THREAD"))
 
     old_proxies_env = {}
     if proxies:
@@ -194,7 +195,7 @@ def fetch_cif_data_mp(material_id: str, formula_pretty: str, api_key: str, proxi
                 suggested_filename = f"MP_{material_id}_{safe_formula}.cif"
                 return cif_string, suggested_filename
             else:
-                raise Exception(f"Estrutura não encontrada para material_id (MP): {material_id}")
+                raise Exception(ptr("Estrutura não encontrada para material_id (MP): {}").format(material_id))
     except Exception as e:
         logging.exception(f"Erro ao buscar CIF do MP para ID {material_id}:")
         raise
@@ -222,7 +223,7 @@ def fetch_rod_file_content(rod_id: str, proxies=None):
     """
     if not rod_id or not rod_id.isdigit():
         logging.error(f"ROD File Fetch: ID da ROD '{rod_id}' inválido.")
-        raise ValueError(f"ID da ROD '{rod_id}' inválido para busca de ficheiro.")
+        raise ValueError(ptr("ID da ROD '{}' inválido para busca de ficheiro.").format(rod_id))
 
     url = f"{ROD_ENTRY_BASE_URL}{rod_id}.rod"
     logging.info(f"ROD File Fetch: Buscando conteúdo de {url} ...")
@@ -240,7 +241,7 @@ def fetch_scihub_pdf(doi: str, scihub_base_url: str, proxies=None):
     Tenta descarregar um PDF do Sci-Hub usando um DOI.
     """
     if not CLOUDSRAPER_AVAILABLE:
-        raise Exception("Biblioteca 'cloudscraper' não instalada. Execute 'pip install cloudscraper'.")
+        raise Exception(ptr("Biblioteca 'cloudscraper' não instalada. Execute 'pip install cloudscraper'."))
 
     scraper = cloudscraper.create_scraper()
     scihub_domains = list(set([scihub_base_url, "https://sci-hub.se/", "https://sci-hub.st/", "https://sci-hub.ru/"]))
@@ -298,4 +299,4 @@ def fetch_scihub_pdf(doi: str, scihub_base_url: str, proxies=None):
         suggested_filename = doi.replace("/", "_").replace(":", "_") + ".pdf"
         return pdf_content_bytes, suggested_filename
     else:
-        raise Exception("Não foi possível encontrar ou descarregar o PDF após todas as tentativas.")
+        raise Exception(ptr("Não foi possível encontrar ou descarregar o PDF após todas as tentativas."))

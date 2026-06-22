@@ -10,6 +10,7 @@ import re
 import logging
 import math
 import numpy as np
+from matfinder.core.translator import ptr
 
 try:
     from pymatgen.core import Structure, Lattice, Element
@@ -19,7 +20,7 @@ try:
     PYMATGEN_AVAILABLE = True
 except ImportError:
     PYMATGEN_AVAILABLE = False
-    logging.warning("Pymatgen não encontrado. A manipulação de CIF não funcionará.")
+    logging.warning(ptr("Pymatgen não encontrado. A manipulação de CIF não funcionará."))
 
 # Tabela de fatores de espalhamento anômalo (f', f'') para Cu Kα (λ=1.54184 Å)
 # e Mo Kα (λ=0.71073 Å) - Valores tabelados do International Tables for Crystallography Vol. C
@@ -189,10 +190,10 @@ class CifHandler:
 
     def __init__(self, cif_content: str, wavelength_key: str = None):
         if not PYMATGEN_AVAILABLE:
-            raise ImportError("A biblioteca 'pymatgen' é necessária para manipular arquivos CIF.")
+            raise ImportError(ptr("A biblioteca 'pymatgen' é necessária para manipular arquivos CIF."))
 
         if not cif_content or not isinstance(cif_content, str):
-            raise ValueError("O conteúdo do CIF fornecido é inválido ou está vazio.")
+            raise ValueError(ptr("O conteúdo do CIF fornecido é inválido ou está vazio."))
 
         self._original_cif_content = cif_content
         # Wavelength para metadados do CIF (f', f'', µ, etc.)
@@ -204,7 +205,7 @@ class CifHandler:
             self.analyzer = SpacegroupAnalyzer(self.structure)
         except Exception as e:
             logging.error(f"Falha ao analisar a string do CIF: {e}")
-            raise ValueError(f"Não foi possível analisar o conteúdo do CIF. Erro: {e}")
+            raise ValueError(ptr("Não foi possível analisar o conteúdo do CIF. Erro: {}").format(e))
 
         # Preservar metadados de simetria do CIF original para validação
         self._original_symmetry = self._extract_symmetry_metadata(cif_content)
@@ -363,14 +364,14 @@ class CifHandler:
             logging.info(f"Parâmetros de rede atualizados para: a={new_a:.3f}, b={new_b:.3f}, c={new_c:.3f}")
         except Exception as e:
             logging.error(f"Erro ao criar nova rede com os parâmetros fornecidos: {e}")
-            raise ValueError(f"Parâmetros de rede inválidos. Erro: {e}")
+            raise ValueError(ptr("Parâmetros de rede inválidos. Erro: {}").format(e))
 
     def scale_volume(self, new_volume: float):
         """
         Escala a célula unitária para um novo volume, mantendo sua forma.
         """
         if new_volume <= 0:
-            raise ValueError("O novo volume deve ser um número positivo.")
+            raise ValueError(ptr("O novo volume deve ser um número positivo."))
 
         old_volume = self.structure.lattice.volume
         self.structure.scale_lattice(new_volume)
@@ -737,7 +738,7 @@ class CifHandler:
             logging.info(f"Operações de simetria substituídas: {len(original_symops)} operações originais restauradas")
             return cif_str
 
-        logging.warning("Não foi possível localizar bloco de operações de simetria para substituição")
+        logging.warning(ptr("Não foi possível localizar bloco de operações de simetria para substituição"))
         return cif_str
 
     def _get_wyckoff_map(self, symprec: float = 0.1) -> dict:
@@ -805,7 +806,7 @@ class CifHandler:
         try:
             return self.analyzer.get_crystal_system().lower()
         except Exception:
-            return 'triclinic'
+            return ptr("triclinic")
 
     def _get_hall_symbol(self) -> str:
         """Retorna o símbolo Hall do grupo espacial para _symmetry_space_group_name_Hall."""
@@ -1871,7 +1872,7 @@ class CifHandler:
                 occ = site.get('occupancy', '1')
                 lines.append(f"{label} {symbol} {x} {y} {z} {occ}")
         else:
-            logging.warning("Sem átomos do CIF original. Usando estrutura P1.")
+            logging.warning(ptr("Sem átomos do CIF original. Usando estrutura P1."))
             try:
                 writer = CifWriter(self.structure, significant_figures=8)
                 return str(writer)

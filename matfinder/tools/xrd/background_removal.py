@@ -476,5 +476,6 @@ def get_method_description(method):
         ),
     }
 
-    return descriptions.get(method, "Método desconhecido")
+    from matfinder.core.translator import ptr
+    return ptr(descriptions.get(method, "Método desconhecido"))
 

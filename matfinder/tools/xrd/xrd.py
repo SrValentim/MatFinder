@@ -188,8 +188,8 @@ class PlotCanvas(FigureCanvas):
         self.axes = fig.add_subplot(111)
         super().__init__(fig)
         self.setParent(parent)
-        self.axes.set_xlabel("2θ (Graus)")
-        self.axes.set_ylabel("Intensidade (Unid. arb.)")
+        self.axes.set_xlabel(ptr("2θ (Graus)"))
+        self.axes.set_ylabel(ptr("Intensidade (Unid. arb.)"))
         # NÃO usar tight_layout aqui - será aplicado apenas quando necessário
         # para evitar problemas com legendas customizadas
 
@@ -216,6 +216,16 @@ class PhaseDRXTool(QMainWindow):
         self.zoom_selector = None
         self._original_x_lim = None
         self._original_y_lim = None
+
+        # Bridge IPC: deixa o "Exportar CIF para PhaseDRX" funcionar mesmo quando o
+        # PhaseDRX é aberto separado (PhaseDRX.exe) e o MatFinder é aberto depois.
+        self._bridge_server = None
+        try:
+            from matfinder.core.phasedrx_bridge import PhaseDRXBridgeServer
+            self._bridge_server = PhaseDRXBridgeServer(self)
+            self._bridge_server.cif_received.connect(self._on_bridge_cif_received)
+        except Exception:
+            logging.exception("Falha ao iniciar o bridge IPC do PhaseDRX.")
         self._is_zoomed = False
 
         # Modo de seleção de pico para normalização
@@ -316,7 +326,7 @@ class PhaseDRXTool(QMainWindow):
         return {
             "x_lim": (0, 100), "y_lim": None, "x_ticks": 10.0, "y_ticks": None,
             "x_visible": True, "y_visible": True, "grid_visible": False,
-            "x_label": "2θ (Graus)", "y_label": "Intensidade (Unid. arb.)",
+            "x_label": ptr("2θ (Graus)"), "y_label": ptr("Intensidade (Unid. arb.)"),
             "x_label_fontsize": 12, "y_label_fontsize": 12,
             "x_label_bold": False, "y_label_bold": False,
             "x_label_italic": False, "y_label_italic": False,
@@ -481,7 +491,7 @@ class PhaseDRXTool(QMainWindow):
 
     def _create_menu_bar(self):
         menubar = self.menuBar()
-        file_menu = menubar.addMenu("&Arquivo")
+        file_menu = menubar.addMenu(ptr("&Arquivo"))
         new_action = QAction(ptr("&Novo Projeto..."), self, triggered=self.new_project)
         open_action = QAction(ptr("&Abrir Projeto..."), self, triggered=self.open_project)
         save_action = QAction(ptr("&Salvar Projeto"), self, triggered=self.save_project)
@@ -557,7 +567,7 @@ class PhaseDRXTool(QMainWindow):
         group_config_layout.addLayout(group_count_layout)
         self.group_table_widget = QTableWidget()
         self.group_table_widget.setColumnCount(2)
-        self.group_table_widget.setHorizontalHeaderLabels(["Grupo", "Nome do Gráfico"])
+        self.group_table_widget.setHorizontalHeaderLabels([ptr("Grupo"), ptr("Nome do Gráfico")])
         self.group_table_widget.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
         self.group_table_widget.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
         self.group_table_widget.verticalHeader().setVisible(False)
@@ -584,18 +594,18 @@ class PhaseDRXTool(QMainWindow):
         form_layout.addRow(self.cif_load_button)
         self.wavelength_combo = QComboBox()
         self.wavelength_combo.addItems(
-            ["Cu Kα (1.54056 Å)", "Co Kα (1.78897 Å)", "Fe Kα (1.93604 Å)", "Mo Kα (0.70930 Å)", "Outro"])
+            [ptr("Cu Kα (1.54056 Å)"), ptr("Co Kα (1.78897 Å)"), ptr("Fe Kα (1.93604 Å)"), ptr("Mo Kα (0.70930 Å)"), ptr("Outro")])
         self.wavelength_custom_input = QLineEdit("1.54056")
         self.wavelength_custom_input.setVisible(False)
         wavelength_layout = QHBoxLayout()
         wavelength_layout.addWidget(self.wavelength_combo)
         wavelength_layout.addWidget(self.wavelength_custom_input)
-        form_layout.addRow("Fonte de Radiação Padrão:", wavelength_layout)
+        form_layout.addRow(ptr("Fonte de Radiação Padrão:"), wavelength_layout)
         self.max_2theta_spin = QDoubleSpinBox()
         self.max_2theta_spin.setRange(10.0, 180.0)
         self.max_2theta_spin.setValue(100.0)
         self.max_2theta_spin.setSuffix(" °")
-        form_layout.addRow("Máximo 2θ:", self.max_2theta_spin)
+        form_layout.addRow(ptr("Máximo 2θ:"), self.max_2theta_spin)
         self.peak_width_spin = QDoubleSpinBox()
         self.peak_width_spin.setRange(0.01, 1.0);
         self.peak_width_spin.setSingleStep(0.01)
@@ -724,8 +734,7 @@ class PhaseDRXTool(QMainWindow):
 
         if plot_item.get("background_corrected", False):
             reply = QMessageBox.question(self, ptr("Refazer Correção"),
-                                         "O fundo deste item já foi corrigido. Deseja refazer a operação?\n"
-                                         "(Isto usará os dados originais novamente)",
+                                         ptr("O fundo deste item já foi corrigido. Deseja refazer a operação?\n(Isto usará os dados originais novamente)"),
                                          QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
             if reply == QMessageBox.StandardButton.No:
                 return
@@ -789,7 +798,7 @@ class PhaseDRXTool(QMainWindow):
             initial_peaks = pattern.x
         except Exception as e:
             QMessageBox.critical(self, ptr("Erro ao Analisar CIF"),
-                                 f"Não foi possível detectar os picos do CIF inicial:\n{e}")
+                                 ptr("Não foi possível detectar os picos do CIF inicial:\n{}").format(e))
             initial_peaks = []
 
         # Obter dados experimentais para auto-ajuste (primeiro experimental visível)
@@ -804,7 +813,7 @@ class PhaseDRXTool(QMainWindow):
         # Obter comprimento de onda atual
         try:
             wl_text = self.wavelength_combo.currentText()
-            if wl_text == "Outro":
+            if wl_text == ptr("Outro"):
                 wavelength = float(self.wavelength_custom_input.text())
             else:
                 wavelength = float(wl_text.split('(')[1].split(' ')[0])
@@ -898,12 +907,11 @@ class PhaseDRXTool(QMainWindow):
         for item in selected_items:
             if item.get("type") != "cif":
                 QMessageBox.critical(self, ptr("Seleção Inválida"),
-                                     f"O item '{item['label']}' não é um CIF e não pode ser combinado.")
+                                     ptr("O item '{}' não é um CIF e não pode ser combinado.").format(item['label']))
                 return
             if item.get("data") is None:
                 QMessageBox.critical(self, ptr("Simulação Necessária"),
-                                     f"O CIF '{item['label']}' ainda não foi simulado.\n"
-                                     "Por favor, calcule todos os CIFs selecionados antes de combinar.")
+                                     ptr("O CIF '{}' ainda não foi simulado.\nPor favor, calcule todos os CIFs selecionados antes de combinar.").format(item['label']))
                 return
 
         self._add_state_to_history()
@@ -912,7 +920,7 @@ class PhaseDRXTool(QMainWindow):
         initial_weights = [1.0 / num_items] * num_items
         component_ids = [item['id'] for item in selected_items]
         labels = [item['label'].replace('.cif', '') for item in selected_items]
-        new_label = "Comb: " + " + ".join(labels)
+        new_label = ptr("Comb: {}").format(' + '.join(labels))
 
         new_item = {
             "id": str(uuid.uuid4()),
@@ -943,7 +951,7 @@ class PhaseDRXTool(QMainWindow):
 
         try:
             wl_text = self.wavelength_combo.currentText()
-            wavelength = float(self.wavelength_custom_input.text()) if wl_text == "Outro" else float(
+            wavelength = float(self.wavelength_custom_input.text()) if wl_text == ptr("Outro") else float(
                 wl_text.split('(')[1].split(' ')[0])
             max_2theta = self.max_2theta_spin.value()
         except (ValueError, IndexError):
@@ -1513,7 +1521,7 @@ class PhaseDRXTool(QMainWindow):
         try:
             # Obter comprimento de onda atual
             wl_text = self.wavelength_combo.currentText()
-            if wl_text == "Outro":
+            if wl_text == ptr("Outro"):
                 wavelength = float(self.wavelength_custom_input.text())
             else:
                 # Extrair wavelength do texto (formato: "Cu Kα (1.54056 Å)")
@@ -1526,10 +1534,10 @@ class PhaseDRXTool(QMainWindow):
             d_spacing = wavelength / (2.0 * np.sin(theta_rad))
 
             # Formatar texto da anotação
-            annotation_text = f"2θ = {x:.2f}°\nInt = {y:.2f}\nd = {d_spacing:.4f} Å"
+            annotation_text = ptr("2θ = {:.2f}°\nInt = {:.2f}\nd = {:.4f} Å").format(x, y, d_spacing)
         except:
             # Se falhar, mostrar apenas 2θ e Intensidade
-            annotation_text = f"2θ = {x:.2f}°\nInt = {y:.2f}"
+            annotation_text = ptr("2θ = {:.2f}°\nInt = {:.2f}").format(x, y)
             logging.debug("Não foi possível calcular distância interplanar")
 
         # Marcador no ponto (círculo vermelho minimalista)
@@ -1562,11 +1570,11 @@ class PhaseDRXTool(QMainWindow):
 
     def set_dirty(self, dirty=True):
         self.is_dirty = dirty
-        title = "PhaseDRX - "
+        title = ptr("PhaseDRX - ")
         if self.current_project_path:
             title += os.path.basename(self.current_project_path)
         else:
-            title += "Sessão Anônima"
+            title += ptr("Sessão Anônima")
         if self.is_dirty:
             title += "*"
         self.setWindowTitle(title)
@@ -1600,8 +1608,7 @@ class PhaseDRXTool(QMainWindow):
             if os.path.exists(project_dir):
                 reply = QMessageBox.question(
                     self, ptr("Pasta Existente"),
-                    f"A pasta '{project_dir}' já existe.\n"
-                    "Deseja abri-la como um projeto existente?",
+                    ptr("A pasta '{}' já existe.\nDeseja abri-la como um projeto existente?").format(project_dir),
                     QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
                     QMessageBox.StandardButton.Yes
                 )
@@ -1610,7 +1617,7 @@ class PhaseDRXTool(QMainWindow):
                 if not os.path.exists(project_file):
                     QMessageBox.warning(
                         self, ptr("Arquivo de Projeto Não Encontrado"),
-                        f"A pasta existe, mas o arquivo de projeto '{project_file}' não foi encontrado."
+                        ptr("A pasta existe, mas o arquivo de projeto '{}' não foi encontrado.").format(project_file)
                     )
                     return
                 project_path_to_open = project_file
@@ -1625,15 +1632,15 @@ class PhaseDRXTool(QMainWindow):
                 except OSError as e:
                     QMessageBox.critical(
                         self, ptr("Erro ao Criar Projeto"),
-                        f"Não foi possível criar a estrutura de pastas do projeto:\n{e}"
+                        ptr("Não foi possível criar a estrutura de pastas do projeto:\n{}").format(e)
                     )
                     return
 
         elif choice == dialog.OPEN_PROJECT:
             # Abrir projeto existente
             path, _ = QFileDialog.getOpenFileName(
-                self, "Abrir Projeto PhaseDRX", "",
-                "Projetos MatFinder (*.mfpx);;Todos os Arquivos (*)"
+                self, ptr("Abrir Projeto PhaseDRX"), "",
+                ptr("Projetos MatFinder (*.mfpx);;Todos os Arquivos (*)")
             )
             if not path:
                 return
@@ -1659,11 +1666,11 @@ class PhaseDRXTool(QMainWindow):
             self.set_dirty(False)
 
             # Atualiza o título da janela
-            title = "PhaseDRX - "
+            title = ptr("PhaseDRX - ")
             if self.current_project_path:
                 title += os.path.basename(self.current_project_path)
             else:
-                title += "Sessão Anônima"
+                title += ptr("Sessão Anônima")
             if self.is_dirty:
                 title += "*"
             self.setWindowTitle(title)
@@ -1674,8 +1681,8 @@ class PhaseDRXTool(QMainWindow):
         if not self.maybe_save(): return
 
         if not path:
-            path, _ = QFileDialog.getOpenFileName(self, "Abrir Projeto", "",
-                                                  "Projetos MatFinder (*.mfpx);;Todos os Arquivos (*)")
+            path, _ = QFileDialog.getOpenFileName(self, ptr("Abrir Projeto"), "",
+                                                  ptr("Projetos MatFinder (*.mfpx);;Todos os Arquivos (*)"))
         if path:
             try:
                 with open(path, 'r', encoding='utf-8') as f:
@@ -1752,14 +1759,14 @@ class PhaseDRXTool(QMainWindow):
                 self.project_directory = os.path.dirname(path)
                 self.set_dirty(False)
             except Exception as e:
-                QMessageBox.critical(self, ptr("Erro ao Abrir"), f"Não foi possível carregar o arquivo de projeto:\n{e}")
+                QMessageBox.critical(self, ptr("Erro ao Abrir"), ptr("Não foi possível carregar o arquivo de projeto:\n{}").format(e))
                 logging.exception("Erro crítico ao abrir projeto:")
 
     def save_project(self, save_as=False):
         path = self.current_project_path
         if save_as or not path:
-            path, _ = QFileDialog.getSaveFileName(self, "Salvar Projeto Como...", "",
-                                                  "Projetos MatFinder (*.mfpx);;Todos os Arquivos (*)")
+            path, _ = QFileDialog.getSaveFileName(self, ptr("Salvar Projeto Como..."), "",
+                                                  ptr("Projetos MatFinder (*.mfpx);;Todos os Arquivos (*)"))
         if not path: return False
 
         self.project_directory = os.path.dirname(path)
@@ -1834,10 +1841,10 @@ class PhaseDRXTool(QMainWindow):
 
             self.current_project_path = path
             self.set_dirty(False)
-            QMessageBox.information(self, ptr("Projeto Salvo"), f"Projeto salvo com sucesso em:\n{path}")
+            QMessageBox.information(self, ptr("Projeto Salvo"), ptr("Projeto salvo com sucesso em:\n{}").format(path))
             return True
         except Exception as e:
-            QMessageBox.critical(self, ptr("Erro ao Salvar"), f"Não foi possível salvar o arquivo de projeto:\n{e}")
+            QMessageBox.critical(self, ptr("Erro ao Salvar"), ptr("Não foi possível salvar o arquivo de projeto:\n{}").format(e))
             logging.exception("Erro crítico ao salvar projeto:")
             return False
 
@@ -1887,11 +1894,28 @@ class PhaseDRXTool(QMainWindow):
         except Exception as e:
             logging.warning(f"Erro ao limpar visualizador 3D no closeEvent: {e}")
 
+        # Fecha o servidor do bridge IPC (libera o named pipe)
+        try:
+            if getattr(self, "_bridge_server", None) is not None:
+                self._bridge_server.close()
+        except Exception:
+            pass
+
         # Agora sim verificar se deve salvar
         if self.maybe_save():
             event.accept()
         else:
             event.ignore()
+
+    def _on_bridge_cif_received(self, cif_content: str, filename: str):
+        """Recebe um CIF de outro processo (MatTerminal/MatFinder) via o bridge e
+        traz a janela para a frente."""
+        try:
+            self.load_cif_from_data(cif_content, filename)
+            self.raise_()
+            self.activateWindow()
+        except Exception:
+            logging.exception("Falha ao importar CIF recebido pelo bridge.")
 
     def resizeEvent(self, event):
         """Evento chamado quando a janela é redimensionada."""
@@ -1958,7 +1982,7 @@ class PhaseDRXTool(QMainWindow):
                 self.plot_items.append(new_item)
             except Exception as e:
                 QMessageBox.critical(self, ptr("Erro ao Ler Arquivo"),
-                                     f"Não foi possível processar o arquivo {os.path.basename(path)}:\n{e}")
+                                     ptr("Não foi possível processar o arquivo {}:\n{}").format(os.path.basename(path), e))
 
         self._repopulate_all_lists()
 
@@ -2003,7 +2027,7 @@ class PhaseDRXTool(QMainWindow):
                 self.plot_items.append(new_item)
             except Exception as e:
                 QMessageBox.critical(self, ptr("Erro ao Carregar CIF"),
-                                     f"Não foi possível carregar ou processar o arquivo '{os.path.basename(path)}'.\n\nErro: {e}")
+                                     ptr("Não foi possível carregar ou processar o arquivo '{}'.\n\nErro: {}").format(os.path.basename(path), e))
 
         self._repopulate_all_lists()
         self.set_dirty()
@@ -2015,7 +2039,7 @@ class PhaseDRXTool(QMainWindow):
             return
 
         if any(c["label"] == filename for c in self.plot_items):
-            QMessageBox.information(self, ptr("CIF Já Carregado"), f"O arquivo CIF '{filename}' já está na lista.")
+            QMessageBox.information(self, ptr("CIF Já Carregado"), ptr("O arquivo CIF '{}' já está na lista.").format(filename))
             return
 
         self._add_state_to_history()
@@ -2048,7 +2072,7 @@ class PhaseDRXTool(QMainWindow):
             self.set_dirty()
         except Exception as e:
             QMessageBox.critical(self, ptr("Erro no CIF"),
-                                 f"O conteúdo do CIF recebido para '{filename}' é inválido.\n\nErro: {e}")
+                                 ptr("O conteúdo do CIF recebido para '{}' é inválido.\n\nErro: {}").format(filename, e))
 
     def _parse_data_file(self, file_path):
         temp_data = []
@@ -2060,7 +2084,7 @@ class PhaseDRXTool(QMainWindow):
                     temp_data.append([float(p) for p in parts])
                 except ValueError:
                     logging.warning(f"Ignorando linha não-numérica: {line.strip()}")
-        if not temp_data: raise ValueError("Nenhum dado numérico válido foi encontrado.")
+        if not temp_data: raise ValueError(ptr("Nenhum dado numérico válido foi encontrado."))
         num_cols = len(temp_data[0])
         headers = [chr(65 + i) for i in range(num_cols)]
         data_dict = {h: [row[i] for row in temp_data] for i, h in enumerate(headers)}
@@ -2102,7 +2126,7 @@ class PhaseDRXTool(QMainWindow):
             except Exception as e:
                 error_count += 1
                 QMessageBox.critical(self, ptr("Erro de Normalização"),
-                                   f"Não foi possível normalizar '{plot_item['label']}':\n{e}")
+                                   ptr("Não foi possível normalizar '{}':\n{}").format(plot_item['label'], e))
 
         # Redesenhar gráfico e atualizar estado
         if success_count > 0:
@@ -2112,10 +2136,10 @@ class PhaseDRXTool(QMainWindow):
             # Mostrar mensagem de sucesso
             if error_count == 0:
                 QMessageBox.information(self, ptr("Normalização Concluída"),
-                                      f"{success_count} arquivo(s) normalizado(s) com sucesso usando:\n{method_name}")
+                                      ptr("{} arquivo(s) normalizado(s) com sucesso usando:\n{}").format(success_count, method_name))
             else:
                 QMessageBox.warning(self, ptr("Normalização Parcial"),
-                                  f"{success_count} arquivo(s) normalizado(s), {error_count} com erro.")
+                                  ptr("{} arquivo(s) normalizado(s), {} com erro.").format(success_count, error_count))
         self.set_dirty()
 
     def run_simulation_for_selected(self):
@@ -2135,11 +2159,11 @@ class PhaseDRXTool(QMainWindow):
         if self.simulation_engine == "none": return
         try:
             wl_text = self.wavelength_combo.currentText()
-            wavelength = float(self.wavelength_custom_input.text()) if wl_text == "Outro" else float(
+            wavelength = float(self.wavelength_custom_input.text()) if wl_text == ptr("Outro") else float(
                 wl_text.split('(')[1].split(' ')[0])
             max_2theta, peak_width = self.max_2theta_spin.value(), self.peak_width_spin.value()
         except (ValueError, IndexError) as e:
-            QMessageBox.critical(self, ptr("Erro de Parâmetro"), f"Valor inválido: {e}")
+            QMessageBox.critical(self, ptr("Erro de Parâmetro"), ptr("Valor inválido: {}").format(e))
             return
 
         try:
@@ -2157,7 +2181,7 @@ class PhaseDRXTool(QMainWindow):
             logging.debug(f"CIF calculado: {plot_item['label']} - estrutura 3D NÃO renderizada automaticamente")
         except Exception as e:
             QMessageBox.critical(self, ptr("Erro na Simulação"),
-                                 f"Ocorreu um erro ao calcular para {plot_item['label']}:\n{e}")
+                                 ptr("Ocorreu um erro ao calcular para {}:\n{}").format(plot_item['label'], e))
 
     def _calculate_with_pymatgen(self, cif_info, wavelength, max_2theta_deg):
         structure = Structure.from_str(cif_info["cif_content"], fmt="cif")
@@ -2805,13 +2829,13 @@ class PhaseDRXTool(QMainWindow):
         # Opção de normalização por pico específico (apenas se 1 item selecionado)
         selected_items = self.exp_list_widget.selectedItems()
         if len(selected_items) == 1:
-            normalize_peak_action = menu.addAction("Normalizar por Pico Específico...")
+            normalize_peak_action = menu.addAction(ptr("Normalizar por Pico Específico..."))
             normalize_peak_action.triggered.connect(lambda: self.start_peak_selection_mode(
                 selected_items[0].data(Qt.ItemDataRole.UserRole)
             ))
             menu.addSeparator()
 
-        remove_action = menu.addAction("Remover da Lista")
+        remove_action = menu.addAction(ptr("Remover da Lista"))
         action = menu.exec(self.exp_list_widget.mapToGlobal(position))
         if action == remove_action:
             self._add_state_to_history()
@@ -2831,25 +2855,25 @@ class PhaseDRXTool(QMainWindow):
 
             # Adicionar opção "Reflexão" para itens CIF
             if plot_item and plot_item.get("type") == "cif":
-                reflection_action = menu.addAction("Reflexão")
+                reflection_action = menu.addAction(ptr("Reflexão"))
                 reflection_action.triggered.connect(lambda: self.show_reflection_dialog(item_id))
 
                 # Adicionar opção "Visualizar 3D" se o visualizador estiver disponível
                 if hasattr(self, 'structure_viewer') and self.structure_viewer is not None:
-                    view_3d_action = menu.addAction("Visualizar 3D")
+                    view_3d_action = menu.addAction(ptr("Visualizar 3D"))
                     view_3d_action.triggered.connect(lambda: self.view_structure_3d(item_id))
 
                 menu.addSeparator()
 
             if plot_item and plot_item.get("type") == "cif" and plot_item.get("is_modified"):
-                save_cif_action = menu.addAction("Salvar CIF")
+                save_cif_action = menu.addAction(ptr("Salvar CIF"))
                 save_cif_action.triggered.connect(lambda: self.save_modified_cif(item_id))
 
-                reset_action = menu.addAction("Resetar para Original")
+                reset_action = menu.addAction(ptr("Resetar para Original"))
                 reset_action.triggered.connect(lambda: self.reset_cif_to_original(item_id))
                 menu.addSeparator()
 
-        remove_action = menu.addAction("Remover da Lista")
+        remove_action = menu.addAction(ptr("Remover da Lista"))
         remove_action.triggered.connect(self.remove_selected_cifs)
 
         menu.exec(self.cif_list_widget.mapToGlobal(position))
@@ -2872,7 +2896,7 @@ class PhaseDRXTool(QMainWindow):
         # Obter comprimento de onda
         try:
             wl_text = self.wavelength_combo.currentText()
-            if wl_text == "Outro":
+            if wl_text == ptr("Outro"):
                 wavelength = float(self.wavelength_custom_input.text())
             else:
                 wavelength = float(wl_text.split('(')[1].split(' ')[0])
@@ -2904,8 +2928,7 @@ class PhaseDRXTool(QMainWindow):
 
         if not hasattr(self, 'structure_viewer') or self.structure_viewer is None:
             QMessageBox.warning(self, ptr("Visualizador Indisponível"),
-                              "O visualizador 3D não está disponível.\n"
-                              "Certifique-se de que 'pyqtgraph' e 'PyOpenGL' estão instalados.")
+                              ptr("O visualizador 3D não está disponível.\nCertifique-se de que 'pyqtgraph' e 'PyOpenGL' estão instalados."))
             return
 
         # Salvar conteúdo CIF em arquivo temporário
@@ -2930,7 +2953,7 @@ class PhaseDRXTool(QMainWindow):
                 logging.info(f"Estrutura 3D carregada para: {plot_item['label']}")
 
         except Exception as e:
-            error_msg = f"Erro ao visualizar estrutura 3D: {str(e)}"
+            error_msg = ptr("Erro ao visualizar estrutura 3D: {}").format(str(e))
             logging.error(error_msg)
             QMessageBox.critical(self, ptr("Erro"), error_msg)
 
@@ -2980,9 +3003,7 @@ class PhaseDRXTool(QMainWindow):
                         QMessageBox.information(
                             self,
                             ptr("CIF não calculado"),
-                            f"O CIF '{plot_item['label']}' ainda não foi calculado.\n\n"
-                            "Clique em 'Calcular Selecionado(s)' para gerar o difratograma e "
-                            "habilitar a visualização 3D."
+                            ptr("O CIF '{}' ainda não foi calculado.\n\nClique em 'Calcular Selecionado(s)' para gerar o difratograma e habilitar a visualização 3D.").format(plot_item['label'])
                         )
                 return
 
@@ -3119,9 +3140,7 @@ class PhaseDRXTool(QMainWindow):
                     QMessageBox.information(
                         self,
                         ptr("CIF não calculado"),
-                        f"O CIF '{plot_item['label']}' ainda não foi calculado.\n\n"
-                        "Clique em 'Calcular Selecionado(s)' para gerar o difratograma e "
-                        "habilitar a visualização 3D."
+                        ptr("O CIF '{}' ainda não foi calculado.\n\nClique em 'Calcular Selecionado(s)' para gerar o difratograma e habilitar a visualização 3D.").format(plot_item['label'])
                     )
             return
 
@@ -3171,9 +3190,9 @@ class PhaseDRXTool(QMainWindow):
 
         file_path, _ = QFileDialog.getSaveFileName(
             self,
-            "Salvar CIF Modificado",
+            ptr("Salvar CIF Modificado"),
             default_name,
-            "Arquivo CIF (*.cif);;Todos os arquivos (*.*)"
+            ptr("Arquivo CIF (*.cif);;Todos os arquivos (*.*)")
         )
 
         if not file_path:
@@ -3183,10 +3202,10 @@ class PhaseDRXTool(QMainWindow):
             with open(file_path, 'w', encoding='utf-8') as f:
                 f.write(cif_content)
             logging.info(f"CIF modificado salvo em: {file_path}")
-            QMessageBox.information(self, ptr("Salvo"), f"CIF modificado salvo com sucesso em:\n{file_path}")
+            QMessageBox.information(self, ptr("Salvo"), ptr("CIF modificado salvo com sucesso em:\n{}").format(file_path))
         except Exception as e:
             logging.error(f"Erro ao salvar CIF modificado: {e}")
-            QMessageBox.critical(self, ptr("Erro"), f"Não foi possível salvar o arquivo:\n{e}")
+            QMessageBox.critical(self, ptr("Erro"), ptr("Não foi possível salvar o arquivo:\n{}").format(e))
 
     def reset_cif_to_original(self, item_id):
         plot_item = self._find_plot_item_by_id(item_id)
@@ -3194,8 +3213,7 @@ class PhaseDRXTool(QMainWindow):
             return
 
         reply = QMessageBox.question(self, ptr("Resetar CIF"),
-                                     f"Tem certeza que deseja resetar '{plot_item['label']}' para o seu estado original?\n"
-                                     "Todas as modificações de rede e parâmetros de simulação serão perdidos.",
+                                     ptr("Tem certeza que deseja resetar '{}' para o seu estado original?\nTodas as modificações de rede e parâmetros de simulação serão perdidos.").format(plot_item['label']),
                                      QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
                                      QMessageBox.StandardButton.No)
         if reply == QMessageBox.StandardButton.No:
@@ -3210,7 +3228,7 @@ class PhaseDRXTool(QMainWindow):
                     os.remove(path_to_delete)
                     logging.info(f"Arquivo CIF modificado '{path_to_delete}' removido.")
                 except OSError as e:
-                    QMessageBox.warning(self, ptr("Erro ao Apagar"), f"Não foi possível apagar o arquivo modificado:\n{e}")
+                    QMessageBox.warning(self, ptr("Erro ao Apagar"), ptr("Não foi possível apagar o arquivo modificado:\n{}").format(e))
                     logging.error(f"Erro ao apagar arquivo modificado '{path_to_delete}': {e}")
 
         plot_item['cif_content'] = plot_item.get('original_cif_content', '')
@@ -3221,7 +3239,7 @@ class PhaseDRXTool(QMainWindow):
         self.run_simulation_for_item(plot_item)
         self._repopulate_all_lists()
         self.set_dirty()
-        QMessageBox.information(self, ptr("Resetado"), f"'{plot_item['label']}' foi resetado para o original.")
+        QMessageBox.information(self, ptr("Resetado"), ptr("'{}' foi resetado para o original.").format(plot_item['label']))
 
     def remove_plot_item(self, item_id_to_remove):
         logging.info(f"🗑 Removendo item: {item_id_to_remove}")
@@ -3325,7 +3343,7 @@ class PhaseDRXTool(QMainWindow):
             self._redraw_all_plots()
             self.set_dirty()
         except Exception as e:
-            QMessageBox.critical(self, ptr("Erro na Suavização"), f"Ocorreu um erro: {e}")
+            QMessageBox.critical(self, ptr("Erro na Suavização"), ptr("Ocorreu um erro: {}").format(e))
 
     def open_peak_detect_dialog(self):
         selected_items = self.exp_list_widget.selectedItems()
@@ -3358,7 +3376,7 @@ class PhaseDRXTool(QMainWindow):
             self._redraw_all_plots()
             self.set_dirty()
         except Exception as e:
-            QMessageBox.critical(self, ptr("Erro na Detecção de Picos"), f"Ocorreu um erro: {e}")
+            QMessageBox.critical(self, ptr("Erro na Detecção de Picos"), ptr("Ocorreu um erro: {}").format(e))
 
     def open_save_plot_dialog(self):
         default_path = self.project_directory if self.project_directory else ""
@@ -3386,9 +3404,9 @@ class PhaseDRXTool(QMainWindow):
                         bbox_inches='tight'
                     )
 
-                QMessageBox.information(self, ptr("Sucesso"), f"Gráfico salvo em:\n{settings['path']}")
+                QMessageBox.information(self, ptr("Sucesso"), ptr("Gráfico salvo em:\n{}").format(settings['path']))
             except Exception as e:
-                QMessageBox.critical(self, ptr("Erro ao Salvar"), f"Não foi possível salvar o gráfico:\n{e}")
+                QMessageBox.critical(self, ptr("Erro ao Salvar"), ptr("Não foi possível salvar o gráfico:\n{}").format(e))
 
     # --- ALTERAÇÃO DE FUNCIONALIDADE: Adicionar Função Exportar para Origin ---
     def export_to_xlsx_for_origin(self):
@@ -3400,8 +3418,7 @@ class PhaseDRXTool(QMainWindow):
         # 1. Verifica se a biblioteca está disponível
         if not OPENPYXL_AVAILABLE:
             QMessageBox.critical(self, ptr("Dependência Faltando"),
-                                 "A biblioteca 'openpyxl' é necessária para exportar para Excel.\n"
-                                 "Por favor, instale-a com: pip install openpyxl")
+                                 ptr("A biblioteca 'openpyxl' é necessária para exportar para Excel.\nPor favor, instale-a com: pip install openpyxl"))
             return
             
         # 2. Verifica se há dados
@@ -3413,9 +3430,9 @@ class PhaseDRXTool(QMainWindow):
         # 3. Pergunta ao utilizador onde salvar
         filepath, _ = QFileDialog.getSaveFileName(
             self,
-            "Exportar para Origin (.xlsx)",
+            ptr("Exportar para Origin (.xlsx)"),
             self.project_directory if self.project_directory else "",
-            "Pasta de Trabalho do Excel (*.xlsx)"
+            ptr("Pasta de Trabalho do Excel (*.xlsx)")
         )
 
         if not filepath:
@@ -3460,12 +3477,11 @@ class PhaseDRXTool(QMainWindow):
             # 8. Salva o ficheiro
             wb.save(filepath)
             QMessageBox.information(self, ptr("Exportação Concluída"),
-                                    f"Dados exportados com sucesso para:\n{filepath}\n\n"
-                                    "Arraste este ficheiro para o Origin para importar.")
+                                    ptr("Dados exportados com sucesso para:\n{}\n\nArraste este ficheiro para o Origin para importar.").format(filepath))
 
         except Exception as e:
             QMessageBox.critical(self, ptr("Erro na Exportação"),
-                                 f"Ocorreu um erro ao exportar para .xlsx:\n{e}")
+                                 ptr("Ocorreu um erro ao exportar para .xlsx:\n{}").format(e))
             logging.exception("Erro ao exportar para XLSX:")
     # --- FIM DA ALTERAÇÃO ---
 
@@ -3487,7 +3503,7 @@ class PhaseDRXTool(QMainWindow):
         return color
 
     def on_wavelength_change(self, index):
-        self.wavelength_custom_input.setVisible(self.wavelength_combo.currentText() == "Outro")
+        self.wavelength_custom_input.setVisible(self.wavelength_combo.currentText() == ptr("Outro"))
 
     def _add_state_to_history(self):
         state = {
@@ -3540,10 +3556,7 @@ class PhaseDRXTool(QMainWindow):
         QMessageBox.information(
             self,
             ptr("Seleção de Pico"),
-            f"Modo de seleção de pico ativado para: {plot_item['label']}\n\n"
-            "Clique no gráfico na posição do pico de interesse.\n"
-            "O programa irá buscar o máximo na região próxima ao clique.\n\n"
-            "Pressione ESC para cancelar."
+            ptr("Modo de seleção de pico ativado para: {}\n\nClique no gráfico na posição do pico de interesse.\nO programa irá buscar o máximo na região próxima ao clique.\n\nPressione ESC para cancelar.").format(plot_item['label'])
         )
 
     def _process_peak_selection(self, peak_x):
@@ -3607,7 +3620,7 @@ class PhaseDRXTool(QMainWindow):
                         QMessageBox.warning(
                             self,
                             ptr("Aviso"),
-                            f"Não foi possível normalizar '{other_item['label']}':\n{e}"
+                            ptr("Não foi possível normalizar '{}':\n{}").format(other_item['label'], e)
                         )
 
             # Redesenhar e atualizar
@@ -3618,16 +3631,14 @@ class PhaseDRXTool(QMainWindow):
             QMessageBox.information(
                 self,
                 ptr("Normalização Concluída"),
-                f"{success_count} arquivo(s) normalizado(s) com sucesso!\n\n"
-                f"Pico de referência: 2θ = {peak_x:.3f}°\n"
-                f"Intensidade do pico: {peak_intensity:.2f}"
+                ptr("{} arquivo(s) normalizado(s) com sucesso!\n\nPico de referência: 2θ = {:.3f}°\nIntensidade do pico: {:.2f}").format(success_count, peak_x, peak_intensity)
             )
 
         except Exception as e:
             QMessageBox.critical(
                 self,
                 ptr("Erro na Normalização"),
-                f"Não foi possível normalizar pelo pico:\n{e}"
+                ptr("Não foi possível normalizar pelo pico:\n{}").format(e)
             )
 
     def undo_action(self):
@@ -3682,8 +3693,8 @@ class PlotCustomizationDialog(QDialog):
         labels_form = QFormLayout(labels_group)
         self.x_label_edit = QLineEdit();
         self.y_label_edit = QLineEdit()
-        labels_form.addRow("Eixo X:", self.x_label_edit);
-        labels_form.addRow("Eixo Y:", self.y_label_edit)
+        labels_form.addRow(ptr("Eixo X:"), self.x_label_edit);
+        labels_form.addRow(ptr("Eixo Y:"), self.y_label_edit)
         scale_layout.addWidget(labels_group)
         x_group = QGroupBox(ptr("Eixo X"));
         x_form = QFormLayout(x_group)
@@ -3699,22 +3710,20 @@ class PlotCustomizationDialog(QDialog):
         self.x_ticks.setMinimum(0.0)  # 0 = automático
         self.x_ticks.setMaximum(2000)
         self.x_ticks.setToolTip(
-            "Intervalo entre marcações principais no eixo X.\n"
-            "0 = Automático (recomendado para 2θ)\n"
-            "Valores muito pequenos (< 0.1) podem causar problemas."
+            ptr("Intervalo entre marcações principais no eixo X.\n0 = Automático (recomendado para 2θ)\nValores muito pequenos (< 0.1) podem causar problemas.")
         )
         self.x_label_size = QSpinBox();
         self.x_label_bold = QCheckBox(ptr("Negrito"));
         self.x_label_italic = QCheckBox(ptr("Itálico"))
         self.x_visible = QCheckBox(ptr("Mostrar Eixo X"))
-        x_form.addRow("De:", self.x_from);
-        x_form.addRow("Para:", self.x_to);
-        x_form.addRow("Major Ticks:", self.x_ticks)
+        x_form.addRow(ptr("De:"), self.x_from);
+        x_form.addRow(ptr("Para:"), self.x_to);
+        x_form.addRow(ptr("Major Ticks:"), self.x_ticks)
         x_font_layout = QHBoxLayout();
         x_font_layout.addWidget(self.x_label_size);
         x_font_layout.addWidget(self.x_label_bold);
         x_font_layout.addWidget(self.x_label_italic)
-        x_form.addRow("Fonte do Rótulo:", x_font_layout);
+        x_form.addRow(ptr("Fonte do Rótulo:"), x_font_layout);
         x_form.addRow(self.x_visible)
         scale_layout.addWidget(x_group)
         y_group = QGroupBox(ptr("Eixo Y"));
@@ -3731,22 +3740,20 @@ class PlotCustomizationDialog(QDialog):
         self.y_ticks.setMinimum(0.0)  # 0 = automático
         self.y_ticks.setMaximum(2000)
         self.y_ticks.setToolTip(
-            "Intervalo entre marcações principais no eixo Y.\n"
-            "0 = Automático (recomendado)\n"
-            "Valores muito pequenos (< 0.1) podem causar problemas."
+            ptr("Intervalo entre marcações principais no eixo Y.\n0 = Automático (recomendado)\nValores muito pequenos (< 0.1) podem causar problemas.")
         )
         self.y_label_size = QSpinBox();
         self.y_label_bold = QCheckBox(ptr("Negrito"));
         self.y_label_italic = QCheckBox(ptr("Itálico"))
         self.y_visible = QCheckBox(ptr("Mostrar Eixo Y"))
-        y_form.addRow("De:", self.y_from);
-        y_form.addRow("Para:", self.y_to);
-        y_form.addRow("Major Ticks:", self.y_ticks)
+        y_form.addRow(ptr("De:"), self.y_from);
+        y_form.addRow(ptr("Para:"), self.y_to);
+        y_form.addRow(ptr("Major Ticks:"), self.y_ticks)
         y_font_layout = QHBoxLayout();
         y_font_layout.addWidget(self.y_label_size);
         y_font_layout.addWidget(self.y_label_bold);
         y_font_layout.addWidget(self.y_label_italic)
-        y_form.addRow("Fonte do Rótulo:", y_font_layout);
+        y_form.addRow(ptr("Fonte do Rótulo:"), y_font_layout);
         y_form.addRow(self.y_visible)
         scale_layout.addWidget(y_group)
         self.grid_visible = QCheckBox(ptr("Mostrar Grade"));
@@ -3764,8 +3771,8 @@ class PlotCustomizationDialog(QDialog):
         self.inter_group_offset_spin.setSingleStep(0.05)  # <-- CORREÇÃO: Adicionado passo fino
         self.inter_group_offset_spin.setRange(-100, 100)  # <-- BÔNUS: Adicionado um range razoável
 
-        stack_form.addRow("Deslocamento Global:", self.global_offset_spin)
-        stack_form.addRow("Espaçamento entre Grupos:", self.inter_group_offset_spin)
+        stack_form.addRow(ptr("Deslocamento Global:"), self.global_offset_spin)
+        stack_form.addRow(ptr("Espaçamento entre Grupos:"), self.inter_group_offset_spin)
 
         num_groups = self.group_settings.get("count", 1)
         for i in range(num_groups):
@@ -3774,7 +3781,7 @@ class PlotCustomizationDialog(QDialog):
             spinbox.setSingleStep(0.05)  # <-- CORREÇÃO: Adicionado passo fino
             spinbox.setRange(-100, 100)  # <-- BÔNUS: Adicionado um range razoável
             spinbox.setValue(self.group_settings.get("spacing", {}).get(str(i), 0.0))
-            stack_form.addRow(f"Espaçamento no Grupo {i + 1}:", spinbox)
+            stack_form.addRow(ptr("Espaçamento no Grupo {}:").format(i + 1), spinbox)
             self.intra_group_spinboxes[i] = spinbox
         scale_layout.addWidget(stack_group)
         scale_layout.addStretch()
@@ -3791,8 +3798,8 @@ class PlotCustomizationDialog(QDialog):
         palette_layout.addWidget(QLabel(ptr("Aplicar paleta:")))
         self.palette_combo = QComboBox()
         self.palette_combo.addItems([
-            "Padrão MatFinder", "Viridis (Perceptual)", "Plasma (Perceptual)",
-            "Tab10 (Qualitativa)", "Set1 (Qualitativa)", "Paired (Qualitativa)"
+            ptr("Padrão MatFinder"), ptr("Viridis (Perceptual)"), ptr("Plasma (Perceptual)"),
+            ptr("Tab10 (Qualitativa)"), ptr("Set1 (Qualitativa)"), ptr("Paired (Qualitativa)")
         ])
         self.apply_palette_button = QPushButton(ptr("Aplicar Paleta"))
         palette_layout.addWidget(self.palette_combo)
@@ -3801,7 +3808,7 @@ class PlotCustomizationDialog(QDialog):
 
         self.lines_table = QTableWidget()
         self.lines_table.setColumnCount(5)
-        self.lines_table.setHorizontalHeaderLabels(["Legenda", "Cor", "Estilo", "Espessura", "Visível"])
+        self.lines_table.setHorizontalHeaderLabels([ptr("Legenda"), ptr("Cor"), ptr("Estilo"), ptr("Espessura"), ptr("Visível")])
         lines_layout.addWidget(self.lines_table)
 
         axes_tab = QWidget()
@@ -3819,13 +3826,13 @@ class PlotCustomizationDialog(QDialog):
         self.axes_linewidth_spin.setRange(0.5, 5.0)
         self.axes_linewidth_spin.setSingleStep(0.1)
         self.axes_linewidth_spin.setValue(1.0)
-        axes_appearance_form.addRow("Espessura das Linhas dos Eixos:", self.axes_linewidth_spin)
+        axes_appearance_form.addRow(ptr("Espessura das Linhas dos Eixos:"), self.axes_linewidth_spin)
         axes_layout.addWidget(axes_appearance_group)
 
         xticks_group = QGroupBox(ptr("Marcadores do Eixo X (Ticks)"))
         xticks_form = QFormLayout(xticks_group)
         self.xtick_direction_combo = QComboBox()
-        self.xtick_direction_combo.addItems(["Para Dentro", "Para Fora", "Sem Ticks"])
+        self.xtick_direction_combo.addItems([ptr("Para Dentro"), ptr("Para Fora"), ptr("Sem Ticks")])
         self.xtick_labelsize_spin = QSpinBox()
         self.xtick_labelsize_spin.setRange(6, 20)
         self.xtick_width_spin = QDoubleSpinBox()
@@ -3833,9 +3840,9 @@ class PlotCustomizationDialog(QDialog):
         self.xtick_width_spin.setSingleStep(0.1)
         self.xtick_visible_check = QCheckBox(ptr("Mostrar Marcadores (ticks)"))
         self.xtick_label_visible_check = QCheckBox(ptr("Mostrar Números"))
-        xticks_form.addRow("Direção:", self.xtick_direction_combo)
-        xticks_form.addRow("Espessura:", self.xtick_width_spin)
-        xticks_form.addRow("Tamanho da Fonte:", self.xtick_labelsize_spin)
+        xticks_form.addRow(ptr("Direção:"), self.xtick_direction_combo)
+        xticks_form.addRow(ptr("Espessura:"), self.xtick_width_spin)
+        xticks_form.addRow(ptr("Tamanho da Fonte:"), self.xtick_labelsize_spin)
         xticks_form.addRow(self.xtick_visible_check)
         xticks_form.addRow(self.xtick_label_visible_check)
         axes_layout.addWidget(xticks_group)
@@ -3843,7 +3850,7 @@ class PlotCustomizationDialog(QDialog):
         yticks_group = QGroupBox(ptr("Marcadores do Eixo Y (Ticks)"))
         yticks_form = QFormLayout(yticks_group)
         self.ytick_direction_combo = QComboBox()
-        self.ytick_direction_combo.addItems(["Para Dentro", "Para Fora", "Sem Ticks"])
+        self.ytick_direction_combo.addItems([ptr("Para Dentro"), ptr("Para Fora"), ptr("Sem Ticks")])
         self.ytick_labelsize_spin = QSpinBox()
         self.ytick_labelsize_spin.setRange(6, 20)
         self.ytick_width_spin = QDoubleSpinBox()
@@ -3851,9 +3858,9 @@ class PlotCustomizationDialog(QDialog):
         self.ytick_width_spin.setSingleStep(0.1)
         self.ytick_visible_check = QCheckBox(ptr("Mostrar Marcadores (ticks)"))
         self.ytick_label_visible_check = QCheckBox(ptr("Mostrar Números"))
-        yticks_form.addRow("Direção:", self.ytick_direction_combo)
-        yticks_form.addRow("Espessura:", self.ytick_width_spin)
-        yticks_form.addRow("Tamanho da Fonte:", self.ytick_labelsize_spin)
+        yticks_form.addRow(ptr("Direção:"), self.ytick_direction_combo)
+        yticks_form.addRow(ptr("Espessura:"), self.ytick_width_spin)
+        yticks_form.addRow(ptr("Tamanho da Fonte:"), self.ytick_labelsize_spin)
         yticks_form.addRow(self.ytick_visible_check)
         yticks_form.addRow(self.ytick_label_visible_check)
         axes_layout.addWidget(yticks_group)
@@ -3905,9 +3912,9 @@ class PlotCustomizationDialog(QDialog):
             color_btn.clicked.connect(lambda checked=False, btn=color_btn: self.change_line_color(btn))
             self.lines_table.setCellWidget(i, 1, color_btn)
             style_combo = QComboBox();
-            style_combo.addItems(line_styles.keys())
+            style_combo.addItems([ptr(k) for k in line_styles.keys()])
             current_style_key = next((k for k, v in line_styles.items() if v == data.get("style", "-")), "Sólida")
-            style_combo.setCurrentText(current_style_key)
+            style_combo.setCurrentText(ptr(current_style_key))
             self.lines_table.setCellWidget(i, 2, style_combo)
             width_spin = QDoubleSpinBox();
             width_spin.setRange(0.5, 10.0);
@@ -3926,11 +3933,11 @@ class PlotCustomizationDialog(QDialog):
 
         self.axes_linewidth_spin.setValue(self.current_settings.get('axes_linewidth', 1.0))
 
-        tick_map = {'in': "Para Dentro", 'out': "Para Fora"}
+        tick_map = {'in': ptr("Para Dentro"), 'out': ptr("Para Fora")}
         self.xtick_direction_combo.setCurrentText(
-            tick_map.get(self.current_settings.get('xtick_direction', 'in'), "Sem Ticks"))
+            tick_map.get(self.current_settings.get('xtick_direction', 'in'), ptr("Sem Ticks")))
         self.ytick_direction_combo.setCurrentText(
-            tick_map.get(self.current_settings.get('ytick_direction', 'in'), "Sem Ticks"))
+            tick_map.get(self.current_settings.get('ytick_direction', 'in'), ptr("Sem Ticks")))
 
         self.xtick_labelsize_spin.setValue(self.current_settings.get('xtick_labelsize', 10))
         self.ytick_labelsize_spin.setValue(self.current_settings.get('ytick_labelsize', 10))
@@ -3954,8 +3961,7 @@ class PlotCustomizationDialog(QDialog):
             QMessageBox.warning(
                 self,
                 ptr("Valor Inválido"),
-                "O valor de X Ticks é muito pequeno (< 0.1) e foi definido como automático.\n"
-                "Valores muito pequenos causam geração excessiva de marcações no eixo."
+                ptr("O valor de X Ticks é muito pequeno (< 0.1) e foi definido como automático.\nValores muito pequenos causam geração excessiva de marcações no eixo.")
             )
 
         if y_ticks_value > 0 and y_ticks_value < 0.1:
@@ -3963,8 +3969,7 @@ class PlotCustomizationDialog(QDialog):
             QMessageBox.warning(
                 self,
                 ptr("Valor Inválido"),
-                "O valor de Y Ticks é muito pequeno (< 0.1) e foi definido como automático.\n"
-                "Valores muito pequenos causam geração excessiva de marcações no eixo."
+                ptr("O valor de Y Ticks é muito pequeno (< 0.1) e foi definido como automático.\nValores muito pequenos causam geração excessiva de marcações no eixo.")
             )
 
         axis_settings = {
@@ -3983,7 +3988,7 @@ class PlotCustomizationDialog(QDialog):
 
         axis_settings['axes_linewidth'] = self.axes_linewidth_spin.value()
 
-        tick_map_inv = {"Para Dentro": 'in', "Para Fora": 'out', "Sem Ticks": None}
+        tick_map_inv = {ptr("Para Dentro"): 'in', ptr("Para Fora"): 'out', ptr("Sem Ticks"): None}
         axis_settings['xtick_direction'] = tick_map_inv.get(self.xtick_direction_combo.currentText())
         axis_settings['ytick_direction'] = tick_map_inv.get(self.ytick_direction_combo.currentText())
 
@@ -4011,7 +4016,7 @@ class PlotCustomizationDialog(QDialog):
                 "id": original_data["id"],
                 "label": self.lines_table.item(i, 0).text(),
                 "color": color_hex,
-                "style": line_styles.get(self.lines_table.cellWidget(i, 2).currentText()),
+                "style": {ptr(k): v for k, v in line_styles.items()}.get(self.lines_table.cellWidget(i, 2).currentText()),
                 "linewidth": self.lines_table.cellWidget(i, 3).value(),
                 "visible": visible_check.isChecked()
             })
@@ -4034,7 +4039,11 @@ class PlotCustomizationDialog(QDialog):
 
     def _apply_color_palette(self):
         palette_name_full = self.palette_combo.currentText()
-        palette_name = palette_name_full.split(" ")[0].lower().replace("padrão", "default")
+        if palette_name_full == ptr("Padrão MatFinder"):
+            palette_name = "default"
+        else:
+            # paletas têm nome próprio invariante (Viridis, Plasma, Set1, Tab10, Paired)
+            palette_name = palette_name_full.split(" ")[0].lower().replace("padrão", "default")
         num_items = len(self.plot_data)
 
         if num_items == 0:
@@ -4050,7 +4059,7 @@ class PlotCustomizationDialog(QDialog):
                           colormap.colors]
             except Exception as e:
                 QMessageBox.critical(self, ptr("Erro de Paleta"),
-                                     f"Não foi possível carregar a paleta '{palette_name}':\n{e}")
+                                     ptr("Não foi possível carregar a paleta '{}':\n{}").format(palette_name, e))
                 return
 
         for i, color_hex in enumerate(colors):
@@ -4071,20 +4080,20 @@ class SavePlotDialog(QDialog):
         self.width_spin.setRange(100, 8000);
         self.width_spin.setValue(1200);
         self.width_spin.setSuffix(ptr(" px"))
-        form_layout.addRow("Largura:", self.width_spin)
+        form_layout.addRow(ptr("Largura:"), self.width_spin)
         self.height_spin = QSpinBox();
         self.height_spin.setRange(100, 8000);
         self.height_spin.setValue(800);
         self.height_spin.setSuffix(ptr(" px"))
-        form_layout.addRow("Altura:", self.height_spin)
+        form_layout.addRow(ptr("Altura:"), self.height_spin)
         self.dpi_spin = QSpinBox();
         self.dpi_spin.setRange(50, 600);
         self.dpi_spin.setValue(600);
         self.dpi_spin.setSuffix(ptr(" DPI"))
-        form_layout.addRow("Qualidade (DPI):", self.dpi_spin)
+        form_layout.addRow(ptr("Qualidade (DPI):"), self.dpi_spin)
         self.format_combo = QComboBox();
-        self.format_combo.addItems(["png", "jpg", "svg", "pdf", "tiff"])
-        form_layout.addRow("Formato:", self.format_combo)
+        self.format_combo.addItems([ptr("png"), ptr("jpg"), ptr("svg"), ptr("pdf"), ptr("tiff")])
+        form_layout.addRow(ptr("Formato:"), self.format_combo)
         self.path_edit = QLineEdit();
         self.path_edit.setReadOnly(True)
         browse_button = QPushButton(ptr("Procurar..."));
@@ -4092,7 +4101,7 @@ class SavePlotDialog(QDialog):
         path_layout = QHBoxLayout();
         path_layout.addWidget(self.path_edit);
         path_layout.addWidget(browse_button)
-        form_layout.addRow("Salvar em:", path_layout)
+        form_layout.addRow(ptr("Salvar em:"), path_layout)
         layout.addLayout(form_layout)
         self.button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
         self.button_box.accepted.connect(self.accept);
@@ -4102,7 +4111,7 @@ class SavePlotDialog(QDialog):
     def browse_path(self):
         file_format = self.format_combo.currentText()
         file_filter = f"{file_format.upper()} Arquivos (*.{file_format});;Todos os Arquivos (*)"
-        path, _ = QFileDialog.getSaveFileName(self, "Salvar Gráfico", self.default_path, file_filter)
+        path, _ = QFileDialog.getSaveFileName(self, ptr("Salvar Gráfico"), self.default_path, file_filter)
         if path: self.path_edit.setText(path)
 
     def get_settings(self):
@@ -4127,11 +4136,11 @@ class SmoothDialog(QDialog):
         self.window_spin.setRange(3, 999);
         self.window_spin.setValue(15);
         self.window_spin.setSingleStep(2)
-        form_layout.addRow("Tamanho da Janela (ímpar):", self.window_spin)
+        form_layout.addRow(ptr("Tamanho da Janela (ímpar):"), self.window_spin)
         self.order_spin = QSpinBox();
         self.order_spin.setRange(1, 10);
         self.order_spin.setValue(2)
-        form_layout.addRow("Ordem do Polinômio:", self.order_spin)
+        form_layout.addRow(ptr("Ordem do Polinômio:"), self.order_spin)
         layout.addLayout(form_layout)
         self.button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
         self.button_box.accepted.connect(self.accept);
@@ -4160,11 +4169,11 @@ class PeakDetectDialog(QDialog):
         self.prominence_spin.setValue(0.02);
         self.prominence_spin.setSingleStep(0.01);
         self.prominence_spin.setDecimals(3)
-        form_layout.addRow("Proeminência (0-1):", self.prominence_spin)
+        form_layout.addRow(ptr("Proeminência (0-1):"), self.prominence_spin)
         self.width_spin = QSpinBox();
         self.width_spin.setRange(1, 100);
         self.width_spin.setValue(3)
-        form_layout.addRow("Largura Mínima (pontos):", self.width_spin)
+        form_layout.addRow(ptr("Largura Mínima (pontos):"), self.width_spin)
         layout.addLayout(form_layout)
         self.button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
         self.button_box.accepted.connect(self.accept);
@@ -4203,8 +4212,8 @@ class WaveletDenoiseDialog(QDialog):
 
         self.wavelet_combo = QComboBox()
         # Lista de algumas wavelets comuns e eficazes
-        self.wavelet_combo.addItems(['sym8', 'db4', 'coif5', 'bior3.5'])
-        controls_layout.addRow("Tipo de Wavelet:", self.wavelet_combo)
+        self.wavelet_combo.addItems([ptr('sym8'), ptr('db4'), ptr('coif5'), ptr("bior3.5")])
+        controls_layout.addRow(ptr("Tipo de Wavelet:"), self.wavelet_combo)
 
         self.threshold_slider = QSlider(Qt.Orientation.Horizontal)
         self.threshold_slider.setRange(1, 100)  # Mapeado para 0.01 a 1.0
@@ -4213,7 +4222,7 @@ class WaveletDenoiseDialog(QDialog):
         slider_layout = QHBoxLayout()
         slider_layout.addWidget(self.threshold_slider)
         slider_layout.addWidget(self.threshold_label)
-        controls_layout.addRow("Nível de Limiar (Threshold):", slider_layout)
+        controls_layout.addRow(ptr("Nível de Limiar (Threshold):"), slider_layout)
 
         main_layout.addWidget(controls_group)
 
@@ -4233,7 +4242,7 @@ class WaveletDenoiseDialog(QDialog):
     def _update_plot(self):
         wavelet = self.wavelet_combo.currentText()
         threshold_value = self.threshold_slider.value() / 100.0
-        self.threshold_label.setText(f"{threshold_value:.2f}")
+        self.threshold_label.setText(ptr("{:.2f}").format(threshold_value))
 
         # --- Alteração: Acesso à função de 'xrd_math_tools' ---
         if not PYWAVELETS_AVAILABLE:
@@ -4250,8 +4259,8 @@ class WaveletDenoiseDialog(QDialog):
         self.axes.plot(self.x_data, self.y_data, label="Sinal Original", color='blue', alpha=0.5)
         self.axes.plot(self.x_data, self.current_denoised_y, label="Sinal Tratado (Wavelet)", color='red',
                        linewidth=1.5)
-        self.axes.set_xlabel("2θ (Graus)")
-        self.axes.set_ylabel("Intensidade")
+        self.axes.set_xlabel(ptr("2θ (Graus)"))
+        self.axes.set_ylabel(ptr("Intensidade"))
         self.axes.legend()
         self.axes.grid(True, linestyle=':', alpha=0.6)
         self.plot_canvas.figure.tight_layout()

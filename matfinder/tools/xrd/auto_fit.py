@@ -22,6 +22,7 @@ import math
 import numpy as np
 from scipy.optimize import minimize
 from scipy.signal import find_peaks
+from matfinder.core.translator import ptr
 
 logger = logging.getLogger(__name__)
 
@@ -571,8 +572,7 @@ def auto_fit_lattice(crystal_system, a, b, c, alpha, beta, gamma,
     param_changes['volume'] = ((vol_after - vol_before) / vol_before) * 100.0 if vol_before > 0 else 0.0
 
     improvement = ((cost_before - cost_after) / cost_before * 100.0) if cost_before > 0 else 0.0
-    msg = (f"Ajuste concluido: {n_matched}/{len(obs_peaks)} picos correspondidos. "
-           f"Erro reduzido em {improvement:.1f}%.")
+    msg = (ptr("Ajuste concluido: {}/{} picos correspondidos. Erro reduzido em {:.1f}%.").format(n_matched, len(obs_peaks), improvement))
 
     logger.info(f"Auto-ajuste v2 concluido: {msg}")
     logger.info(f"  Antes:  a={a:.5f}, b={b:.5f}, c={c:.5f}, V={vol_before:.3f}")
