@@ -23,7 +23,7 @@
 
   <br/><br/>
 
-  ### 📖 [Overview](README.md) · 📸 [Screenshots](SCREENSHOTS.md)
+  ###  [Overview](README.md) ·  [Screenshots](SCREENSHOTS.md)
 </div>
 
 ---
