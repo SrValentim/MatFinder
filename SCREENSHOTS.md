@@ -32,7 +32,7 @@ Switch between Materials Project, OQMD, COD and ROD from a single dropdown.
 
 ---
 
-## 📈 PhaseDRX — XRD analysis suite
+##  PhaseDRX — XRD analysis suite
 
 ### Project-based workflow
 PhaseDRX opens with a project launcher: start a new project, reopen an existing one, or work in
@@ -72,7 +72,7 @@ Stack many diffractograms to follow how a sample evolves over time, all against 
 
 ---
 
-## 🖼️ Publication-ready figures
+##  Publication-ready figures
 
 ### Phase identification
 Export clean, annotated figures — the experimental pattern against candidate phases
@@ -89,6 +89,6 @@ A full synthesis time series (**1 h → 24 h**) of SmFeO₃, stacked over the re
 
 <div align="center">
 
-📖 **[Back to Overview](README.md)**
+ **[Back to Overview](README.md)**
 
 </div>
