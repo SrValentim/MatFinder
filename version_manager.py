@@ -210,6 +210,27 @@ def update_citation_file(version):
         print(f"✗ Erro ao atualizar {cff_file}: {e}")
 
 
+def update_readme_file(version):
+    """Atualiza a linha '**Current version:** X.Y.Z' do README.md."""
+    readme = os.path.join(get_root_dir(), 'README.md')
+    if not os.path.exists(readme):
+        return
+    try:
+        with open(readme, 'r', encoding='utf-8') as f:
+            content = f.read()
+        new_content = re.sub(
+            r'(\*\*Current version:\*\*\s*)[\d.]+',
+            rf'\g<1>{version}',
+            content
+        )
+        if new_content != content:
+            with open(readme, 'w', encoding='utf-8') as f:
+                f.write(new_content)
+            print(f"✓ Atualizado: {readme}")
+    except Exception as e:
+        print(f"✗ Erro ao atualizar {readme}: {e}")
+
+
 def update_all(version):
     """Atualiza todos os arquivos com a nova versão."""
     # Normaliza sempre para X.Y.Z completo.
@@ -225,6 +246,7 @@ def update_all(version):
     update_setup_file(version)
     update_iss_file(version)
     update_citation_file(version)
+    update_readme_file(version)
 
     print(f"\n✅ Versão atualizada com sucesso para {version}!")
     print("\nPróximos passos (fluxo profissional — a tag dispara o build no GitHub Actions):")

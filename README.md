@@ -1,4 +1,4 @@
-# MatFinder v3.24.0
+# MatFinder
 
 <div align="center">
   <img src="matfinder/assets/logos/splash.png" alt="MatFinder Logo" width="200"/>
@@ -19,7 +19,7 @@
   </a>
 
   <br/>
-  <sub><b>~172 MB</b> · no Python required · just extract and run <code>MatFinder.exe</code></sub>
+  <sub>Windows installer or portable <code>.zip</code> · no Python required</sub>
 
   <br/><br/>
 
@@ -60,8 +60,10 @@ MatFinder is available in:
 ###  Option 1 — Download the ready-to-use app (recommended)
 
 1. Open **[Releases ▸ latest](https://github.com/SrValentim/MatFinder/releases/latest)**.
-2. Download **`MatFinder-3.24.0-win64.zip`** (~172 MB).
-3. Extract and run **`MatFinder/MatFinder.exe`**. No Python, no install.
+2. Download either the **installer** (`MatFinder-…-Setup.exe`) or the portable
+   **`MatFinder-…-win64.zip`**.
+3. Run the installer **or** extract the zip and run **`MatFinder/MatFinder.exe`**
+   (and `PhaseDRX.exe` for the XRD suite). No Python, no setup.
 
 > Works on **Windows 10/11 (64-bit)**. 4 GB RAM minimum (8 GB recommended).
 
@@ -90,7 +92,8 @@ python3.11 -m venv .venv
 ###  Option 3 — Compile your own optimized `.exe`
 
 1. Double-click **`INSTALAR_REQUISITOS.bat`** — installs Python 3.11 + dependencies (once).
-2. Double-click **`COMPILAR.bat`** — produces `dist/MatFinder/MatFinder.exe` (~402 MB).
+2. Double-click **`COMPILAR.bat`** — produces `dist/MatFinder/` with `MatFinder.exe`
+   and `PhaseDRX.exe` (~450 MB, shared `_internal`).
 
 Full guide: **[`COMO_COMPILAR.md`](COMO_COMPILAR.md)** · [`docs/compilation/GUIA_COMPILACAO.md`](docs/compilation/GUIA_COMPILACAO.md)
 
@@ -121,7 +124,7 @@ MatFinder/
 │   ├── requirements-build.lock.txt # Exact, reproducible deps (Python 3.11)
 │   └── requirements-build.txt      # Readable/minimal deps
 ├── .github/workflows/
-│   └── build-release.yml           # CI: build on Windows + publish Release
+│   └── build-release.yml           # CI: build (Windows/Linux/macOS) + publish Release
 ├── docs/                           # Documentation (incl. compilation guide)
 ├── licenses/                       # License files
 ├── tests/                          # Tests
@@ -134,8 +137,8 @@ MatFinder/
 
 ### Compilation
 
-Optimized build (~402 MB, no "missing module" loop). One-time setup with
-`INSTALAR_REQUISITOS.bat`, then `COMPILAR.bat` to build:
+Optimized build (~450 MB, two exes sharing `_internal`, no "missing module" loop).
+One-time setup with `INSTALAR_REQUISITOS.bat`, then `COMPILAR.bat` to build:
 
 ```bat
 INSTALAR_REQUISITOS.bat       :: 1x: Python 3.11 + deps (from the lock)
@@ -145,7 +148,8 @@ COMPILAR.bat --clean          :: pristine rebuild (clears the cache)
 
 - Self-check after a build (lists any missing module at once): `MatFinder.exe --selftest`
 - **CI:** pushing a tag `vX.Y.Z` triggers `.github/workflows/build-release.yml`,
-  which builds on Windows and publishes a Release with the `.zip`.
+  which builds on **Windows, Linux and macOS** and publishes a Release with the
+  Windows installer + `.zip`, a Linux `.tar.gz` and a macOS `.zip`.
 
 For details, see **[`COMO_COMPILAR.md`](COMO_COMPILAR.md)** and
 [`docs/compilation/GUIA_COMPILACAO.md`](docs/compilation/GUIA_COMPILACAO.md).
@@ -245,24 +249,22 @@ This project is licensed under the **GNU General Public License v3.0** - see the
 
 ##  Project Status
 
-🟢 **Active** - Under development and maintenance
+🟢 **Active** — under development and maintenance.
 
-### Current Version: 3.24.0
+**Current version:** 3.24.1 — see the [`CHANGELOG.md`](CHANGELOG.md) for the full history.
 
-**Latest Updates**:
--  Full multilingual support (Portuguese, English, German)
-- Peak-specific normalization
-- Interactive legend dialog
-- Background removal (SNIP, Polynomial)
-- Bug fixes in CIF editor
-- Plotting performance improvements
-- GPL v3 license integration
+Recent highlights:
+- Full UI translation (Portuguese, English, German)
+- PhaseDRX as a standalone app (`PhaseDRX.exe`) with cross-app CIF export
+- Open-access article retrieval by DOI (OpenAlex/Unpaywall)
+- Runs from source on Windows, Linux and macOS
 
 ---
 
-## 🐛 Report Issues
+## Report Issues
 
-Found a bug? Have a suggestion? Open an [issue](https://github.com/SrValentim/MatFinder/issues).
+Found a bug? Have a suggestion? Open an [issue](https://github.com/SrValentim/MatFinder/issues)
+(templates available) — see [`CONTRIBUTING.md`](CONTRIBUTING.md) for what to include.
 
 ---
 
