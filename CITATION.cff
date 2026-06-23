@@ -13,11 +13,11 @@ authors:
     affiliation: "Federal University of Amazonas (UFAM)"
     orcid: "https://orcid.org/0009-0004-3470-6893"
 version: "3.25.0"
-date-released: "2026-06-22"
-doi: 10.5281/zenodo.20806339
+date-released: "2026-06-23"
+doi: 10.5281/zenodo.20820779
 license: GPL-3.0-only
 repository-code: "https://github.com/SrValentim/MatFinder"
-url: "https://doi.org/10.5281/zenodo.20806339"
+url: "https://doi.org/10.5281/zenodo.20820779"
 keywords:
   - Python
   - Databases
@@ -32,5 +32,5 @@ identifiers:
     value: 10.5281/zenodo.20778195
     description: "Concept DOI (all versions; always resolves to the latest)"
   - type: doi
-    value: 10.5281/zenodo.20806339
-    description: "Version 3.24.1 DOI"
+    value: 10.5281/zenodo.20820779
+    description: "Version 3.25.0 DOI"

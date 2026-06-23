@@ -188,9 +188,9 @@ Quick version:
 
 If you use MatFinder in your research, please cite it (archived on **Zenodo**):
 
-> Valentim, R. (2026). *MatFinder - X-ray diffraction analysis tools* (3.24.1). Zenodo. https://doi.org/10.5281/zenodo.20806339
+> Valentim, R. (2026). *MatFinder - X-ray diffraction analysis tools* (3.25.0). Zenodo. https://doi.org/10.5281/zenodo.20820779
 
-**DOI:** [10.5281/zenodo.20806339](https://doi.org/10.5281/zenodo.20806339) (version 3.24.1) · [10.5281/zenodo.20778195](https://doi.org/10.5281/zenodo.20778195) (all versions, always latest)
+**DOI:** [10.5281/zenodo.20820779](https://doi.org/10.5281/zenodo.20820779) (version 3.25.0) · [10.5281/zenodo.20778195](https://doi.org/10.5281/zenodo.20778195) (all versions, always latest)
 
 <details>
 <summary>BibTeX</summary>
@@ -201,9 +201,9 @@ If you use MatFinder in your research, please cite it (archived on **Zenodo**):
   title     = {{MatFinder - X-ray diffraction analysis tools}},
   year      = {2026},
   publisher = {Zenodo},
-  version   = {3.24.1},
-  doi       = {10.5281/zenodo.20806339},
-  url       = {https://doi.org/10.5281/zenodo.20806339}
+  version   = {3.25.0},
+  doi       = {10.5281/zenodo.20820779},
+  url       = {https://doi.org/10.5281/zenodo.20820779}
 }
 ```
 </details>
