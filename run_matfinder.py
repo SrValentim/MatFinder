@@ -34,9 +34,15 @@ def _ensure_writable_data_dir():
         os.remove(_probe)
         return app_dir
     except Exception:
-        base = (os.environ.get("LOCALAPPDATA") or os.environ.get("APPDATA")
-                or tempfile.gettempdir())
-        data_dir = os.path.join(base, "MatFinder")
+        # Pasta do app não gravável (ex.: Program Files no Windows, /usr no Linux):
+        # usa o diretório de dados do usuário, por plataforma.
+        if sys.platform == "win32":
+            base = os.environ.get("LOCALAPPDATA") or os.environ.get("APPDATA")
+        elif sys.platform == "darwin":
+            base = os.path.expanduser("~/Library/Application Support")
+        else:
+            base = os.environ.get("XDG_DATA_HOME") or os.path.expanduser("~/.local/share")
+        data_dir = os.path.join(base or tempfile.gettempdir(), "MatFinder")
         os.makedirs(data_dir, exist_ok=True)
         return data_dir
 

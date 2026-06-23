@@ -65,18 +65,27 @@ MatFinder is available in:
 
 > Works on **Windows 10/11 (64-bit)**. 4 GB RAM minimum (8 GB recommended).
 
-###  Option 2 — Run from source
+###  Option 2 — Run from source (Windows, Linux or macOS)
 
 ```bash
 git clone https://github.com/SrValentim/MatFinder.git
 cd MatFinder
+
+# Windows
 py -3.11 -m venv .venv
 .venv\Scripts\python -m pip install -r build_tools\requirements-build.lock.txt
 .venv\Scripts\python run_matfinder.py
+
+# Linux / macOS
+python3.11 -m venv .venv
+.venv/bin/python -m pip install -r build_tools/requirements-build.lock.txt
+.venv/bin/python run_matfinder.py
 ```
 
 > Requires **Python 3.11 (64-bit)**. The pinned `build_tools/requirements-build.lock.txt`
 > is the reproducible dependency set (the root `requirements.txt` is a full env freeze).
+> Running from source works on all three platforms; the pre-built `.exe`/installer
+> are Windows-only.
 
 ###  Option 3 — Compile your own optimized `.exe`
 
@@ -156,11 +165,16 @@ For details, see **[`COMO_COMPILAR.md`](COMO_COMPILAR.md)** and
 
 ##  Contributing
 
-Contributions are welcome! To contribute:
+Contributions are welcome — bug reports, feature ideas, docs, translations and
+code. Please read **[`CONTRIBUTING.md`](CONTRIBUTING.md)** (dev setup, coding and
+translation guidelines, PR process) and our
+**[`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md)**.
+
+Quick version:
 
 1. Fork the repository
 2. Create a branch for your feature (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+3. Commit your changes (`git commit -m 'feat: add some AmazingFeature'`)
 4. Push to the branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
