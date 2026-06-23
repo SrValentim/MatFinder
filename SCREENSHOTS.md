@@ -10,7 +10,7 @@ A visual tour of MatFinder and its built-in XRD suite, **PhaseDRX**.
 
 ---
 
-## 🔬 Material discovery
+##  Material discovery
 
 ### Search multiple databases at once
 Query the **Materials Project**, **OQMD**, **COD** and **ROD** by element. Results list the
