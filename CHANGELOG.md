@@ -23,6 +23,10 @@ e versionamento [Semantic Versioning](https://semver.org/lang/pt-BR/) (MAJOR.MIN
 
 ## [Não publicado]
 
+---
+
+## [3.25.0] - 2026-06-23
+
 ### Added
 - `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md` (Contributor Covenant 2.1) e templates de
   issue (bug/feature).

@@ -6,8 +6,8 @@ Sistema centralizado de versionamento
 """
 
 # Versão do programa - ALTERE APENAS AQUI OU USE version_manager.py
-__version__ = "3.24.1"
-__version_info__ = (3, 24, 1)  # (major, minor, patch)
+__version__ = "3.25.0"
+__version_info__ = (3, 25, 0)  # (major, minor, patch)
 
 # Informações do programa
 __author__ = "Raynner Valentim"
