@@ -154,7 +154,7 @@ For details, see **[`COMO_COMPILAR.md`](COMO_COMPILAR.md)** and
 
 ---
 
-## 🤝 Contributing
+##  Contributing
 
 Contributions are welcome! To contribute:
 
@@ -209,7 +209,7 @@ This project is licensed under the **GNU General Public License v3.0** - see the
 
 ---
 
-## 👨‍💻 Author
+##  Author
 
 **Raynner Valentim**
 - 🎓 Federal University of Amazonas (UFAM) | Department of Physics | Materials Physics Department
