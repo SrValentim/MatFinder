@@ -80,6 +80,20 @@ See [`COMO_COMPILAR.md`](COMO_COMPILAR.md) for details. Running from source
   any platform-specific call with `sys.platform`.
 - A change should at least pass `python run_matfinder.py --selftest`.
 
+## Testing
+
+The core logic has an automated test suite (pytest):
+
+```bash
+python -m pip install -r requirements-dev.txt
+python -m pytest
+```
+
+Tests run headless and live in [`tests/`](tests/) (see `tests/README.md`). They
+also run in CI on every push/PR (`.github/workflows/tests.yml`). Please add or
+update tests when you change core logic, and reuse the sample data in
+[`examples/`](examples/) as fixtures when relevant.
+
 ## Translations
 
 UI text lives in `matfinder/assets/translations/`:

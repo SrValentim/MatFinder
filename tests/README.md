@@ -1,62 +1,35 @@
-# Testes do MatFinder
+# Tests
 
-Esta pasta contém scripts de teste para diferentes funcionalidades do MatFinder.
+Automated test suite (pytest) for MatFinder's core logic — the parts that run
+without the GUI.
 
-## Estrutura dos Testes
+## Running
 
-### Testes do Visualizador 3D
-- **test_structure_viewer_accuracy.py** - Validação de precisão do visualizador 3D
-- **test_bonds_quick.py** - Teste rápido do algoritmo de ligações químicas
-- **test_bonds_visual.py** - Teste visual das ligações químicas
-
-### Testes de Funcionalidades do PhaseDRX
-- **test_logo_resize.py** - Teste do redimensionamento automático da logo
-- **test_reflection_dialog.py** - Teste do diálogo de reflexões cristalográficas
-- **test_reflection_full.py** - Teste completo do sistema de reflexões
-
-## Como Executar os Testes
-
-### Testes do Visualizador 3D
 ```bash
-# Teste de precisão do visualizador 3D
-python tests/test_structure_viewer_accuracy.py
-
-# Teste rápido de ligações
-python tests/test_bonds_quick.py
-
-# Teste visual de ligações
-python tests/test_bonds_visual.py
+python -m pip install -r requirements-dev.txt   # pytest
+python -m pytest                                 # from the project root
 ```
 
-### Testes do PhaseDRX
-```bash
-# Teste da logo
-python tests/test_logo_resize.py
+Tests run headless (`QT_QPA_PLATFORM=offscreen`, set in `conftest.py`).
 
-# Teste do diálogo de reflexões
-python tests/test_reflection_dialog.py
+## What is covered
 
-# Teste completo de reflexões
-python tests/test_reflection_full.py
-```
+| File | Module under test |
+|------|-------------------|
+| `test_grupo_espacial.py` | space-group data table (230 groups) |
+| `test_normalization.py` | `tools/xrd/normalization_dialog` (normalization math) |
+| `test_background.py` | `tools/xrd/background_removal` (SNIP / arPLS / dispatch) |
+| `test_xrd_math.py` | `tools/xrd/xrd_math_tools` (smoothing, peak detection) |
+| `test_quimica.py` | `tools/calculator/quimica_calc` (molar mass, conversions) |
+| `test_api_logic.py` | `core/api_logic._normalize_doi` (no network) |
+| `test_translations.py` | `core/translator` (ptr) + translation-file integrity |
+| `test_examples_data.py` | the sample data in [`../examples/`](../examples/) (CIFs + `.dat`) |
 
-## Requisitos
+GUI dialogs/widgets are intentionally not unit-tested here; a headless smoke
+check of the whole frozen app is available via `MatFinder.exe --selftest`
+(see `build_tools/build_clean.py`).
 
-Todos os testes requerem as dependências principais do MatFinder instaladas:
-- PySide6
-- pymatgen
-- matplotlib
-- numpy
-- scipy
+## `manual/`
 
-Para instalar todas as dependências:
-```bash
-pip install -r requirements.txt
-```
-
-## Notas
-
-- Os testes do visualizador 3D requerem `pymatgen` e `pyqtgraph`
-- Os testes de reflexões requerem arquivos CIF válidos
-- Alguns testes podem abrir janelas gráficas (feche-as para continuar)
-
+Older ad-hoc/visual scripts (require a display and manual inspection) live in
+`manual/` and are **not** collected by pytest (`norecursedirs = manual`).

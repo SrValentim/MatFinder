@@ -37,6 +37,11 @@ e versionamento [Semantic Versioning](https://semver.org/lang/pt-BR/) (MAJOR.MIN
 ### Added
 - `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md` (Contributor Covenant 2.1) e templates de
   issue (bug/feature) — diretrizes de comunidade exigidas pela JOSS.
+- Pasta **`examples/`** com dados de exemplo (CIFs + série temporal de DRX SmFeO₃) e um
+  tutorial (`examples/README.md`) do fluxo completo. Substitui a antiga "Galeria de CIF".
+- **Suíte de testes automatizados (pytest)** em `tests/` cobrindo a lógica central
+  (normalização, background, matemática de DRX, calculadora, DOI, traduções, dados de
+  exemplo) + workflow de CI (`tests.yml`) e `requirements-dev.txt`.
 
 ### Changed
 - **Cross-platform:** roda de fonte em Windows, Linux e macOS. O diretório de dados

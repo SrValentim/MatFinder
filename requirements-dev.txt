@@ -1,0 +1,2 @@
+# Dependências de desenvolvimento/testes (não usadas para rodar/empacotar o app)
+pytest>=8.0

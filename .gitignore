@@ -76,3 +76,6 @@ desktop.ini
 # Manual do usuário (desatualizado) - mantido local p/ o app, fora do repo
 # ate sair a versao nova. Remover esta linha quando o novo manual for adicionado.
 docs/Manual*.pdf
+
+# pytest
+.pytest_cache/
