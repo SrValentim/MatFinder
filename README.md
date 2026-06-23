@@ -28,11 +28,11 @@
 
 ---
 
-## 📋 About
+##  About
 
 MatFinder is a complete desktop application for searching, visualizing, and analyzing crystalline material structures. Developed at the Federal University of Amazonas (UFAM), Brazil, it integrates multiple crystallographic databases and X-ray diffraction analysis tools.
 
-### 🌍 Multilingual Support
+###  Multilingual Support
 
 MatFinder is available in:
 - 🇧🇷 **Portuguese** (default)
@@ -55,9 +55,9 @@ MatFinder is available in:
 
 ---
 
-## 🚀 Get MatFinder
+##  Get MatFinder
 
-### ⬇️ Option 1 — Download the ready-to-use app (recommended)
+###  Option 1 — Download the ready-to-use app (recommended)
 
 1. Open **[Releases ▸ latest](https://github.com/SrValentim/MatFinder/releases/latest)**.
 2. Download **`MatFinder-3.24.0-win64.zip`** (~172 MB).
@@ -65,7 +65,7 @@ MatFinder is available in:
 
 > Works on **Windows 10/11 (64-bit)**. 4 GB RAM minimum (8 GB recommended).
 
-### 🐍 Option 2 — Run from source
+###  Option 2 — Run from source
 
 ```bash
 git clone https://github.com/SrValentim/MatFinder.git
@@ -78,7 +78,7 @@ py -3.11 -m venv .venv
 > Requires **Python 3.11 (64-bit)**. The pinned `build_tools/requirements-build.lock.txt`
 > is the reproducible dependency set (the root `requirements.txt` is a full env freeze).
 
-### 🔨 Option 3 — Compile your own optimized `.exe`
+###  Option 3 — Compile your own optimized `.exe`
 
 1. Double-click **`INSTALAR_REQUISITOS.bat`** — installs Python 3.11 + dependencies (once).
 2. Double-click **`COMPILAR.bat`** — produces `dist/MatFinder/MatFinder.exe` (~402 MB).
@@ -94,7 +94,7 @@ Full guide: **[`COMO_COMPILAR.md`](COMO_COMPILAR.md)** · [`docs/compilation/GUI
 
 ---
 
-## 🛠️ Development
+##  Development
 
 ### Project Structure
 
@@ -166,7 +166,7 @@ Contributions are welcome! To contribute:
 
 ---
 
-## 📖 How to cite
+##  How to cite
 
 If you use MatFinder in your research, please cite it (archived on **Zenodo**):
 
@@ -194,7 +194,7 @@ If you use MatFinder in your research, please cite it (archived on **Zenodo**):
 
 ---
 
-## 📜 License
+##  License
 
 This project is licensed under the **GNU General Public License v3.0** - see the [`licenses/LICENSE`](licenses/LICENSE) file for details.
 
@@ -229,14 +229,14 @@ This project is licensed under the **GNU General Public License v3.0** - see the
 
 ---
 
-## 📊 Project Status
+##  Project Status
 
 🟢 **Active** - Under development and maintenance
 
 ### Current Version: 3.24.0
 
 **Latest Updates**:
-- 🌍 Full multilingual support (Portuguese, English, German)
+-  Full multilingual support (Portuguese, English, German)
 - Peak-specific normalization
 - Interactive legend dialog
 - Background removal (SNIP, Polynomial)
