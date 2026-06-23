@@ -3,14 +3,13 @@
 """
 release.py - Release LOCAL do MatFinder, de um comando só.
 
-Enquanto o GitHub Actions estiver bloqueado (problema de billing da conta), este
-script faz TUDO que o workflow faria, localmente e na ordem certa:
+Faz TODO o fluxo de release localmente (Windows), na ordem certa:
 
     bump de versao  ->  build (2 exes)  ->  instalador (.exe)  ->  zip portatil
     ->  commit + tag  ->  push  ->  Release no GitHub (zip + instalador)
 
-Assim que o Actions voltar, o mesmo resultado sai automatico ao dar push da tag;
-este script continua util como fallback offline e para iterar rapido.
+Alternativa ao CI (build-release.yml), util para iterar rapido sem depender do
+runner do GitHub.
 
 USO (rodar com o python do .venv-build):
     .venv-build\\Scripts\\python build_tools\\release.py --bump patch

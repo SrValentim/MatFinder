@@ -8,9 +8,7 @@ name: Build & Release (Windows, Linux, macOS)
 #  - manualmente (Actions > Run workflow) -> compila e sobe os artifacts (sem release)
 #
 # OBS.: o PyInstaller NAO faz cross-compile; por isso cada SO compila no seu runner.
-# Este workflow ficou pronto/"engatilhado" e passa a valer assim que o billing do
-# GitHub Actions for regularizado (Settings > Billing). O caminho local comprovado
-# continua sendo build_tools/release.py (Windows).
+# Alternativa local (Windows): build_tools/release.py faz o fluxo completo num comando.
 on:
   push:
     tags:

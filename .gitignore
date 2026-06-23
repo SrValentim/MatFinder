@@ -73,6 +73,9 @@ desktop.ini
 # Notas pessoais (local, nunca versionar)
 /HISTORIA_DO_MATFINDER.txt
 
+# Rascunhos pessoais (local, fora do repo)
+/paper/
+
 # Manual do usuário (desatualizado) - mantido local p/ o app, fora do repo
 # ate sair a versao nova. Remover esta linha quando o novo manual for adicionado.
 docs/Manual*.pdf

@@ -8,27 +8,16 @@ e versionamento [Semantic Versioning](https://semver.org/lang/pt-BR/) (MAJOR.MIN
 - **MINOR** — novos recursos compatíveis.
 - **PATCH** — correções de bugs compatíveis.
 
-## Fluxo de release (profissional)
+## Fluxo de release (mantenedores)
 
-**Caminho A — automático (quando o GitHub Actions estiver ativo):**
 1. `python version_manager.py --bump patch|minor|major` (sincroniza VERSION, `__init__.py`,
-   traduções, `setup.py`, `MatFinder.iss` e `CITATION.cff`).
-2. Mover as entradas de **[Não publicado]** para a nova versão aqui.
-3. `git commit -am "chore: release vX.Y.Z"`
-4. `git tag vX.Y.Z && git push origin main --tags`
-5. O GitHub Actions compila (zip + instalador) e publica o Release automaticamente.
+   traduções, `setup.py`, `MatFinder.iss`, `CITATION.cff` e a versão no README).
+2. Mover as entradas de **[Não publicado]** para a nova versão abaixo.
+3. `git commit -am "chore: release vX.Y.Z"` e `git tag vX.Y.Z`.
+4. Enviar a tag; o CI compila os pacotes e publica o Release.
+   (`build_tools/release.py` faz o fluxo completo localmente em um comando.)
 
-**Caminho B — local, de um comando (fallback / sem depender do Actions):**
-1. Editar o CHANGELOG ([Não publicado] → versão).
-2. `.venv-build\Scripts\python build_tools\release.py --bump patch`
-   (faz bump + build + instalador + zip + commit + tag + push + Release no GitHub).
-   Use `--no-publish` para um ensaio (só build/instalador/zip, sem enviar nada).
-
-> ⚠️ O Actions está **bloqueado por pendência de billing** na conta do GitHub
-> (Settings → Billing). Até regularizar, use o **Caminho B**. O workflow já está
-> pronto e passa a valer sozinho quando o billing for resolvido.
-
-> Tags publicadas são **imutáveis** — nunca mover/reescrever uma tag já lançada.
+> Tags publicadas são imutáveis — nunca mover/reescrever uma tag já lançada.
 
 ---
 
@@ -36,13 +25,12 @@ e versionamento [Semantic Versioning](https://semver.org/lang/pt-BR/) (MAJOR.MIN
 
 ### Added
 - `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md` (Contributor Covenant 2.1) e templates de
-  issue (bug/feature) — diretrizes de comunidade exigidas pela JOSS.
+  issue (bug/feature).
 - Pasta **`examples/`** com dados de exemplo (CIFs + série temporal de DRX SmFeO₃) e um
   tutorial (`examples/README.md`) do fluxo completo. Substitui a antiga "Galeria de CIF".
 - **Suíte de testes automatizados (pytest)** em `tests/` cobrindo a lógica central
   (normalização, background, matemática de DRX, calculadora, DOI, traduções, dados de
   exemplo) + workflow de CI (`tests.yml`) e `requirements-dev.txt`.
-- Rascunho do artigo JOSS: `paper/paper.md` + `paper/paper.bib`.
 
 ### Changed
 - **Cross-platform:** roda de fonte em Windows, Linux e macOS. O diretório de dados
@@ -55,8 +43,7 @@ e versionamento [Semantic Versioning](https://semver.org/lang/pt-BR/) (MAJOR.MIN
 
 ### Infra
 - CI (`build-release.yml`) virou **matriz de 3 SOs**: na tag, gera instalador+zip
-  (Windows), `.tar.gz` (Linux) e `.zip` (macOS) e publica todos no Release. Roda quando
-  o billing do Actions for regularizado; o release local (`release.py`) segue para Windows.
+  (Windows), `.tar.gz` (Linux) e `.zip` (macOS) e publica todos no Release.
 - `build_clean.py` ciente do SO (nome do binário sem `.exe` em Linux/macOS).
 
 ---
@@ -69,14 +56,13 @@ e versionamento [Semantic Versioning](https://semver.org/lang/pt-BR/) (MAJOR.MIN
   mas busca a versão de acesso aberto do artigo.
 
 ### Removed
-- Integração com **Sci-Hub** (ilegal e bloqueadora de publicação) e todo o código de
-  scraping associado.
+- Antigo downloader de artigos via **Sci-Hub** (substituído pelo acesso aberto) e todo
+  o código de scraping associado.
 
 ### Added
 - `CHANGELOG.md`.
 - `build_tools/release.py` — release local de um comando (bump → build → instalador →
-  zip → commit/tag/push → Release no GitHub), usado como fallback enquanto o Actions
-  está bloqueado por billing.
+  zip → commit/tag/push → Release no GitHub).
 
 ### Infra
 - `version_manager.py` agora sincroniza também `build_tools/MatFinder.iss` e

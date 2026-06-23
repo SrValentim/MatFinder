@@ -1,8 +1,7 @@
 name: Tests
 
 # Roda a suíte pytest a cada push no main e em pull requests.
-# (Como o restante do CI, fica pronto e passa a rodar quando o billing do Actions
-#  for regularizado. Localmente: python -m pytest)
+# Localmente: python -m pytest
 on:
   push:
     branches: [main]
