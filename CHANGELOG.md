@@ -34,18 +34,31 @@ e versionamento [Semantic Versioning](https://semver.org/lang/pt-BR/) (MAJOR.MIN
 
 ## [Não publicado]
 
+---
+
+## [3.24.1] - 2026-06-22
+
 ### Changed
-- Infraestrutura de versionamento profissionalizada: `version_manager.py` agora
-  sincroniza também `build_tools/MatFinder.iss` e `CITATION.cff`, normaliza a versão
-  para `X.Y.Z` completo e força saída UTF-8 (rodava com erro no console do Windows).
-- GitHub Actions (`build-release.yml`) agora gera **também o instalador** (`.exe` via
-  Inno Setup) e publica `.zip` + instalador no Release.
+- **Download de artigo por DOI** agora usa apenas fontes legais de **acesso aberto**
+  (OpenAlex + Unpaywall) no lugar do Sci-Hub. O botão "Buscar e Salvar PDF" continua,
+  mas busca a versão de acesso aberto do artigo.
+
+### Removed
+- Integração com **Sci-Hub** (ilegal e bloqueadora de publicação) e todo o código de
+  scraping associado.
 
 ### Added
 - `CHANGELOG.md`.
 - `build_tools/release.py` — release local de um comando (bump → build → instalador →
   zip → commit/tag/push → Release no GitHub), usado como fallback enquanto o Actions
   está bloqueado por billing.
+
+### Infra
+- `version_manager.py` agora sincroniza também `build_tools/MatFinder.iss` e
+  `CITATION.cff`, normaliza a versão para `X.Y.Z` completo e força saída UTF-8.
+- GitHub Actions (`build-release.yml`) passa a gerar **também o instalador** (`.exe` via
+  Inno Setup) e publicar `.zip` + instalador no Release.
+- Versão consistente em `X.Y.Z` em todos os arquivos.
 
 ---
 
