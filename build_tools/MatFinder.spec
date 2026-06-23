@@ -10,7 +10,7 @@ ESTRATÉGIA (resolve o "loop infinito de módulo faltando" + o tamanho de 1,5GB)
      instalado. É a maior parte da otimização de tamanho.
 
   2) collect_all() / collect_submodules() para os pacotes de IMPORT DINÂMICO/LAZY
-     (pymatgen, mp_api, emmet, monty, chempy, spglib, pyqtgraph, cloudscraper, ...).
+     (pymatgen, mp_api, emmet, monty, chempy, spglib, pyqtgraph, ...).
      Pega TODOS os submódulos + arquivos de dados + binários de uma vez, em vez de
      listar módulo por módulo (que é o que causava o whack-a-mole).
 
@@ -79,7 +79,6 @@ COLLECT_ALL_PKGS = [
     'chempy',       # balanceamento estequiométrico (usa sympy)
     'spglib',       # simetria (binário + dados)
     'pyqtgraph',    # visualização 3D (carrega itens GL dinamicamente)
-    'cloudscraper', # scraping (resolve módulos em runtime)
     # plotly: NAO usar collect_all. O app nao usa plotly (vem so transitivo do
     # pymatgen e nunca cria figuras). collect_all puxava 1594 modulos + 40MB de
     # validadores inuteis e dominava o tempo de analise. O gerador + analise

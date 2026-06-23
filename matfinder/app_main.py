@@ -22,8 +22,6 @@ import re
 # Essas importações são carregadas apenas quando necessárias para acelerar inicialização
 requests = None  # Carregado sob demanda
 BeautifulSoup = None  # Carregado sob demanda
-cloudscraper = None  # Carregado sob demanda
-CLOUDSRAPER_AVAILABLE = None  # Verificado sob demanda
 MPRester = None  # Carregado sob demanda
 Composition = None  # Carregado sob demanda
 Structure = None  # Carregado sob demanda
@@ -45,21 +43,6 @@ def _ensure_beautifulsoup():
         from bs4 import BeautifulSoup as _BeautifulSoup
         BeautifulSoup = _BeautifulSoup
     return BeautifulSoup
-
-
-def _ensure_cloudscraper():
-    """Carrega cloudscraper sob demanda."""
-    global cloudscraper, CLOUDSRAPER_AVAILABLE
-    if CLOUDSRAPER_AVAILABLE is None:
-        try:
-            import cloudscraper as _cloudscraper
-            cloudscraper = _cloudscraper
-            CLOUDSRAPER_AVAILABLE = True
-        except ImportError:
-            CLOUDSRAPER_AVAILABLE = False
-            cloudscraper = None
-            logging.warning(ptr("Biblioteca 'cloudscraper' não encontrada. (recurso opcional)."))
-    return cloudscraper, CLOUDSRAPER_AVAILABLE
 
 
 def _ensure_mp_api():

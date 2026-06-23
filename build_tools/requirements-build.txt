@@ -48,7 +48,6 @@ pillow==10.4.0
 openpyxl==3.1.5
 beautifulsoup4==4.12.3
 lxml==5.4.0
-cloudscraper==1.2.71
 requests==2.32.3
 
 # --- Build ---

@@ -14,14 +14,6 @@ from pymatgen.core.structure import Structure
 from pymatgen.io.cif import CifWriter
 from matfinder.core.translator import ptr
 
-try:
-    import cloudscraper
-
-    CLOUDSRAPER_AVAILABLE = True
-except ImportError:
-    CLOUDSRAPER_AVAILABLE = False
-    logging.warning(ptr("Biblioteca 'cloudscraper' não encontrada. (recurso opcional)."))
-
 # --- Constantes de API ---
 ROD_SEARCH_BASE_URL = "https://solsa.crystallography.net/rod/result"
 ROD_ENTRY_BASE_URL = "https://solsa.crystallography.net/rod/"

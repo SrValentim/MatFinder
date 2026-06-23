@@ -42,11 +42,16 @@ e versionamento [Semantic Versioning](https://semver.org/lang/pt-BR/) (MAJOR.MIN
 - **Suíte de testes automatizados (pytest)** em `tests/` cobrindo a lógica central
   (normalização, background, matemática de DRX, calculadora, DOI, traduções, dados de
   exemplo) + workflow de CI (`tests.yml`) e `requirements-dev.txt`.
+- Rascunho do artigo JOSS: `paper/paper.md` + `paper/paper.bib`.
 
 ### Changed
 - **Cross-platform:** roda de fonte em Windows, Linux e macOS. O diretório de dados
   do usuário passa a ser escolhido por plataforma (LOCALAPPDATA / ~/Library/Application
   Support / XDG). README "Run from source" com comandos para os 3 SOs.
+
+### Removed
+- Dependência **`cloudscraper`** (ficou morta após a remoção do Sci-Hub): retirada do
+  código, do `MatFinder.spec` e dos `requirements-build`.
 
 ### Infra
 - CI (`build-release.yml`) virou **matriz de 3 SOs**: na tag, gera instalador+zip
