@@ -20,7 +20,7 @@ try:
     CLOUDSRAPER_AVAILABLE = True
 except ImportError:
     CLOUDSRAPER_AVAILABLE = False
-    logging.warning(ptr("Biblioteca 'cloudscraper' não encontrada. O download do Sci-Hub pode falhar."))
+    logging.warning(ptr("Biblioteca 'cloudscraper' não encontrada. (recurso opcional)."))
 
 # --- Constantes de API ---
 ROD_SEARCH_BASE_URL = "https://solsa.crystallography.net/rod/result"
@@ -236,67 +236,95 @@ def fetch_rod_file_content(rod_id: str, proxies=None):
         raise
 
 
-def fetch_scihub_pdf(doi: str, scihub_base_url: str, proxies=None):
-    """
-    Tenta descarregar um PDF do Sci-Hub usando um DOI.
-    """
-    if not CLOUDSRAPER_AVAILABLE:
-        raise Exception(ptr("Biblioteca 'cloudscraper' não instalada. Execute 'pip install cloudscraper'."))
+# Email de contato para a "polite pool" do OpenAlex e exigido pela API do Unpaywall.
+# E o e-mail publico do mantenedor (ja consta em matfinder/__init__.py).
+OA_CONTACT_EMAIL = "Raynnervalentim@hotmail.com"
 
-    scraper = cloudscraper.create_scraper()
-    scihub_domains = list(set([scihub_base_url, "https://sci-hub.se/", "https://sci-hub.st/", "https://sci-hub.ru/"]))
-    pdf_content_bytes = None
-    final_pdf_url_used = None
 
-    for domain_idx, domain in enumerate(scihub_domains):
-        if pdf_content_bytes: break
-        target_page_url = f"{domain.rstrip('/')}/{doi}"
-        logging.info(f"Tentativa Sci-Hub {domain_idx + 1}/{len(scihub_domains)}: Acessando {target_page_url}")
+def _normalize_doi(doi: str) -> str:
+    d = (doi or "").strip()
+    for pref in ("https://doi.org/", "http://doi.org/", "https://dx.doi.org/",
+                 "doi.org/", "doi:", "DOI:"):
+        if d.lower().startswith(pref.lower()):
+            d = d[len(pref):]
+    return d.strip().strip("/")
+
+
+def _download_pdf(url, proxies=None, timeout=60):
+    """Baixa a URL e devolve os bytes se for um PDF de verdade; senao None."""
+    headers = {"User-Agent": f"MatFinder (mailto:{OA_CONTACT_EMAIL})"}
+    resp = requests.get(url, headers=headers, timeout=timeout, proxies=proxies,
+                        allow_redirects=True)
+    resp.raise_for_status()
+    content = resp.content
+    ctype = resp.headers.get("Content-Type", "").lower()
+    if "application/pdf" in ctype or content[:5] == b"%PDF-":
+        return content
+    return None
+
+
+def fetch_oa_pdf(doi: str, proxies=None):
+    """Procura a versao de ACESSO ABERTO (legal) de um artigo pelo DOI e baixa o PDF.
+
+    Usa OpenAlex (que agrega os locais de OA do Unpaywall) e, como reforco, a API do
+    Unpaywall. Retorna (pdf_bytes, suggested_filename) ou levanta Exception com mensagem
+    clara se nao houver versao de acesso aberto disponivel. Usa apenas fontes legais
+    de acesso aberto.
+    """
+    doi_clean = _normalize_doi(doi)
+    headers = {"User-Agent": f"MatFinder (mailto:{OA_CONTACT_EMAIL})"}
+    candidates = []
+
+    # 1) OpenAlex - inclui os locais de OA do Unpaywall, sem exigir e-mail.
+    try:
+        r = requests.get(
+            f"https://api.openalex.org/works/doi:{doi_clean}",
+            params={"mailto": OA_CONTACT_EMAIL},
+            headers=headers, timeout=30, proxies=proxies,
+        )
+        if r.status_code == 200:
+            w = r.json()
+            locs = [w.get("best_oa_location"), w.get("primary_location")]
+            locs += (w.get("locations") or [])
+            for loc in locs:
+                if isinstance(loc, dict) and loc.get("pdf_url"):
+                    candidates.append(loc["pdf_url"])
+            oa_url = (w.get("open_access") or {}).get("oa_url")
+            if oa_url:
+                candidates.append(oa_url)
+    except Exception as e:
+        logging.warning(f"OpenAlex falhou para {doi_clean}: {e}")
+
+    # 2) Unpaywall - reforco.
+    try:
+        r = requests.get(
+            f"https://api.unpaywall.org/v2/{doi_clean}",
+            params={"email": OA_CONTACT_EMAIL},
+            headers=headers, timeout=30, proxies=proxies,
+        )
+        if r.status_code == 200:
+            d = r.json()
+            for loc in [d.get("best_oa_location")] + (d.get("oa_locations") or []):
+                if isinstance(loc, dict):
+                    for u in (loc.get("url_for_pdf"), loc.get("url")):
+                        if u:
+                            candidates.append(u)
+    except Exception as e:
+        logging.warning(f"Unpaywall falhou para {doi_clean}: {e}")
+
+    # Baixa o primeiro candidato que for realmente um PDF.
+    seen = set()
+    for url in candidates:
+        if not url or url in seen:
+            continue
+        seen.add(url)
         try:
-            page_response = scraper.get(target_page_url, timeout=30, proxies=proxies)
-            page_response.raise_for_status()
-            content_type = page_response.headers.get("Content-Type", "").lower()
+            pdf = _download_pdf(url, proxies=proxies)
+            if pdf:
+                logging.info(f"PDF de acesso aberto obtido de: {url}")
+                fname = doi_clean.replace("/", "_").replace(":", "_") + ".pdf"
+                return pdf, fname
+        except Exception as e:
+            logging.warning(f"Falha ao baixar PDF de {url}: {e}")
 
-            if "application/pdf" in content_type:
-                pdf_content_bytes = page_response.content
-                final_pdf_url_used = target_page_url
-                break
-            else:
-                soup = BeautifulSoup(page_response.text, "html.parser")
-                pdf_url_found_in_html = None
-                selectors = [("iframe#pdf", "src"), ("embed#pdf", "src"), ('a[onclick*=".pdf"]', "onclick")]
-                for tag_selector, attr_name in selectors:
-                    element = soup.select_one(tag_selector)
-                    if element:
-                        if attr_name == "onclick" and "location.href='" in element[attr_name]:
-                            pdf_url_found_in_html = element[attr_name].split("location.href='")[1].split("'")[0]
-                            break
-                        elif element.get(attr_name):
-                            pdf_url_found_in_html = element.get(attr_name)
-                            break
-                if pdf_url_found_in_html:
-                    if pdf_url_found_in_html.startswith("//"):
-                        pdf_url_found_in_html = "https:" + pdf_url_found_in_html
-                    elif not pdf_url_found_in_html.startswith(("http://", "https://")):
-                        pdf_url_found_in_html = urljoin(target_page_url, pdf_url_found_in_html)
-
-                    if pdf_url_found_in_html == target_page_url: continue
-
-                    logging.info(f"  Link PDF encontrado no HTML: {pdf_url_found_in_html}")
-                    pdf_response = scraper.get(pdf_url_found_in_html, stream=True, timeout=60, proxies=proxies)
-                    pdf_response.raise_for_status()
-                    if "application/pdf" in pdf_response.headers.get("Content-Type", "").lower():
-                        pdf_content_bytes = pdf_response.content
-                        final_pdf_url_used = pdf_url_found_in_html
-                        break
-        except requests.exceptions.RequestException as req_err:
-            logging.warning(f"Erro de requisição para {target_page_url}: {req_err}.")
-        except Exception as e_parse:
-            logging.error(f"Erro ao processar HTML de {target_page_url}: {e_parse}.")
-
-    if pdf_content_bytes:
-        logging.info(f"PDF descarregado com sucesso de {final_pdf_url_used or 'URL desconhecida'}")
-        suggested_filename = doi.replace("/", "_").replace(":", "_") + ".pdf"
-        return pdf_content_bytes, suggested_filename
-    else:
-        raise Exception(ptr("Não foi possível encontrar ou descarregar o PDF após todas as tentativas."))
+    raise Exception(ptr("Nenhuma versao de acesso aberto (Unpaywall/OpenAlex) foi encontrada para este DOI."))

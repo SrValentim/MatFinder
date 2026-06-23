@@ -166,13 +166,13 @@
   },
   "bottom_panel": {
     "external_databases": "Externe Datenbanken",
-    "scihub_downloader": "Sci-Hub DOI Downloader",
+    "oa_pdf_downloader": "Open-Access-PDF (per DOI)",
     "article_search": "Schnelle Artikelsuche",
     "doi_label": "Nach DOI abrufen:",
     "doi_placeholder": "Artikel-DOI eingeben...",
     "doi_tooltip": "Geben Sie eine DOI (z.B.: 10.1234/beispiel) oder URL mit DOI ein, um das PDF abzurufen.",
-    "scihub_button": "PDF suchen und speichern",
-    "scihub_tooltip": "Versuchen Sie, das Artikel-PDF über Sci-Hub mit der angegebenen DOI herunterzuladen.",
+    "oa_pdf_button": "PDF suchen und speichern",
+    "oa_pdf_tooltip": "Sucht und lädt das Open-Access-PDF (über Unpaywall/OpenAlex) für die angegebene DOI herunter.",
     "google_scholar": "Google Scholar:",
     "sciencedirect": "ScienceDirect:",
     "search_placeholder": "Geben Sie Ihre Suche hier ein...",
@@ -490,14 +490,14 @@
       "results_title": "Ergebnisse"
     }
   },
-  "scihub": {
-    "searching": "Suche PDF auf Sci-Hub...",
-    "not_found": "PDF nicht auf Sci-Hub gefunden",
+  "oa_pdf": {
+    "searching": "Suche das Open-Access-PDF...",
+    "not_found": "Keine Open-Access-Version für diese DOI gefunden.",
     "invalid_doi": "Ungültige oder fehlende DOI",
     "doi_missing_title": "Fehlende DOI",
     "doi_missing_message": "Bitte geben Sie eine DOI ein.",
     "in_progress_title": "In Bearbeitung",
-    "in_progress_message": "Ein Sci-Hub-Download ist bereits im Gange.",
+    "in_progress_message": "Ein Open-Access-PDF-Download läuft bereits.",
     "download_error": "Fehler beim Herunterladen des PDF",
     "save_title": "PDF speichern",
     "download_complete": "Download abgeschlossen",

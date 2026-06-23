@@ -58,7 +58,7 @@ def _ensure_cloudscraper():
         except ImportError:
             CLOUDSRAPER_AVAILABLE = False
             cloudscraper = None
-            logging.warning(ptr("Biblioteca 'cloudscraper' não encontrada. O download do Sci-Hub pode falhar."))
+            logging.warning(ptr("Biblioteca 'cloudscraper' não encontrada. (recurso opcional)."))
     return cloudscraper, CLOUDSRAPER_AVAILABLE
 
 
@@ -174,7 +174,7 @@ def get_crystal_system_translated(system_key: str) -> str:
 class Worker(QObject):
     # (O conteúdo da classe Worker permanece o mesmo)
     material_search_results_ready = Signal(list, str)
-    scihub_pdf_downloaded = Signal(bytes, str)
+    oa_pdf_downloaded = Signal(bytes, str)
     task_error = Signal(str, str)
     cif_data_ready = Signal(str, str)
     cod_cif_data_ready = Signal(str, str, str)
@@ -202,10 +202,10 @@ class Worker(QObject):
                 self.material_search_results_ready.emit(
                     results_raw, db_choice_from_func
                 )
-            elif self.task_type == "scihub_pdf":
-                context_for_error = ptr("Sci-Hub")
+            elif self.task_type == "oa_pdf":
+                context_for_error = ptr("Open-Access PDF")
                 pdf_content, suggested_filename = self.task_callable(*self.args)
-                self.scihub_pdf_downloaded.emit(pdf_content, suggested_filename)
+                self.oa_pdf_downloaded.emit(pdf_content, suggested_filename)
             elif self.task_type == "fetch_doi_from_ccdc":
                 context_for_error = ptr("Busca de DOI (CCDC)")
                 doi = self.task_callable(*self.args)
@@ -318,7 +318,6 @@ class Worker(QObject):
 
 
 class MaterialsApp(QMainWindow):
-    SCIHUB_BASE_URL = "https://sci-hub.in"
 
     def __init__(self):
         super().__init__()
@@ -351,14 +350,14 @@ class MaterialsApp(QMainWindow):
         self.cif_export_target = None
 
         self.search_thread = None
-        self.scihub_thread = None
+        self.oa_pdf_thread = None
         self.cif_fetch_thread = None
         self.cod_cif_fetch_thread = None
         self.rod_file_fetch_thread = None
         self.doi_fetch_thread = None
 
         self.btn_consultar_ref = None
-        self.btn_scihub_ref = None
+        self.btn_oa_pdf_ref = None
         self.doi_entry_ref = None
 
         self.proxy_settings = {"enabled": False, "http": "", "https": ""}
@@ -819,8 +818,8 @@ class MaterialsApp(QMainWindow):
         if hasattr(self, 'db_logos_group') and self.db_logos_group:
             self.db_logos_group.setTitle(tr('bottom_panel.external_databases'))
 
-        if hasattr(self, 'scihub_group') and self.scihub_group:
-            self.scihub_group.setTitle(tr('bottom_panel.scihub_downloader'))
+        if hasattr(self, 'oa_pdf_group') and self.oa_pdf_group:
+            self.oa_pdf_group.setTitle(tr('bottom_panel.oa_pdf_downloader'))
 
         if hasattr(self, 'article_search_group') and self.article_search_group:
             self.article_search_group.setTitle(tr('bottom_panel.article_search'))
@@ -829,9 +828,9 @@ class MaterialsApp(QMainWindow):
             self.doi_entry_ref.setPlaceholderText(tr('bottom_panel.doi_placeholder'))
             self.doi_entry_ref.setToolTip(tr('bottom_panel.doi_tooltip'))
 
-        if hasattr(self, 'btn_scihub_ref') and self.btn_scihub_ref:
-            self.btn_scihub_ref.setText(tr('bottom_panel.scihub_button'))
-            self.btn_scihub_ref.setToolTip(tr('bottom_panel.scihub_tooltip'))
+        if hasattr(self, 'btn_oa_pdf_ref') and self.btn_oa_pdf_ref:
+            self.btn_oa_pdf_ref.setText(tr('bottom_panel.oa_pdf_button'))
+            self.btn_oa_pdf_ref.setToolTip(tr('bottom_panel.oa_pdf_tooltip'))
 
         # Atualizar botão da tabela periódica
         if hasattr(self, 'btn_tabela_periodica') and self.btn_tabela_periodica:
@@ -1270,18 +1269,18 @@ class MaterialsApp(QMainWindow):
         db_logos_layout.addStretch(1)
         bottom_main_layout.addWidget(self.db_logos_group)
 
-        # GroupBox do Sci-Hub
-        self.scihub_group = QGroupBox(tr('bottom_panel.scihub_downloader'))
-        scihub_layout = QVBoxLayout(self.scihub_group)
+        # GroupBox do PDF de acesso aberto
+        self.oa_pdf_group = QGroupBox(tr('bottom_panel.oa_pdf_downloader'))
+        oa_pdf_layout = QVBoxLayout(self.oa_pdf_group)
         self.doi_entry_ref = QLineEdit()
         self.doi_entry_ref.setPlaceholderText(tr('bottom_panel.doi_placeholder'))
-        self.doi_entry_ref.returnPressed.connect(self.trigger_scihub_download)
-        scihub_layout.addWidget(self.doi_entry_ref)
-        self.btn_scihub_ref = QPushButton(tr('bottom_panel.scihub_button'))
-        self.btn_scihub_ref.clicked.connect(self.trigger_scihub_download)
-        scihub_layout.addWidget(self.btn_scihub_ref)
-        scihub_layout.addStretch(1)
-        bottom_main_layout.addWidget(self.scihub_group)
+        self.doi_entry_ref.returnPressed.connect(self.trigger_oa_pdf_download)
+        oa_pdf_layout.addWidget(self.doi_entry_ref)
+        self.btn_oa_pdf_ref = QPushButton(tr('bottom_panel.oa_pdf_button'))
+        self.btn_oa_pdf_ref.clicked.connect(self.trigger_oa_pdf_download)
+        oa_pdf_layout.addWidget(self.btn_oa_pdf_ref)
+        oa_pdf_layout.addStretch(1)
+        bottom_main_layout.addWidget(self.oa_pdf_group)
 
         # GroupBox de busca de artigos
         self.article_search_group = QGroupBox(tr('bottom_panel.article_search'))
@@ -1330,169 +1329,43 @@ class MaterialsApp(QMainWindow):
                 self, tr('search.empty_title'), tr('search.empty_message')
             )
 
-    def trigger_scihub_download(self):
-        # (O conteúdo desta função permanece o mesmo)
+    def trigger_oa_pdf_download(self):
         doi = self.doi_entry_ref.text().strip()
         if not doi:
-            QMessageBox.warning(self, tr('scihub.doi_missing_title'), tr('scihub.doi_missing_message'))
+            QMessageBox.warning(self, tr('oa_pdf.doi_missing_title'), tr('oa_pdf.doi_missing_message'))
             return
 
-        if self.scihub_thread and self.scihub_thread.is_alive():
+        if self.oa_pdf_thread and self.oa_pdf_thread.is_alive():
             QMessageBox.information(
-                self, tr('scihub.in_progress_title'), tr('scihub.in_progress_message')
+                self, tr('oa_pdf.in_progress_title'), tr('oa_pdf.in_progress_message')
             )
             return
 
-        logging.info(f"Iniciando busca de PDF no Sci-Hub para DOI: {doi}")
+        logging.info(f"Buscando PDF de acesso aberto para o DOI: {doi}")
         self.statusBar().showMessage(
-            ptr("Buscando PDF para DOI: {} via Sci-Hub...").format(doi), 3000
+            ptr("Buscando PDF de acesso aberto para o DOI: {}...").format(doi), 3000
         )
-        self.btn_scihub_ref.setEnabled(False)
+        self.btn_oa_pdf_ref.setEnabled(False)
         self.doi_entry_ref.setEnabled(False)
 
-        scihub_worker = Worker(
-            self._fetch_scihub_pdf_logic, "scihub_pdf", doi, self.SCIHUB_BASE_URL
-        )
-        scihub_worker.scihub_pdf_downloaded.connect(self.handle_scihub_pdf_ready)
-        scihub_worker.task_error.connect(self.handle_scihub_fetch_error)
+        oa_worker = Worker(self._fetch_oa_pdf_logic, "oa_pdf", doi)
+        oa_worker.oa_pdf_downloaded.connect(self.handle_oa_pdf_ready)
+        oa_worker.task_error.connect(self.handle_oa_pdf_fetch_error)
 
-        self.scihub_thread = threading.Thread(target=scihub_worker.run)
-        self.scihub_thread.daemon = True
-        self.scihub_thread.start()
+        self.oa_pdf_thread = threading.Thread(target=oa_worker.run)
+        self.oa_pdf_thread.daemon = True
+        self.oa_pdf_thread.start()
 
-    def _fetch_scihub_pdf_logic(self, doi: str, scihub_base_url: str):
-        # Carregar módulos sob demanda
-        import requests as _requests
-        _ensure_cloudscraper()
-        _ensure_beautifulsoup()
-
-        if not CLOUDSRAPER_AVAILABLE:
-            raise Exception(
-                ptr("Biblioteca 'cloudscraper' não instalada. Execute 'pip install cloudscraper' no seu terminal.")
-            )
-        # ... (lógica interna de scraping)
-        scraper = cloudscraper.create_scraper()
-
-        scihub_domains = {
-            scihub_base_url,
-            "https://sci-hub.se/",
-            "https://sci-hub.st/",
-            "https://sci-hub.ru/",
-        }
-        pdf_content_bytes = None
-        final_pdf_url_used = None
-        proxies = self._get_proxies_dict()
-
-        for domain_idx, domain in enumerate(scihub_domains):
-            if pdf_content_bytes:
-                break
-            target_page_url = f"{domain.rstrip('/')}/{doi}"
-            logging.info(
-                f"Tentativa Sci-Hub {domain_idx + 1}/{len(scihub_domains)}: Acessando {target_page_url}"
-            )
-            try:
-                page_response = scraper.get(
-                    target_page_url,
-                    timeout=30,
-                    proxies=proxies,
-                )
-                page_response.raise_for_status()
-                content_type = page_response.headers.get("Content-Type", "").lower()
-
-                if "application/pdf" in content_type:
-                    pdf_content_bytes = page_response.content
-                    final_pdf_url_used = target_page_url
-                    break
-                else:
-                    html_content = page_response.text
-                    soup = BeautifulSoup(html_content, "html.parser")
-                    pdf_url_found_in_html = None
-                    selectors = [
-                        ("iframe#pdf", "src"),
-                        ("iframe", "src"),
-                        ("embed#pdf", "src"),
-                        ('embed[type="application/pdf"]', "src"),
-                        ("a#pdf", "href"),
-                        ('a[onclick*=".pdf"]', "onclick"),
-                        ("div#viewer embed", "src"),
-                    ]
-                    for tag_selector, attr_name in selectors:
-                        element = soup.select_one(tag_selector)
-                        if element:
-                            if (
-                                    attr_name == "onclick"
-                                    and "location.href='" in element[attr_name]
-                            ):
-                                pdf_url_found_in_html = (
-                                    element[attr_name]
-                                    .split("location.href='")[1]
-                                    .split("'")[0]
-                                )
-                                break
-                            elif element.get(attr_name):
-                                pdf_url_found_in_html = element.get(attr_name)
-                                break
-                    if pdf_url_found_in_html:
-                        if pdf_url_found_in_html.startswith("//"):
-                            pdf_url_found_in_html = "https:" + pdf_url_found_in_html
-                        elif not pdf_url_found_in_html.startswith(
-                                ("http://", "https://")
-                        ):
-                            pdf_url_found_in_html = urljoin(
-                                target_page_url, pdf_url_found_in_html
-                            )
-
-                        if pdf_url_found_in_html == target_page_url:
-                            continue
-
-                        logging.info(
-                            f"  Link PDF encontrado no HTML do Sci-Hub: {pdf_url_found_in_html}"
-                        )
-                        pdf_response = scraper.get(
-                            pdf_url_found_in_html,
-                            stream=True,
-                            timeout=60,
-                            proxies=proxies,
-                        )
-                        pdf_response.raise_for_status()
-                        if (
-                                "application/pdf"
-                                in pdf_response.headers.get("Content-Type", "").lower()
-                        ):
-                            pdf_content_bytes = pdf_response.content
-                            final_pdf_url_used = pdf_url_found_in_html
-                            break
-                        else:
-                            logging.warning(
-                                f"  Link encontrado no Sci-Hub não era PDF: {pdf_response.headers.get('Content-Type')}"
-                            )
-            except _requests.exceptions.RequestException as req_err:
-                logging.warning(
-                    f"Erro de requisição para {target_page_url} (Sci-Hub): {req_err}."
-                )
-            except Exception as e_parse:
-                logging.error(
-                    f"Erro ao processar HTML de {target_page_url} (Sci-Hub): {e_parse}."
-                )
-
-        if pdf_content_bytes:
-            logging.info(
-                f"PDF baixado com sucesso de {final_pdf_url_used if final_pdf_url_used else 'URL desconhecida (Sci-Hub)'}"
-            )
-            suggested_filename = doi.replace("/", "_").replace(":", "_") + ".pdf"
-            return pdf_content_bytes, suggested_filename
-        else:
-            raise Exception(
-                ptr("Não foi possível encontrar ou baixar o PDF do Sci-Hub após todas as tentativas.")
-            )
+    def _fetch_oa_pdf_logic(self, doi: str):
+        """Procura e baixa a versao de ACESSO ABERTO (legal) do artigo a partir do
+        DOI, via OpenAlex e Unpaywall. Retorna (pdf_bytes, filename) ou levanta erro."""
+        from matfinder.core import api_logic
+        return api_logic.fetch_oa_pdf(doi, proxies=self._get_proxies_dict())
 
     @Slot(bytes, str)
-    def handle_scihub_pdf_ready(
-            self, pdf_content_bytes: bytes, suggested_filename: str
-    ):
-        # (O conteúdo desta função permanece o mesmo)
+    def handle_oa_pdf_ready(self, pdf_content_bytes: bytes, suggested_filename: str):
         self.statusBar().clearMessage()
-        self.btn_scihub_ref.setEnabled(True)
+        self.btn_oa_pdf_ref.setEnabled(True)
         self.doi_entry_ref.setEnabled(True)
 
         downloads_path = QStandardPaths.writableLocation(
@@ -1513,53 +1386,38 @@ class MaterialsApp(QMainWindow):
                     f.write(pdf_content_bytes)
                 self.statusBar().showMessage(tr('status.file_saved', path=filePath), 7000)
                 QMessageBox.information(
-                    self, tr('scihub.download_complete'), tr('scihub.file_saved', path=filePath)
+                    self, tr('oa_pdf.download_complete'), tr('oa_pdf.file_saved', path=filePath)
                 )
-                logging.info(f"Artigo Sci-Hub salvo em: {filePath}")
+                logging.info(f"Artigo (acesso aberto) salvo em: {filePath}")
                 if not QDesktopServices.openUrl(QUrl.fromLocalFile(filePath)):
                     QMessageBox.warning(
                         self,
                         tr('dialogs.error.warning'),
-                        tr('scihub.cannot_open_file', path=filePath),
+                        tr('oa_pdf.cannot_open_file', path=filePath),
                     )
-                    logging.warning(
-                        f"Não foi possível abrir automaticamente o arquivo PDF: {filePath}"
-                    )
-
             except IOError as ioe:
                 QMessageBox.critical(
                     self,
-                    tr('scihub.save_error'),
-                    tr('scihub.save_io_error', error=str(ioe)),
+                    tr('oa_pdf.save_error'),
+                    tr('oa_pdf.save_io_error', error=str(ioe)),
                 )
-                logging.exception(
-                    f"Erro de E/S ao salvar PDF do Sci-Hub em {filePath}:"
-                )
+                logging.exception(f"Erro de E/S ao salvar PDF em {filePath}:")
             except Exception as e:
                 QMessageBox.critical(
-                    self, tr('scihub.save_error'), tr('scihub.save_generic_error', error=str(e))
+                    self, tr('oa_pdf.save_error'), tr('oa_pdf.save_generic_error', error=str(e))
                 )
-                logging.exception(
-                    f"Erro inesperado ao salvar PDF do Sci-Hub em {filePath}:"
-                )
+                logging.exception(f"Erro inesperado ao salvar PDF em {filePath}:")
         else:
             QMessageBox.information(
-                self, tr('scihub.download_cancelled_title'), tr('scihub.download_cancelled_msg')
+                self, tr('oa_pdf.download_cancelled_title'), tr('oa_pdf.download_cancelled_msg')
             )
-            self.statusBar().showMessage(tr('scihub.download_cancelled_status'), 3000)
-            logging.info("Download do PDF (Sci-Hub) cancelado pelo usuário.")
+            self.statusBar().showMessage(tr('oa_pdf.download_cancelled_status'), 3000)
 
     @Slot(str, str)
-    def handle_scihub_fetch_error(self, error_title: str, error_message: str):
-        # (O conteúdo desta função permanece o mesmo)
+    def handle_oa_pdf_fetch_error(self, error_title: str, error_message: str):
         self.statusBar().clearMessage()
-        self.btn_scihub_ref.setEnabled(True)
+        self.btn_oa_pdf_ref.setEnabled(True)
         self.doi_entry_ref.setEnabled(True)
-        if "Sci-Hub" in error_title or "Sci-Hub" in error_message:
-            error_message += (
-                "\n\nVerifique sua conexão com a internet ou "
-                "tente configurar um proxy em 'Configuração > Configurar Proxy...'."
-            )
         QMessageBox.critical(self, error_title, error_message)
 
     def toggle_search_cancellation(self):

@@ -1175,10 +1175,6 @@
   "en_US": "File Not Found",
   "de_DE": "Datei nicht gefunden"
  },
- "Biblioteca 'cloudscraper' não encontrada. O download do Sci-Hub pode falhar.": {
-  "en_US": "'cloudscraper' library not found. Sci-Hub download may fail.",
-  "de_DE": "Bibliothek 'cloudscraper' nicht gefunden. Der Sci-Hub-Download kann fehlschlagen."
- },
  "Erro ao Salvar Chave": {
   "en_US": "Error Saving Key",
   "de_DE": "Fehler beim Speichern des Schlüssels"
@@ -2255,14 +2251,6 @@
   "en_US": "The 'pymatgen' library is required to handle CIF files.",
   "de_DE": "Die Bibliothek 'pymatgen' wird zum Verarbeiten von CIF-Dateien benötigt."
  },
- "Buscando PDF para DOI: {} via Sci-Hub...": {
-  "en_US": "Searching PDF for DOI: {} via Sci-Hub...",
-  "de_DE": "Suche PDF für DOI: {} über Sci-Hub..."
- },
- "Não foi possível encontrar ou baixar o PDF do Sci-Hub após todas as tentativas.": {
-  "en_US": "Could not find or download the PDF from Sci-Hub after all attempts.",
-  "de_DE": "Das PDF konnte nach allen Versuchen nicht von Sci-Hub gefunden oder heruntergeladen werden."
- },
  "Não foi possível encontrar ou descarregar o PDF após todas as tentativas.": {
   "en_US": "Could not find or download the PDF after all attempts.",
   "de_DE": "Das PDF konnte nach allen Versuchen nicht gefunden oder heruntergeladen werden."
@@ -2638,5 +2626,13 @@
  "Comprimento de onda inválido": {
   "en_US": "Invalid wavelength",
   "de_DE": "Ungültige Wellenlänge"
+ },
+ "Buscando PDF de acesso aberto para o DOI: {}...": {
+  "en_US": "Searching for the open-access PDF for DOI: {}...",
+  "de_DE": "Suche Open-Access-PDF für DOI: {}..."
+ },
+ "Nenhuma versao de acesso aberto (Unpaywall/OpenAlex) foi encontrada para este DOI.": {
+  "en_US": "No open-access version (Unpaywall/OpenAlex) was found for this DOI.",
+  "de_DE": "Es wurde keine Open-Access-Version (Unpaywall/OpenAlex) für diese DOI gefunden."
  }
 }

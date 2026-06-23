@@ -15,7 +15,7 @@ A visual tour of MatFinder and its built-in XRD suite, **PhaseDRX**.
 ### Search multiple databases at once
 Query the **Materials Project**, **OQMD**, **COD** and **ROD** by element. Results list the
 space group, band gap, formation energy and a color-coded thermodynamic stability — alongside
-favorites, external-database links, a Sci-Hub DOI downloader and quick article search.
+favorites, external-database links, an open-access PDF downloader (Unpaywall/OpenAlex) and quick article search.
 
 ![MatFinder main window with Materials Project search results](docs/screenshots/screenshot1.png)
 
