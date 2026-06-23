@@ -34,6 +34,21 @@ e versionamento [Semantic Versioning](https://semver.org/lang/pt-BR/) (MAJOR.MIN
 
 ## [Não publicado]
 
+### Added
+- `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md` (Contributor Covenant 2.1) e templates de
+  issue (bug/feature) — diretrizes de comunidade exigidas pela JOSS.
+
+### Changed
+- **Cross-platform:** roda de fonte em Windows, Linux e macOS. O diretório de dados
+  do usuário passa a ser escolhido por plataforma (LOCALAPPDATA / ~/Library/Application
+  Support / XDG). README "Run from source" com comandos para os 3 SOs.
+
+### Infra
+- CI (`build-release.yml`) virou **matriz de 3 SOs**: na tag, gera instalador+zip
+  (Windows), `.tar.gz` (Linux) e `.zip` (macOS) e publica todos no Release. Roda quando
+  o billing do Actions for regularizado; o release local (`release.py`) segue para Windows.
+- `build_clean.py` ciente do SO (nome do binário sem `.exe` em Linux/macOS).
+
 ---
 
 ## [3.24.1] - 2026-06-22

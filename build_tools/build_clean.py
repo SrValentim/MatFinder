@@ -24,7 +24,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 SPEC = os.path.join(HERE, "MatFinder.spec")
 DIST_APP = os.path.join(ROOT, "dist", "MatFinder")
-EXE = os.path.join(DIST_APP, "MatFinder.exe")
+# Nome do binário por plataforma (Windows: .exe; Linux/macOS: sem extensão).
+EXE = os.path.join(DIST_APP, "MatFinder.exe" if sys.platform == "win32" else "MatFinder")
 
 
 def sh(title, cmd, **kw):
