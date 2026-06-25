@@ -10,7 +10,7 @@
   [![Python](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/)
   [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey.svg)](#get-matfinder)
   
-  🌐 **Available in:** Português | English | Deutsch
+  🌐 **English** · [Português](README.pt-BR.md) · [Deutsch](README.de.md)
 
   <br/><br/>
 
