@@ -33,7 +33,7 @@ planned — the slots are ready below.
 1. Launch **MatFinder** (`MatFinder.exe` or `python run_matfinder.py`).
 2. Type the elements (e.g. `Sm, Fe, O`) and choose a database.
    COD/OQMD/ROD need no key; Materials Project needs a free
-   [API key](install.md#optional-materials-project-api-key).
+   [API key](getting-started/index.md#optional-materials-project-api-key).
 3. Right-click a result → **Download CIF** or **Export CIF to PhaseDRX**.
 
 ---

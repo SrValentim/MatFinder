@@ -16,7 +16,7 @@ time you run it. This is expected for new, independent software. To proceed:
 
 The app is open-source — you can read every line on
 [GitHub](https://github.com/SrValentim/MatFinder) or build it yourself
-(see [Install ▸ Option 3](install.md#option-3-compile-your-own-optimized-exe)).
+(see [Install ▸ Option 3](getting-started/index.md#option-3-compile-your-own-optimized-exe)).
 
 ## Do I need Python?
 
@@ -27,7 +27,7 @@ You only need Python 3.11 if you want to run from source or compile your own bui
 
 Only the **Materials Project**, and its key is free. **COD**, **OQMD** and **ROD**
 work with no key at all. See
-[Install ▸ API key](install.md#optional-materials-project-api-key).
+[Install ▸ API key](getting-started/index.md#optional-materials-project-api-key).
 
 ## Which file formats can PhaseDRX open?
 

@@ -1,8 +1,9 @@
 # Download & Install
 
 !!! success "No account or registration required"
-    All downloads come from the public [GitHub Releases](https://github.com/SrValentim/MatFinder/releases/latest)
-    page. No sign-up, no email, no GitHub account needed.
+    All downloads come from the public
+    [GitHub Releases](https://github.com/SrValentim/MatFinder/releases/latest) page.
+    No sign-up, no email, no GitHub account needed.
 
 [Download the latest release](https://github.com/SrValentim/MatFinder/releases/latest){ .md-button .md-button--primary }
 
@@ -20,8 +21,8 @@
     Windows 10/11 (64-bit). 4 GB RAM minimum (8 GB recommended).
 
 !!! warning "Windows SmartScreen"
-    The installer is not code-signed yet, so Windows may show a SmartScreen
-    warning. Click **More info → Run anyway**. See the [FAQ](faq.md) for details.
+    The installer is not code-signed yet, so Windows may show a SmartScreen warning.
+    Click **More info → Run anyway**. See the [FAQ](../faq.md) for details.
 
 ---
 
@@ -43,8 +44,8 @@ python3.11 -m venv .venv
 ```
 
 Requires **Python 3.11 (64-bit)**. The pinned `build_tools/requirements-build.lock.txt`
-is the reproducible dependency set. Running from source works on all three
-platforms; the pre-built `.exe`/installer are Windows-only.
+is the reproducible dependency set. Running from source works on all three platforms;
+the pre-built `.exe`/installer are Windows-only.
 
 ---
 
@@ -65,3 +66,7 @@ work without one). Get a key from the
 [Materials Project dashboard](https://next-gen.materialsproject.org/api) and set it in
 MatFinder under *Settings ▸ Materials Project Key…*. The key is stored locally on your
 machine and is never bundled with the app.
+
+---
+
+Ready? Continue with the **[Quick start](quick-start.md)**.

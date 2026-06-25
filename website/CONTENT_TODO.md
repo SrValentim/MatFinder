@@ -24,17 +24,22 @@ site updates itself.
 
 ---
 
-## Page map (the scope)
+## Site structure (the scope)
 
-| Page | File | Status |
-|------|------|--------|
-| Home / landing | `docs/index.md` | Done — has the download button |
-| Download & Install | `docs/install.md` | Done |
-| Features | `docs/features.md` | Done — could add screenshots |
-| Tutorials & Videos | `docs/tutorial.md` | **3 video slots waiting** |
-| Examples | `docs/examples.md` | Done — add more datasets |
-| How to cite | `docs/cite.md` | Done |
-| FAQ | `docs/faq.md` | Done |
+| Section | Pages | File(s) |
+|---|---|---|
+| **Home** | landing + download | `docs/index.md` |
+| **Overview** | Summary · What is MatFinder · Statement of need · Key features | `docs/overview/` |
+| **Get Started** | Download & Install · Quick start | `docs/getting-started/` |
+| **User Guide** | Database search · Analysis (PhaseDRX) · 3D viewer · Tools | `docs/guide/` |
+| **Tutorials & Videos** | 3 video slots + steps | `docs/tutorial.md` |
+| **Examples** | SmFeO₃ worked example | `docs/examples.md` |
+| **Cite** | DOI + BibTeX | `docs/cite.md` |
+| **FAQ** | help & troubleshooting | `docs/faq.md` |
+| **About** | The project · License · Contributing | `docs/about/` |
+
+The navigation is defined in `website/mkdocs.yml` (the `nav:` block). To add a page,
+create the `.md` file and add it to `nav`.
 
 ---
 
@@ -58,13 +63,14 @@ explaining exactly what to record. To embed a video:
 Put data under the repository's `examples/` folder, then describe the workflow in
 `docs/examples.md`. The page already links to `examples/` on GitHub.
 
-### 3. Tutorial text
-The step-by-step text in `docs/tutorial.md` is a first draft — refine it to match
-exactly what the app does.
+### 3. Screenshots (recommended)
+Drop PNGs into `docs/assets/` and reference them in the guide pages, e.g. in
+`docs/guide/analysis.md`: `![PhaseDRX overlay](../assets/screenshot-overlay.png)`.
+Good places: the analysis overlay, the 3D viewer, the main search window.
 
-### 4. Screenshots (optional but recommended)
-Drop PNGs into `docs/assets/` and reference them, e.g. in `features.md`:
-`![Main window](assets/screenshot-main.png)`.
+### 4. Refine the text
+The User Guide and tutorials are a solid first draft — tweak wording to match exactly
+what the app does as it evolves.
 
 ---
 
@@ -75,3 +81,5 @@ Drop PNGs into `docs/assets/` and reference them, e.g. in `features.md`:
 - Primary language is **English**. Portuguese/German can be added later with the
   `mkdocs-static-i18n` plugin (the PT/DE READMEs are already a head start).
 - The built site (`website/site/`) is git-ignored; CI builds it fresh each time.
+- Every internal link is checked at build time (`--strict`), so a broken link fails
+  the deploy instead of shipping silently.

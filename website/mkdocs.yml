@@ -38,7 +38,9 @@ theme:
   features:
     - navigation.tabs
     - navigation.sections
+    - navigation.indexes
     - navigation.top
+    - navigation.footer
     - navigation.tracking
     - toc.follow
     - search.suggest
@@ -76,9 +78,25 @@ extra:
 
 nav:
   - Home: index.md
-  - Download & Install: install.md
-  - Features: features.md
+  - Overview:
+      - overview/index.md
+      - What is MatFinder: overview/what-is-matfinder.md
+      - Statement of need: overview/statement-of-need.md
+      - Key features: overview/features.md
+  - Get Started:
+      - getting-started/index.md
+      - Quick start: getting-started/quick-start.md
+  - User Guide:
+      - guide/index.md
+      - Database search: guide/database-search.md
+      - Analysis (PhaseDRX): guide/analysis.md
+      - 3D structure viewer: guide/structure-viewer.md
+      - Tools & calculators: guide/tools.md
   - Tutorials & Videos: tutorial.md
   - Examples: examples.md
-  - How to cite: cite.md
+  - Cite: cite.md
   - FAQ: faq.md
+  - About:
+      - about/index.md
+      - License: about/license.md
+      - Contributing: about/contributing.md

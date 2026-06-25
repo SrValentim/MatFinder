@@ -13,7 +13,7 @@ hide:
 <p class="tagline">Crystalline materials search and X-ray diffraction phase analysis — in a single, free desktop app.</p>
 
 [Download for Windows](https://github.com/SrValentim/MatFinder/releases/latest){ .md-button .md-button--primary }
-[View on GitHub](https://github.com/SrValentim/MatFinder){ .md-button }
+[Get started](getting-started/index.md){ .md-button }
 
 <small>Free and open-source (GPL-3.0) · No account or registration required</small>
 
@@ -26,30 +26,38 @@ hide:
 MatFinder unifies the everyday powder X-ray diffraction (XRD) workflow in one place:
 search open crystallographic databases, retrieve and manage CIF files, simulate and
 compare diffraction patterns, and visualize crystal structures in 3D. Its analysis
-module, **PhaseDRX**, loads experimental diffractograms, cleans them
-(background removal, normalization, smoothing, denoising) and overlays simulated
-patterns for qualitative phase identification — including an interactive 3D view of
-the unit cell.
+module, **PhaseDRX**, loads experimental diffractograms, cleans them and overlays
+simulated patterns for qualitative phase identification.
 
 Developed at the Federal University of Amazonas (UFAM), Brazil.
 
+[Read the overview](overview/index.md){ .md-button }
+
 <div class="grid cards" markdown>
 
--   :material-download:{ .lg .middle } __Get it__
+-   :material-book-open-variant:{ .lg .middle } __Overview__
 
     ---
 
-    Download the Windows installer or portable zip — no Python required.
+    Summary, what it is, and why it exists.
 
-    [:octicons-arrow-right-24: Download & Install](install.md)
+    [:octicons-arrow-right-24: Overview](overview/index.md)
 
--   :material-star-four-points:{ .lg .middle } __Features__
+-   :material-download:{ .lg .middle } __Get started__
 
     ---
 
-    Multi-database search, CIF tools, pattern simulation, 3D viewer, data treatment.
+    Download, install and run your first analysis — no Python required.
 
-    [:octicons-arrow-right-24: Explore features](features.md)
+    [:octicons-arrow-right-24: Get started](getting-started/index.md)
+
+-   :material-book-cog-outline:{ .lg .middle } __User Guide__
+
+    ---
+
+    Reference docs for search, analysis, the 3D viewer and tools.
+
+    [:octicons-arrow-right-24: User Guide](guide/index.md)
 
 -   :material-play-circle:{ .lg .middle } __Tutorials & videos__
 
@@ -74,14 +82,6 @@ Developed at the Federal University of Amazonas (UFAM), Brazil.
     DOI and BibTeX for using MatFinder in your research.
 
     [:octicons-arrow-right-24: How to cite](cite.md)
-
--   :material-help-circle:{ .lg .middle } __FAQ__
-
-    ---
-
-    Windows SmartScreen, API keys, supported file formats and more.
-
-    [:octicons-arrow-right-24: Read the FAQ](faq.md)
 
 </div>
 
