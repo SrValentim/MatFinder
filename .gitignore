@@ -82,3 +82,6 @@ docs/Manual*.pdf
 
 # pytest
 .pytest_cache/
+
+# Site de documentação (MkDocs) - build gerado, CI reconstrói a cada push
+website/site/

@@ -1,0 +1,3 @@
+# Dependencies to build the MatFinder documentation site.
+# Used both locally (mkdocs serve) and by the CI deploy workflow.
+mkdocs-material>=9.5,<10

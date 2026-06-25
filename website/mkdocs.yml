@@ -1,0 +1,84 @@
+# MkDocs configuration for the MatFinder documentation site.
+# Build:   mkdocs build -f website/mkdocs.yml
+# Preview: mkdocs serve -f website/mkdocs.yml   (then open http://127.0.0.1:8000)
+site_name: MatFinder
+site_url: https://srvalentim.github.io/MatFinder/
+site_description: >-
+  Scientific desktop tool for crystallographic database search and
+  X-ray diffraction phase analysis. Free, open-source, no registration.
+site_author: Raynner Valentim
+copyright: Copyright &copy; 2026 Raynner Valentim — GPL-3.0
+
+repo_url: https://github.com/SrValentim/MatFinder
+repo_name: SrValentim/MatFinder
+edit_uri: edit/main/website/docs/
+
+theme:
+  name: material
+  language: en
+  logo: assets/logo.png
+  favicon: assets/favicon.ico
+  icon:
+    repo: fontawesome/brands/github
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - navigation.tracking
+    - toc.follow
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.action.edit
+
+extra_css:
+  - stylesheets/extra.css
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - tables
+  - footnotes
+  - toc:
+      permalink: true
+  - pymdownx.superfences
+  - pymdownx.details
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+
+plugins:
+  - search
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/SrValentim/MatFinder
+      name: MatFinder on GitHub
+
+nav:
+  - Home: index.md
+  - Download & Install: install.md
+  - Features: features.md
+  - Tutorials & Videos: tutorial.md
+  - Examples: examples.md
+  - How to cite: cite.md
+  - FAQ: faq.md
