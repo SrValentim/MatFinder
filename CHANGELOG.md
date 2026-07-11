@@ -28,10 +28,10 @@ e versionamento [Semantic Versioning](https://semver.org/lang/pt-BR/) (MAJOR.MIN
 ## [3.26.0] - 2026-07-11
 
 ### Added
-- **Medição de distância interatômica no visualizador 3D (PhaseDRX)**, no estilo VESTA:
-  o duplo-clique em dois átomos traça uma linha pontilhada e mostra a distância em Å no
-  meio dela; o rótulo acompanha a estrutura ao girar/dar zoom, e o botão direito limpa as
-  medições.
+- **Medição de distância interatômica no visualizador 3D (PhaseDRX)**, recurso baseado
+  em VESTA, Mercury e outros programas de visualização cristalográfica: o duplo-clique em
+  dois átomos traça uma linha pontilhada e mostra a distância em Å no meio dela; o rótulo
+  acompanha a estrutura ao girar/dar zoom, e o botão direito limpa as medições.
 
 ### Changed
 - Abas do PhaseDRX com nomes mais curtos: **Difração** (antes "Difratograma (2D)") e

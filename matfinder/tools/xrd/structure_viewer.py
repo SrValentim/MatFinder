@@ -198,7 +198,7 @@ class StructureViewer3D(QWidget):
         self._animation_type = None  # 'rotation_x', 'rotation_y', 'rotation_z', 'vibration'
         self._original_atom_positions = []
 
-        # Medição de distância interatômica (estilo VESTA)
+        # Medição de distância interatômica (baseada em VESTA, Mercury e outros)
         self._atom_info = []            # [{'pos','element','mesh'}] para picking
         self._measure_first_idx = None  # índice do primeiro átomo selecionado
         self._measurements = []         # medições persistentes: {'line','label','mid'}
@@ -1708,7 +1708,7 @@ class StructureViewer3D(QWidget):
         self._sync_orientation_gizmo()
 
     # ==================================================================
-    # MEDIÇÃO DE DISTÂNCIA INTERATÔMICA (estilo VESTA)
+    # MEDIÇÃO DE DISTÂNCIA INTERATÔMICA (baseada em VESTA, Mercury e outros)
     # ------------------------------------------------------------------
     # Duplo-clique num átomo o seleciona; uma linha pontilhada acompanha o
     # mouse; o duplo-clique num segundo átomo fixa a linha e mostra a
