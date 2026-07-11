@@ -14,7 +14,7 @@ from PySide6.QtWidgets import (
     QGroupBox, QDialogButtonBox, QFrame, QComboBox, QSpinBox
 )
 from PySide6.QtCore import Qt, Slot
-from PySide6.QtGui import QIcon
+from PySide6.QtGui import QIcon, QVector4D
 import pyqtgraph.opengl as gl
 import pyqtgraph as pg
 from matfinder.core.translator import ptr
@@ -34,6 +34,24 @@ try:
 except ImportError:
     BOND_LIBRARY_AVAILABLE = False
     logging.warning(ptr("⚠️  Biblioteca de ligações não disponível - usando fallback genérico"))
+
+
+def _site_symbol(site):
+    """Símbolo do elemento de um sítio, robusto a sítios DESORDENADOS.
+
+    Em estruturas com ocupação parcial (comuns em CIFs do COD), `site.specie`
+    lança AttributeError; nesse caso usamos a espécie de MAIOR ocupação, o que
+    é adequado para a visualização (cor/raio/ligações). As posições — e portanto
+    as distâncias medidas — não dependem disto.
+    """
+    try:
+        return site.specie.symbol
+    except Exception:
+        try:
+            sp = max(site.species, key=site.species.get)
+            return getattr(sp, 'symbol', str(sp))
+        except Exception:
+            return 'X'
 
 
 class StructureViewer3D(QWidget):
@@ -180,6 +198,15 @@ class StructureViewer3D(QWidget):
         self._animation_type = None  # 'rotation_x', 'rotation_y', 'rotation_z', 'vibration'
         self._original_atom_positions = []
 
+        # Medição de distância interatômica (estilo VESTA)
+        self._atom_info = []            # [{'pos','element','mesh'}] para picking
+        self._measure_first_idx = None  # índice do primeiro átomo selecionado
+        self._measurements = []         # medições persistentes: {'line','label','mid'}
+        self._rubber_line = None        # linha pontilhada que acompanha o mouse
+        self._highlight_item = None     # destaque do átomo selecionado
+        self._orig_mouse_double = None
+        self._orig_mouse_press = None
+        self._orig_mouse_move = None
 
         self._init_ui()
 
@@ -239,6 +266,9 @@ class StructureViewer3D(QWidget):
 
         # Iniciar sincronização periódica do gizmo
         self._start_gizmo_sync_timer()
+
+        # Instalar handlers de medição de distância (picking por duplo-clique)
+        self._install_measure_handlers()
 
     def _add_axes(self):
         """Adiciona eixos coordenados XYZ."""
@@ -516,7 +546,7 @@ class StructureViewer3D(QWidget):
         # Obter elementos únicos da estrutura
         elements = set()
         for site in self.structure:
-            elements.add(site.specie.symbol)
+            elements.add(_site_symbol(site))
 
         # Ordenar elementos alfabeticamente
         elements = sorted(elements)
@@ -602,6 +632,12 @@ class StructureViewer3D(QWidget):
             except Exception as e:
                 # Ignorar erros de sincronização silenciosamente
                 pass
+
+        # Reprojetar rótulos de distância (acompanham a estrutura ao girar/zoom)
+        try:
+            self._update_measurement_labels()
+        except Exception:
+            pass
 
     def _start_gizmo_sync_timer(self):
         """Inicia timer para sincronizar o gizmo periodicamente."""
@@ -739,6 +775,10 @@ class StructureViewer3D(QWidget):
             self.bond_meshes.clear()
             self.unit_cell_lines.clear()
 
+            # Limpar medições de distância
+            self._clear_measurements()
+            self._atom_info = []
+
             # Limpar também a estrutura
             self.structure = None
 
@@ -792,6 +832,9 @@ class StructureViewer3D(QWidget):
             self.atom_meshes.clear()
             self.bond_meshes.clear()
             self.unit_cell_lines.clear()
+            # Medições ficam inválidas ao re-renderizar (átomos recriados)
+            self._clear_measurements()
+            self._atom_info = []
 
         # IMPORTANTE: Renderizar na ordem correta para melhor visualização
         # 1. Primeiro ligações (ficam "atrás")
@@ -839,7 +882,7 @@ class StructureViewer3D(QWidget):
                     for site in self.structure:
                         # IMPORTANTE: site.coords já está em coordenadas cartesianas
                         pos = site.coords + translation
-                        element = site.specie.symbol
+                        element = _site_symbol(site)
 
                         # Obter cor e raio
                         color = self.ATOMIC_COLORS.get(element, self.ATOMIC_COLORS['default'])
@@ -857,6 +900,7 @@ class StructureViewer3D(QWidget):
                         mesh.translate(pos[0], pos[1], pos[2])
                         self.view_widget.addItem(mesh)
                         self.atom_meshes.append(mesh)
+                        self._atom_info.append({'pos': pos.copy(), 'element': element, 'mesh': mesh})
 
         logging.info(f"✅ Estrutura renderizada: {len(self.atom_meshes)} átomos, "
                     f"{len(self.bond_meshes)} ligações, {len(self.unit_cell_lines)} arestas da célula")
@@ -903,7 +947,7 @@ class StructureViewer3D(QWidget):
                             pos = site.coords + translation
                             all_atoms.append({
                                 'pos': pos,
-                                'element': site.specie.symbol,
+                                'element': _site_symbol(site),
                                 'cell': (i, j, k),
                                 'site_idx': idx,
                                 'global_idx': len(all_atoms)  # Índice único global
@@ -1663,6 +1707,389 @@ class StructureViewer3D(QWidget):
         # Sincronizar o gizmo de orientação
         self._sync_orientation_gizmo()
 
+    # ==================================================================
+    # MEDIÇÃO DE DISTÂNCIA INTERATÔMICA (estilo VESTA)
+    # ------------------------------------------------------------------
+    # Duplo-clique num átomo o seleciona; uma linha pontilhada acompanha o
+    # mouse; o duplo-clique num segundo átomo fixa a linha e mostra a
+    # distância (em Å) no meio dela. Clique direito limpa as medições.
+    # ==================================================================
+    def _install_measure_handlers(self):
+        """Sobrepõe os handlers de mouse do view_widget (mesmo padrão de
+        override por atributo já usado em info_label.mouseDoubleClickEvent)."""
+        try:
+            vw = self.view_widget
+            self._orig_mouse_double = vw.mouseDoubleClickEvent
+            self._orig_mouse_press = vw.mousePressEvent
+            self._orig_mouse_move = vw.mouseMoveEvent
+            vw.mouseDoubleClickEvent = self._measure_double_click
+            vw.mousePressEvent = self._measure_mouse_press
+            vw.mouseMoveEvent = self._measure_mouse_move
+        except Exception as e:
+            logging.warning(f"Handlers de medição 3D não instalados: {e}")
+
+    def _measure_double_click(self, ev):
+        try:
+            p = ev.position()
+            idx = self._pick_atom(p.x(), p.y())
+            if idx is not None:
+                self._on_atom_picked(idx)
+        except Exception as e:
+            logging.warning(f"Erro no duplo-clique de medição: {e}")
+
+    def _measure_mouse_press(self, ev):
+        try:
+            if ev.button() == Qt.MouseButton.RightButton and (
+                self._measure_first_idx is not None or self._measurements
+            ):
+                self._clear_measurements()
+        except Exception as e:
+            logging.warning(f"Erro no clique direito de medição: {e}")
+        if self._orig_mouse_press is not None:
+            self._orig_mouse_press(ev)
+
+    def _measure_mouse_move(self, ev):
+        if self._orig_mouse_move is not None:
+            self._orig_mouse_move(ev)
+        if self._measure_first_idx is not None:
+            try:
+                p = ev.position()
+                self._update_rubber_line(p.x(), p.y())
+            except Exception:
+                pass
+
+    def _on_atom_picked(self, idx):
+        if idx < 0 or idx >= len(self._atom_info):
+            return
+        if self._measure_first_idx is None:
+            self._measure_first_idx = idx
+            self._add_highlight(idx)
+            self._start_rubber_line(idx)
+            try:
+                self.view_widget.setMouseTracking(True)
+            except Exception:
+                pass
+        else:
+            if idx != self._measure_first_idx:
+                self._complete_measurement(self._measure_first_idx, idx)
+            self._measure_first_idx = None
+            self._remove_highlight()
+            self._remove_rubber_line()
+            try:
+                self.view_widget.setMouseTracking(False)
+            except Exception:
+                pass
+
+    def _complete_measurement(self, idx1, idx2):
+        try:
+            p1 = np.asarray(self._atom_info[idx1]['pos'], dtype=float)
+            p2 = np.asarray(self._atom_info[idx2]['pos'], dtype=float)
+            dist = float(np.linalg.norm(p2 - p1))
+            line = self._make_dashed_line(p1, p2, color=(0.12, 0.12, 0.12, 1.0), width=2.5)
+            if line is not None:
+                self.view_widget.addItem(line)
+            label = self._make_distance_label(dist)
+            mid = (p1 + p2) / 2.0
+            self._measurements.append({'line': line, 'label': label, 'mid': mid})
+            self._update_measurement_labels()
+            e1 = self._atom_info[idx1]['element']
+            e2 = self._atom_info[idx2]['element']
+            logging.info(f"Distância {e1}-{e2}: {dist:.3f} Å")
+        except Exception as e:
+            logging.warning(f"Erro ao medir distância: {e}")
+
+    def _add_highlight(self, idx):
+        self._remove_highlight()
+        try:
+            info = self._atom_info[idx]
+            r = self.ATOMIC_RADII.get(info['element'], self.ATOMIC_RADII['default']) * self.atom_scale
+            md = gl.MeshData.sphere(rows=8, cols=8, radius=r * 1.35)
+            hl = gl.GLMeshItem(meshdata=md, smooth=False, drawFaces=False,
+                               drawEdges=True, edgeColor=(1.0, 0.85, 0.0, 1.0),
+                               glOptions='opaque')
+            p = info['pos']
+            hl.translate(p[0], p[1], p[2])
+            self.view_widget.addItem(hl)
+            self._highlight_item = hl
+        except Exception as e:
+            logging.warning(f"Erro ao destacar átomo: {e}")
+
+    def _remove_highlight(self):
+        if self._highlight_item is not None:
+            try:
+                self.view_widget.removeItem(self._highlight_item)
+            except Exception:
+                pass
+            self._highlight_item = None
+
+    def _start_rubber_line(self, idx):
+        self._remove_rubber_line()
+        try:
+            p = np.asarray(self._atom_info[idx]['pos'], dtype=float)
+            line = gl.GLLinePlotItem(pos=np.array([p, p]), color=(0.4, 0.4, 0.4, 0.9),
+                                     width=1.5, antialias=True, mode='lines')
+            self.view_widget.addItem(line)
+            self._rubber_line = line
+        except Exception as e:
+            logging.warning(f"Erro ao iniciar linha de medição: {e}")
+
+    def _update_rubber_line(self, mx, my):
+        if self._rubber_line is None or self._measure_first_idx is None:
+            return
+        try:
+            p1 = np.asarray(self._atom_info[self._measure_first_idx]['pos'], dtype=float)
+            end = self._screen_to_plane_point(mx, my, p1)
+            if end is None:
+                return
+            seg = self._dashed_segments(p1, end)
+            if seg is not None and len(seg) >= 2:
+                self._rubber_line.setData(pos=seg, mode='lines')
+        except Exception:
+            pass
+
+    def _remove_rubber_line(self):
+        if self._rubber_line is not None:
+            try:
+                self.view_widget.removeItem(self._rubber_line)
+            except Exception:
+                pass
+            self._rubber_line = None
+
+    def _clear_measurements(self):
+        """Remove todas as medições, o destaque e a linha que acompanha o mouse."""
+        self._remove_rubber_line()
+        self._remove_highlight()
+        self._measure_first_idx = None
+        try:
+            self.view_widget.setMouseTracking(False)
+        except Exception:
+            pass
+        for m in getattr(self, '_measurements', []):
+            try:
+                if m.get('line') is not None:
+                    self.view_widget.removeItem(m['line'])
+            except Exception:
+                pass
+            try:
+                if m.get('label') is not None:
+                    m['label'].deleteLater()
+            except Exception:
+                pass
+        self._measurements = []
+
+    def _make_distance_label(self, dist):
+        try:
+            lbl = QLabel(self._format_distance(dist), self.viewer_container)
+            lbl.setStyleSheet(
+                "QLabel { background: rgba(255,255,255,225); color: #111;"
+                " border: 1px solid #777; border-radius: 3px; padding: 0px 4px;"
+                " font-size: 10pt; font-weight: bold; }"
+            )
+            lbl.setAttribute(Qt.WA_TransparentForMouseEvents, True)
+            lbl.adjustSize()
+            lbl.show()
+            lbl.raise_()
+            return lbl
+        except Exception as e:
+            logging.warning(f"Erro ao criar rótulo de distância: {e}")
+            return None
+
+    def _format_distance(self, dist):
+        """Formata a distância em Å com vírgula decimal (ex.: '1,42 Å')."""
+        return ("%.2f" % dist).replace('.', ',') + " Å"
+
+    def _update_measurement_labels(self):
+        if not getattr(self, '_measurements', None):
+            return
+        try:
+            mvp = self._get_mvp()
+        except Exception:
+            return
+        for m in self._measurements:
+            lbl = m.get('label')
+            if lbl is None:
+                continue
+            scr = self._project_to_screen(m['mid'], mvp=mvp)
+            if scr is None:
+                lbl.hide()
+                continue
+            px, py = scr
+            lbl.move(int(px - lbl.width() / 2), int(py - lbl.height() / 2))
+            if not lbl.isVisible():
+                lbl.show()
+            lbl.raise_()
+
+    # ---------- projeção / picking ----------
+    def _get_mvp(self):
+        # A assinatura de projectionMatrix() varia entre versões do pyqtgraph:
+        # umas aceitam projectionMatrix() (region=None), outras exigem (region, viewport).
+        vw = self.view_widget
+        try:
+            proj = vw.projectionMatrix()
+        except TypeError:
+            try:
+                vp = vw.getViewport()
+            except Exception:
+                vp = (0, 0, max(1, vw.width()), max(1, vw.height()))
+            try:
+                proj = vw.projectionMatrix(vp, vp)
+            except TypeError:
+                proj = vw.projectionMatrix(vp)
+        view = vw.viewMatrix()
+        m = proj * view  # QMatrix4x4 × QMatrix4x4 (ok no PySide6)
+        # QMatrix4x4 × QVector4D NÃO é confiável no PySide6 -> converter p/ numpy.
+        # .data() é column-major; reshape+transpose dá a matriz linha-major.
+        return np.array(m.data(), dtype=float).reshape(4, 4).T
+
+    def _project_ndc(self, point3d, mvp=None):
+        """Projeta um ponto 3D -> (ndc_x, ndc_y, w). None se atrás da câmera.
+        mvp é a matriz numpy 4x4 de _get_mvp()."""
+        if mvp is None:
+            mvp = self._get_mvp()
+        clip = mvp @ np.array([float(point3d[0]), float(point3d[1]),
+                               float(point3d[2]), 1.0])
+        w = clip[3]
+        if w <= 1e-6:
+            return None
+        return (clip[0] / w, clip[1] / w, w)
+
+    def _project_to_screen(self, point3d, mvp=None):
+        ndc = self._project_ndc(point3d, mvp=mvp)
+        if ndc is None:
+            return None
+        W = self.view_widget.width()
+        H = self.view_widget.height()
+        return ((ndc[0] * 0.5 + 0.5) * W, (1.0 - (ndc[1] * 0.5 + 0.5)) * H)
+
+    def _camera_right(self):
+        """Vetor 'direita' aproximado da câmera (para estimar o raio projetado)."""
+        try:
+            eye = self.view_widget.cameraPosition()
+            center = self.view_widget.opts['center']
+            fwd = np.array([center.x() - eye.x(), center.y() - eye.y(),
+                            center.z() - eye.z()], dtype=float)
+            if np.linalg.norm(fwd) < 1e-9:
+                return np.array([1.0, 0.0, 0.0])
+            fwd /= np.linalg.norm(fwd)
+            right = np.cross(fwd, np.array([0.0, 0.0, 1.0]))
+            if np.linalg.norm(right) < 1e-6:
+                return np.array([1.0, 0.0, 0.0])
+            return right / np.linalg.norm(right)
+        except Exception:
+            return np.array([1.0, 0.0, 0.0])
+
+    def _pick_atom(self, mx, my):
+        """Retorna o índice do átomo sob (mx, my) ou None (projeção direta em NDC)."""
+        try:
+            if not self._atom_info:
+                return None
+            W = self.view_widget.width()
+            H = self.view_widget.height()
+            if W <= 0 or H <= 0:
+                return None
+            ndc_mx = 2.0 * (mx / W) - 1.0
+            ndc_my = 1.0 - 2.0 * (my / H)
+            mvp = self._get_mvp()
+            right = self._camera_right()
+            best_idx = None
+            best_depth = None
+            for i, info in enumerate(self._atom_info):
+                p = np.asarray(info['pos'], dtype=float)
+                ndc = self._project_ndc(p, mvp=mvp)
+                if ndc is None:
+                    continue
+                ax, ay, w = ndc
+                r = self.ATOMIC_RADII.get(info['element'], self.ATOMIC_RADII['default']) * self.atom_scale
+                edge = self._project_ndc(p + right * r, mvp=mvp)
+                if edge is None:
+                    continue
+                r_ndc = max(((edge[0] - ax) ** 2 + (edge[1] - ay) ** 2) ** 0.5, 0.02)
+                d = ((ndc_mx - ax) ** 2 + (ndc_my - ay) ** 2) ** 0.5
+                if d <= r_ndc and (best_depth is None or w < best_depth):
+                    best_depth = w
+                    best_idx = i
+            return best_idx
+        except Exception as e:
+            logging.warning(f"Erro no picking de átomo: {e}")
+            return None
+
+    def _ndc_to_ray(self, ndc_x, ndc_y):
+        """Converte um ponto NDC num raio (origem, direção) no espaço do mundo."""
+        mvp = self._get_mvp()
+        try:
+            inv = np.linalg.inv(mvp)
+        except np.linalg.LinAlgError:
+            return None
+        near = inv @ np.array([ndc_x, ndc_y, -1.0, 1.0])
+        far = inv @ np.array([ndc_x, ndc_y, 1.0, 1.0])
+        if abs(near[3]) < 1e-9 or abs(far[3]) < 1e-9:
+            return None
+        o = near[:3] / near[3]
+        f = far[:3] / far[3]
+        d = f - o
+        if np.linalg.norm(d) < 1e-9:
+            return None
+        return o, d / np.linalg.norm(d)
+
+    def _screen_to_plane_point(self, mx, my, plane_pt):
+        """Interseção do raio do mouse com o plano por plane_pt, normal = direção de visão."""
+        try:
+            W = self.view_widget.width()
+            H = self.view_widget.height()
+            if W <= 0 or H <= 0:
+                return None
+            ray = self._ndc_to_ray(2.0 * (mx / W) - 1.0, 1.0 - 2.0 * (my / H))
+            if ray is None:
+                return None
+            o, d = ray
+            eye = self.view_widget.cameraPosition()
+            center = self.view_widget.opts['center']
+            n = np.array([center.x() - eye.x(), center.y() - eye.y(),
+                          center.z() - eye.z()], dtype=float)
+            if np.linalg.norm(n) < 1e-9:
+                return None
+            n /= np.linalg.norm(n)
+            denom = float(np.dot(n, d))
+            if abs(denom) < 1e-9:
+                return None
+            t = float(np.dot(n, np.asarray(plane_pt, dtype=float) - o)) / denom
+            if t <= 0:
+                return None
+            return o + t * d
+        except Exception:
+            return None
+
+    def _dashed_segments(self, p1, p2, dash=0.18, gap=0.14):
+        """Gera pares de pontos (para mode='lines') formando uma linha pontilhada."""
+        p1 = np.asarray(p1, dtype=float)
+        p2 = np.asarray(p2, dtype=float)
+        vec = p2 - p1
+        length = float(np.linalg.norm(vec))
+        if length < 1e-6:
+            return None
+        direction = vec / length
+        seg = []
+        t = 0.0
+        step = dash + gap
+        while t < length:
+            seg.append(p1 + direction * t)
+            seg.append(p1 + direction * min(t + dash, length))
+            t += step
+        if len(seg) < 2:
+            seg = [p1, p2]
+        return np.array(seg)
+
+    def _make_dashed_line(self, p1, p2, color=(0.12, 0.12, 0.12, 1.0), width=2.5):
+        try:
+            seg = self._dashed_segments(p1, p2)
+            if seg is None:
+                return None
+            return gl.GLLinePlotItem(pos=seg, color=color, width=width,
+                                     antialias=True, mode='lines')
+        except Exception as e:
+            logging.warning(f"Erro ao criar linha pontilhada: {e}")
+            return None
+
     def closeEvent(self, event):
         """Limpeza segura ao fechar o visualizador."""
         try:
@@ -1717,6 +2144,8 @@ class StructureViewer3D(QWidget):
             return
 
         self.stop_animation()
+        # Medições ficam inválidas quando os átomos vibram
+        self._clear_measurements()
         self._animation_type = 'vibration'
         self._animation_angle = 0
         self._vibration_amplitude = amplitude

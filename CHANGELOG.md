@@ -25,6 +25,25 @@ e versionamento [Semantic Versioning](https://semver.org/lang/pt-BR/) (MAJOR.MIN
 
 ---
 
+## [3.26.0] - 2026-07-11
+
+### Added
+- **Medição de distância interatômica no visualizador 3D (PhaseDRX)**, no estilo VESTA:
+  o duplo-clique em dois átomos traça uma linha pontilhada e mostra a distância em Å no
+  meio dela; o rótulo acompanha a estrutura ao girar/dar zoom, e o botão direito limpa as
+  medições.
+
+### Changed
+- Abas do PhaseDRX com nomes mais curtos: **Difração** (antes "Difratograma (2D)") e
+  **Estrutura** (antes "Estrutura Cristalina (3D)"), com traduções em inglês e alemão.
+
+### Fixed
+- Visualizador 3D agora carrega **estruturas desordenadas** (ocupação parcial, comuns em
+  CIFs do COD): passa a usar a espécie de maior ocupação em vez de falhar em `site.specie`.
+- Projeção 3D do picking compatível com diferentes versões do pyqtgraph.
+
+---
+
 ## [3.25.0] - 2026-06-23
 
 ### Added
