@@ -421,7 +421,7 @@ class PhaseDRXTool(QMainWindow):
         plot_2d_layout.setContentsMargins(0, 0, 0, 0)
         self.plot_canvas = PlotCanvas(self, width=8, height=6)
         plot_2d_layout.addWidget(self.plot_canvas)
-        self.plot_tab_widget.addTab(plot_2d_widget, ptr("Difratograma (2D)"))
+        self.plot_tab_widget.addTab(plot_2d_widget, ptr("Difração"))
 
         # Aba do visualizador 3D
         try:
@@ -463,7 +463,7 @@ class PhaseDRXTool(QMainWindow):
 
             viewer_3d_layout.addLayout(render_button_layout)
 
-            self.plot_tab_widget.addTab(viewer_3d_widget, ptr("Estrutura Cristalina (3D)"))
+            self.plot_tab_widget.addTab(viewer_3d_widget, ptr("Estrutura"))
             logging.info("Visualizador 3D criado com sucesso!")
         except ImportError as e:
             logging.error(f"Erro de importação ao criar visualizador 3D: {e}")

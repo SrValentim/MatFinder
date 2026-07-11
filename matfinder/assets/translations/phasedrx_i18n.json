@@ -51,9 +51,9 @@
   "en_US": "Customize Plot",
   "de_DE": "Diagramm anpassen"
  },
- "Difratograma (2D)": {
-  "en_US": "Diffractogram (2D)",
-  "de_DE": "Diffraktogramm (2D)"
+ "Difração": {
+  "en_US": "Diffraction",
+  "de_DE": "Beugung"
  },
  "&Novo Projeto...": {
   "en_US": "&New Project...",
@@ -287,9 +287,9 @@
   "en_US": "Animations (360° rotation, vibration)",
   "de_DE": "Animationen (360°-Rotation, Vibration)"
  },
- "Estrutura Cristalina (3D)": {
-  "en_US": "Crystal Structure (3D)",
-  "de_DE": "Kristallstruktur (3D)"
+ "Estrutura": {
+  "en_US": "Structure",
+  "de_DE": "Struktur"
  },
  "Instale 'openpyxl' para usar esta função": {
   "en_US": "Install 'openpyxl' to use this function",
