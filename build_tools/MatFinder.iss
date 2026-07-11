@@ -11,7 +11,7 @@
 ; ============================================================================
 
 #define AppName "MatFinder"
-#define AppVersion "3.25.0"
+#define AppVersion "3.26.0"
 #define AppPublisher "Raynner Valentim - UFAM"
 #define AppURL "https://github.com/SrValentim/MatFinder"
 #define AppExe "MatFinder.exe"
