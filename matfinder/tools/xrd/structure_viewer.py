@@ -179,6 +179,7 @@ class StructureViewer3D(QWidget):
         self.atom_meshes = []
         self.bond_meshes = []
         self.unit_cell_lines = []
+        self._completion_atoms = []   # átomos fora da célula que fecham a coordenação (borda)
 
         # AJUSTE: Tamanho padrão dos átomos em 70% para melhor visualização
         # (antes era 100% = 1.0, agora 70% = 0.7)
@@ -862,49 +863,109 @@ class StructureViewer3D(QWidget):
         self._render_unit_cell()
 
 
-        # Renderizar átomos por último (ficam na frente)
-        # Criar supercélula baseada na expansão [na, nb, nc]
-        na, nb, nc = self.supercell_expansion
-        lattice = self.structure.lattice
+        # Renderizar átomos por último (ficam na frente).
+        # Inclui a réplica de borda/face/canto (convenção do VESTA): um átomo em
+        # coordenada fracionária 0/1 é compartilhado entre células vizinhas e aparece
+        # em todas as suas imagens dentro de [0, N] em cada eixo, deixando a célula
+        # visualmente completa. Ver _iter_display_atoms().
+        for pos, element, base_idx in self._iter_display_atoms():
+            color = self.ATOMIC_COLORS.get(element, self.ATOMIC_COLORS['default'])
+            radius = self.ATOMIC_RADII.get(element, self.ATOMIC_RADII['default']) * self.atom_scale
 
-        # Vetores de rede (mesmos usados na célula unitária)
-        a_vec = lattice.matrix[0]
-        b_vec = lattice.matrix[1]
-        c_vec = lattice.matrix[2]
+            mesh_data = gl.MeshData.sphere(rows=15, cols=15, radius=radius)
+            mesh = gl.GLMeshItem(
+                meshdata=mesh_data,
+                smooth=True,
+                color=(*color, 0.95),
+                shader='shaded',
+                glOptions='opaque'
+            )
+            mesh.translate(pos[0], pos[1], pos[2])
+            self.view_widget.addItem(mesh)
+            self.atom_meshes.append(mesh)
+            self._atom_info.append({'pos': pos.copy(), 'element': element,
+                                    'mesh': mesh, 'base_idx': base_idx})
 
-        for i in range(na):
-            for j in range(nb):
-                for k in range(nc):
-                    # Vetor de translação para esta célula (IDÊNTICO ao da célula unitária)
-                    translation = a_vec * i + b_vec * j + c_vec * k
-
-                    # Renderizar todos os átomos da célula unitária transladados
-                    for site in self.structure:
-                        # IMPORTANTE: site.coords já está em coordenadas cartesianas
-                        pos = site.coords + translation
-                        element = _site_symbol(site)
-
-                        # Obter cor e raio
-                        color = self.ATOMIC_COLORS.get(element, self.ATOMIC_COLORS['default'])
-                        radius = self.ATOMIC_RADII.get(element, self.ATOMIC_RADII['default']) * self.atom_scale
-
-                        # Criar esfera para o átomo
-                        mesh_data = gl.MeshData.sphere(rows=15, cols=15, radius=radius)
-                        mesh = gl.GLMeshItem(
-                            meshdata=mesh_data,
-                            smooth=True,
-                            color=(*color, 0.95),
-                            shader='shaded',
-                            glOptions='opaque'
-                        )
-                        mesh.translate(pos[0], pos[1], pos[2])
-                        self.view_widget.addItem(mesh)
-                        self.atom_meshes.append(mesh)
-                        self._atom_info.append({'pos': pos.copy(), 'element': element, 'mesh': mesh})
+        # Átomos de COMPLETUDE de borda (definidos por _render_bonds): fecham anéis e
+        # poliedros como no VESTA. Desenhados APÓS os primários para manter a mesma ordem
+        # de índice usada pelas ligações.
+        for a in getattr(self, '_completion_atoms', []):
+            element = a['element']
+            color = self.ATOMIC_COLORS.get(element, self.ATOMIC_COLORS['default'])
+            radius = self.ATOMIC_RADII.get(element, self.ATOMIC_RADII['default']) * self.atom_scale
+            mesh_data = gl.MeshData.sphere(rows=15, cols=15, radius=radius)
+            mesh = gl.GLMeshItem(
+                meshdata=mesh_data,
+                smooth=True,
+                color=(*color, 0.95),
+                shader='shaded',
+                glOptions='opaque'
+            )
+            p = np.asarray(a['pos'], dtype=float)
+            mesh.translate(p[0], p[1], p[2])
+            self.view_widget.addItem(mesh)
+            self.atom_meshes.append(mesh)
+            self._atom_info.append({'pos': p.copy(), 'element': element,
+                                    'mesh': mesh, 'base_idx': a.get('base_idx', -1)})
 
         logging.info(f"✅ Estrutura renderizada: {len(self.atom_meshes)} átomos, "
                     f"{len(self.bond_meshes)} ligações, {len(self.unit_cell_lines)} arestas da célula")
 
+    def _iter_display_atoms(self):
+        """Gera (pos_cartesiana, elemento, base_idx) de todos os átomos a exibir.
+
+        Aplica a REPLICAÇÃO DE BORDA (convenção do VESTA): um átomo em coordenada
+        fracionária 0 (ou 1) está na face/aresta/canto da célula e é compartilhado com
+        as células vizinhas; por isso é desenhado em todas as suas imagens dentro de
+        [0, N] em cada eixo (N = expansão da supercélula naquele eixo). Não inventa
+        átomos — são imagens periódicas dos mesmos sítios; deixa a célula completa como
+        no VESTA. Para átomos internos (fração != 0/1), o comportamento é o de sempre.
+        """
+        if not self.structure:
+            return
+        lattice = self.structure.lattice
+        N = self.supercell_expansion
+        tol = 5e-3
+        for idx, site in enumerate(self.structure):
+            element = _site_symbol(site)
+            f = np.array(site.frac_coords, dtype=float) % 1.0
+            per_axis = []
+            for ax in range(3):
+                fx = f[ax]
+                if fx < tol or fx > 1.0 - tol:      # átomo na borda deste eixo
+                    per_axis.append([float(o) for o in range(0, N[ax] + 1)])  # 0..N
+                else:
+                    per_axis.append([fx + o for o in range(0, N[ax])])        # 0..N-1
+            for fa in per_axis[0]:
+                for fb in per_axis[1]:
+                    for fc in per_axis[2]:
+                        pos = lattice.get_cartesian_coords(np.array([fa, fb, fc]))
+                        yield pos, element, idx
+
+    def _iter_boundary_candidates(self):
+        """Imagens periódicas FORA da célula [0,N] (padding de 1 célula), candidatas a
+        COMPLETAR a coordenação dos átomos de borda — fecham anéis/poliedros como no
+        VESTA. Só são efetivamente desenhadas se estiverem ligadas a um átomo primário."""
+        if not self.structure:
+            return
+        lattice = self.structure.lattice
+        N = self.supercell_expansion
+        tol = 5e-3
+        for idx, site in enumerate(self.structure):
+            element = _site_symbol(site)
+            f0 = np.array(site.frac_coords, dtype=float) % 1.0
+            for tx in range(-1, N[0] + 2):
+                for ty in range(-1, N[1] + 2):
+                    for tz in range(-1, N[2] + 2):
+                        frac = f0 + np.array([tx, ty, tz], dtype=float)
+                        # dentro do padded [-1, N+1]?
+                        if not all(-1.0 - tol <= frac[a] <= N[a] + 1.0 + tol for a in range(3)):
+                            continue
+                        # excluir os que já são PRIMÁRIOS (frac em [0, N])
+                        if all(-tol <= frac[a] <= N[a] + tol for a in range(3)):
+                            continue
+                        yield {'pos': lattice.get_cartesian_coords(frac),
+                               'element': element, 'base_idx': idx}
 
     def _render_bonds(self):
         """
@@ -921,100 +982,94 @@ class StructureViewer3D(QWidget):
         self.bond_meshes.clear()
 
         try:
-            na, nb, nc = self.supercell_expansion
-            lattice = self.structure.lattice
-            n_sites = len(self.structure)
-            n_total_atoms = n_sites * na * nb * nc
+            self._completion_atoms = []
 
-            # Vetores de rede (mesmos usados nos átomos e célula unitária)
-            a_vec = lattice.matrix[0]
-            b_vec = lattice.matrix[1]
-            c_vec = lattice.matrix[2]
+            # Átomos PRIMÁRIOS (célula [0,N] com réplica de borda) — mesma ordem dos meshes.
+            primary = [{'pos': np.asarray(p, dtype=float), 'element': e}
+                       for p, e, _i in self._iter_display_atoms()]
+            n_primary = len(primary)
+            primary_pos = (np.array([p['pos'] for p in primary])
+                           if primary else np.zeros((0, 3)))
 
-            logging.info(f"Calculando ligações para supercélula {na}×{nb}×{nc} = {n_total_atoms} átomos")
+            # Candidatos FORA da célula (padding de 1 célula) para completar a coordenação
+            # de borda — fecham anéis/poliedros como no VESTA.
+            outside = list(self._iter_boundary_candidates())
+            outside_pos = (np.array([o['pos'] for o in outside])
+                           if outside else np.zeros((0, 3)))
 
-            # Dicionário para rastrear pares já adicionados (evitar duplicatas)
+            # Lista combinada: primários (0..n_primary-1) + externos usados (sob demanda).
+            # Os índices em 'combined' são os mesmos dos meshes de átomo (ver _render_structure).
+            combined = list(primary)
+            outside_index = {}   # k em 'outside' -> índice em 'combined'
             added_pairs = set()
 
-            # Criar lista de TODOS os átomos da supercélula com suas posições
-            all_atoms = []
-            for i in range(na):
-                for j in range(nb):
-                    for k in range(nc):
-                        # Vetor de translação (IDÊNTICO ao usado nos átomos)
-                        translation = a_vec * i + b_vec * j + c_vec * k
-                        for idx, site in enumerate(self.structure):
-                            pos = site.coords + translation
-                            all_atoms.append({
-                                'pos': pos,
-                                'element': _site_symbol(site),
-                                'cell': (i, j, k),
-                                'site_idx': idx,
-                                'global_idx': len(all_atoms)  # Índice único global
-                            })
+            def _keep_outside(k):
+                if k not in outside_index:
+                    outside_index[k] = len(combined)
+                    o = outside[k]
+                    combined.append({'pos': o['pos'], 'element': o['element']})
+                    self._completion_atoms.append(o)
+                return outside_index[k]
 
-            # Calcular ligações entre TODOS os átomos da supercélula
-            for idx1, atom1 in enumerate(all_atoms):
-                pos1 = atom1['pos']
-                element1 = atom1['element']
+            # Para cada átomo PRIMÁRIO, achar a vizinhança (primários + externos) e ligar
+            # pelo critério VESTA (até 1.35x do mais próximo, respeitando a distância máxima
+            # por par de elementos). Só se desenha ligação que envolva um primário; átomos
+            # externos só entram se ficarem ligados a um primário.
+            for i in range(n_primary):
+                pos1 = primary_pos[i]
+                el1 = primary[i]['element']
+                r2 = self._get_max_bond_distance(el1) * 2.0
 
-                # BUSCA INICIAL: usar raio conservador para encontrar candidatos
-                search_radius = self._get_max_bond_distance(element1)
+                cand = []  # (dist, kind, ref)   kind: 'p'=primário, 'o'=externo
+                if n_primary:
+                    dp = np.linalg.norm(primary_pos - pos1, axis=1)
+                    for j in np.where(dp < r2)[0]:
+                        if j == i:
+                            continue
+                        d = float(dp[j])
+                        if d <= self._get_max_bond_distance(el1, primary[int(j)]['element']):
+                            cand.append((d, 'p', int(j)))
+                if len(outside):
+                    do = np.linalg.norm(outside_pos - pos1, axis=1)
+                    for k in np.where(do < r2)[0]:
+                        d = float(do[k])
+                        if d <= self._get_max_bond_distance(el1, outside[int(k)]['element']):
+                            cand.append((d, 'o', int(k)))
 
-                # Buscar vizinhos próximos CANDIDATOS
-                neighbor_data = []
-                for idx2, atom2 in enumerate(all_atoms):
-                    if idx2 <= idx1:  # Evitar duplicatas e auto-ligação
+                if not cand:
+                    continue
+                cand.sort(key=lambda x: x[0])
+                dmax = cand[0][0] * 1.35   # critério VESTA sobre o vizinho mais próximo
+
+                for d, kind, ref in cand:
+                    if d > dmax:
+                        break
+                    if kind == 'p':
+                        a, b = (i, ref) if i < ref else (ref, i)
+                        pos_b = primary[ref]['pos']
+                    else:
+                        a, b = i, _keep_outside(ref)
+                        pos_b = outside[ref]['pos']
+                    if (a, b) in added_pairs:
                         continue
+                    added_pairs.add((a, b))
 
-                    pos2 = atom2['pos']
-                    element2 = atom2['element']
-                    dist = np.linalg.norm(pos2 - pos1)
+                    cyl = self._create_bond_cylinder(pos1, pos_b)
+                    if cyl:
+                        self.view_widget.addItem(cyl)
+                        self.bond_meshes.append(cyl)
+                        cyl._bond_atoms = (a, b)
+                        cyl._original_pos1 = np.asarray(combined[a]['pos'], float).copy()
+                        cyl._original_pos2 = np.asarray(combined[b]['pos'], float).copy()
 
-                    # Primeira triagem: distância de busca
-                    if dist < search_radius * 2:  # Buscar com margem
-                        # VALIDAÇÃO ESPECÍFICA: distância máxima para este PAR de elementos
-                        max_bond_for_pair = self._get_max_bond_distance(element1, element2)
-
-                        if dist <= max_bond_for_pair:
-                            neighbor_data.append((idx2, dist, pos2, element2))
-
-                # Ordenar por distância
-                neighbor_data.sort(key=lambda x: x[1])
-
-                # Usar critério: vizinhos até 1.35x da distância do mais próximo
-                # IMPORTANTE: Este critério adicional previne ligações excessivas
-                if neighbor_data:
-                    min_dist = neighbor_data[0][1]
-                    max_neighbor_dist = min_dist * 1.35
-
-                    for idx2, dist, pos2, element2 in neighbor_data:
-                        if dist > max_neighbor_dist:
-                            break
-
-                        # ✅ Validação DUPLA aprovada:
-                        # 1. dist <= max_bond_for_pair (específico por elementos)
-                        # 2. dist <= min_dist * 1.35 (critério VESTA)
-
-                        # Criar cilindro 3D para a ligação
-                        bond_cylinder = self._create_bond_cylinder(pos1, pos2)
-                        if bond_cylinder:
-                            self.view_widget.addItem(bond_cylinder)
-                            self.bond_meshes.append(bond_cylinder)
-
-                            # Armazenar informações para animação
-                            bond_cylinder._bond_atoms = (idx1, idx2)
-                            bond_cylinder._original_pos1 = pos1.copy()
-                            bond_cylinder._original_pos2 = pos2.copy()
-
-            logging.info(f"✅ Renderizadas {len(self.bond_meshes)} ligações na supercélula {na}×{nb}×{nc}")
+            logging.info(f"✅ Ligações: {len(self.bond_meshes)} "
+                         f"({n_primary} átomos + {len(self._completion_atoms)} de borda)")
 
             if len(self.bond_meshes) == 0:
-                logging.warning(f"⚠️  Nenhuma ligação encontrada")
+                logging.warning("⚠️  Nenhuma ligação encontrada")
 
-            # VALIDAÇÃO AUTOMÁTICA: Verificar se há ligações suspeitas
             if BOND_LIBRARY_AVAILABLE:
-                self._validate_rendered_bonds(all_atoms)
+                self._validate_rendered_bonds(combined)
 
         except Exception as e:
             logging.error(f"❌ Erro ao renderizar ligações: {e}")
@@ -1619,9 +1674,10 @@ class StructureViewer3D(QWidget):
         for bond in self.bond_meshes:
             bond.setVisible(visible)
 
-        # Se ativando, renderizar novamente
+        # Se ativando e não houver ligações, re-renderizar tudo (mantém átomos de
+        # completude e índices em sincronia com as ligações).
         if visible and self.structure and not self.bond_meshes:
-            self._render_bonds()
+            self._render_structure()
 
     def _update_atom_sizes(self, value):
         """Atualiza o tamanho dos átomos."""

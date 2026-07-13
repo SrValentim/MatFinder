@@ -23,6 +23,12 @@ e versionamento [Semantic Versioning](https://semver.org/lang/pt-BR/) (MAJOR.MIN
 
 ## [Não publicado]
 
+### Added
+- Visualizador 3D (PhaseDRX): a célula unitária agora é exibida **completa**. Átomos de
+  face/aresta/canto aparecem em todas as suas imagens de borda, e a coordenação é
+  completada com os vizinhos ligados que caem logo fora da célula (anéis e poliedros
+  fecham), como em VESTA, Mercury e outros. As posições atômicas permanecem exatas.
+
 ---
 
 ## [3.26.0] - 2026-07-11
