@@ -28,6 +28,10 @@ e versionamento [Semantic Versioning](https://semver.org/lang/pt-BR/) (MAJOR.MIN
   face/aresta/canto aparecem em todas as suas imagens de borda, e a coordenação é
   completada com os vizinhos ligados que caem logo fora da célula (anéis e poliedros
   fecham), como em VESTA, Mercury e outros. As posições atômicas permanecem exatas.
+- Visualizador 3D (PhaseDRX): **sombreamento por profundidade (depth cueing)** — átomos
+  mais próximos do observador ficam mais claros e os mais ao fundo mais sombreados, dando
+  noção de profundidade. Leve (reaplicado só quando a câmera para; modula apenas a cor,
+  sem recriar geometria) e ajustável.
 
 ---
 

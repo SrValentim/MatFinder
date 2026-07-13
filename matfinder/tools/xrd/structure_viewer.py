@@ -8,6 +8,7 @@ import numpy as np
 import logging
 import sys
 import os
+import time
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
     QLabel, QSlider, QCheckBox, QMessageBox, QDialog,
@@ -180,6 +181,14 @@ class StructureViewer3D(QWidget):
         self.bond_meshes = []
         self.unit_cell_lines = []
         self._completion_atoms = []   # átomos fora da célula que fecham a coordenação (borda)
+
+        # Iluminação simulada (depth cueing): átomos mais próximos da câmera ficam mais
+        # claros; os do fundo, mais sombreados. Leve — reaplica só quando a câmera para.
+        self._depth_shading = True
+        self._depth_min_bright = 0.6   # brilho do átomo mais distante (1.0 = sem sombra)
+        self._shade_key = None
+        self._shade_change_t = 0.0
+        self._shade_dirty = False
 
         # AJUSTE: Tamanho padrão dos átomos em 70% para melhor visualização
         # (antes era 100% = 1.0, agora 70% = 0.7)
@@ -640,6 +649,65 @@ class StructureViewer3D(QWidget):
         except Exception:
             pass
 
+        # Iluminação simulada: reaplica o sombreamento por profundidade ao parar de girar
+        try:
+            self._maybe_depth_shade()
+        except Exception:
+            pass
+
+    def _maybe_depth_shade(self):
+        """Reaplica o depth cueing quando a câmera muda e depois estabiliza (~0,2 s),
+        para não pesar durante a rotação em PCs mais fracos."""
+        if not getattr(self, '_depth_shading', True) or not self._atom_info:
+            return
+        try:
+            p = self.view_widget.cameraParams()
+            c = p['center']
+            key = (round(p['azimuth'], 1), round(p['elevation'], 1),
+                   round(p['distance'], 2),
+                   round(c.x(), 2), round(c.y(), 2), round(c.z(), 2))
+        except Exception:
+            return
+        now = time.time()
+        if key != self._shade_key:
+            self._shade_key = key
+            self._shade_change_t = now
+            self._shade_dirty = True
+            return
+        # câmera estável: aplicar após pequeno atraso (debounce)
+        if self._shade_dirty and (now - self._shade_change_t) > 0.2:
+            self._shade_dirty = False
+            self._apply_depth_shading()
+
+    def _apply_depth_shading(self):
+        """Sombreamento por profundidade: átomos mais próximos da câmera ficam mais
+        claros; os do fundo, mais sombreados (como se a tela iluminasse a estrutura).
+        Modula apenas a cor uniforme de cada esfera — sem recriar geometria."""
+        if not getattr(self, '_depth_shading', True) or not self._atom_info:
+            return
+        try:
+            cam = self.view_widget.cameraPosition()
+            cam = np.array([cam.x(), cam.y(), cam.z()], dtype=float)
+        except Exception:
+            return
+        pos = np.array([a['pos'] for a in self._atom_info], dtype=float)
+        d = np.linalg.norm(pos - cam, axis=1)
+        dmin = float(d.min())
+        span = float(d.max()) - dmin
+        mb = getattr(self, '_depth_min_bright', 0.6)
+        for a, dist in zip(self._atom_info, d):
+            base = a.get('base_color')
+            mesh = a.get('mesh')
+            if base is None or mesh is None:
+                continue
+            t = 0.0 if span < 1e-6 else (float(dist) - dmin) / span   # 0=perto, 1=longe
+            f = 1.0 - (1.0 - mb) * t
+            try:
+                mesh.opts['color'] = (base[0] * f, base[1] * f, base[2] * f, 0.95)
+                mesh.update()
+            except Exception:
+                pass
+
     def _start_gizmo_sync_timer(self):
         """Inicia timer para sincronizar o gizmo periodicamente."""
         from PySide6.QtCore import QTimer
@@ -884,7 +952,8 @@ class StructureViewer3D(QWidget):
             self.view_widget.addItem(mesh)
             self.atom_meshes.append(mesh)
             self._atom_info.append({'pos': pos.copy(), 'element': element,
-                                    'mesh': mesh, 'base_idx': base_idx})
+                                    'mesh': mesh, 'base_idx': base_idx,
+                                    'base_color': color})
 
         # Átomos de COMPLETUDE de borda (definidos por _render_bonds): fecham anéis e
         # poliedros como no VESTA. Desenhados APÓS os primários para manter a mesma ordem
@@ -906,10 +975,17 @@ class StructureViewer3D(QWidget):
             self.view_widget.addItem(mesh)
             self.atom_meshes.append(mesh)
             self._atom_info.append({'pos': p.copy(), 'element': element,
-                                    'mesh': mesh, 'base_idx': a.get('base_idx', -1)})
+                                    'mesh': mesh, 'base_idx': a.get('base_idx', -1),
+                                    'base_color': color})
 
         logging.info(f"✅ Estrutura renderizada: {len(self.atom_meshes)} átomos, "
                     f"{len(self.bond_meshes)} ligações, {len(self.unit_cell_lines)} arestas da célula")
+
+        # Iluminação simulada inicial (depth cueing)
+        try:
+            self._apply_depth_shading()
+        except Exception:
+            pass
 
     def _iter_display_atoms(self):
         """Gera (pos_cartesiana, elemento, base_idx) de todos os átomos a exibir.
