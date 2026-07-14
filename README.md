@@ -251,7 +251,7 @@ This project is licensed under the **GNU General Public License v3.0** - see the
 
 🟢 **Active** — under development and maintenance.
 
-**Current version:** 3.26.0 — see the [`CHANGELOG.md`](CHANGELOG.md) for the full history.
+**Current version:** 3.27.0 — see the [`CHANGELOG.md`](CHANGELOG.md) for the full history.
 
 Recent highlights:
 - Full UI translation (Portuguese, English, German)
