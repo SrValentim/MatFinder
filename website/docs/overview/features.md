@@ -19,8 +19,9 @@ A concise map of what MatFinder can do. For step-by-step usage, see the
 - **Overlay and compare** calculated vs. measured patterns for qualitative phase
   identification.
 - **Read per-peak** 2θ, intensity and d-spacing.
-- **Interactive 3D viewer** of the crystal structure (positions and bond distances
-  from `pymatgen`).
+- **Interactive 3D viewer** of the crystal structure (positions and bonds from
+  `pymatgen`): complete unit cell, two-colour bonds, interatomic-distance measurement
+  and camera orientation along the a/b/c axes.
 
 ## Data treatment
 
