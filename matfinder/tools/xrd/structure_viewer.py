@@ -8,7 +8,6 @@ import numpy as np
 import logging
 import sys
 import os
-import time
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
     QLabel, QSlider, QCheckBox, QMessageBox, QDialog,
@@ -35,6 +34,55 @@ try:
 except ImportError:
     BOND_LIBRARY_AVAILABLE = False
     logging.warning(ptr("⚠️  Biblioteca de ligações não disponível - usando fallback genérico"))
+
+
+def _make_lit_shader():
+    """Programa GLSL para átomos e ligações: iluminação headlight (fonte na direção do
+    observador) com termo especular, mais atenuação por profundidade (mistura aditiva
+    para o branco) que dá noção de distância. uFogStart/uFogEnd delimitam o intervalo de
+    profundidade em Å e são atualizados por frame em _update_fog_uniforms(). Retorna
+    'shaded' (shader embutido) em caso de falha na compilação."""
+    try:
+        return gl.shaders.ShaderProgram('matfinder_lit', [
+            gl.shaders.VertexShader("""
+                varying vec3 vN;
+                varying vec3 vP;
+                void main() {
+                    vN = normalize(gl_NormalMatrix * gl_Normal);
+                    vec4 ep = gl_ModelViewMatrix * gl_Vertex;
+                    vP = ep.xyz;
+                    gl_FrontColor = gl_Color;
+                    gl_BackColor = gl_Color;
+                    gl_Position = ftransform();
+                }
+            """),
+            gl.shaders.FragmentShader("""
+                uniform float uFogStart;
+                uniform float uFogEnd;
+                varying vec3 vN;
+                varying vec3 vP;
+                void main() {
+                    vec3 N = normalize(vN);
+                    vec3 V = normalize(-vP);
+                    // termo difuso headlight (fonte na direção do observador)
+                    float base = 0.5 + 0.5 * abs(N.z);
+                    // termo especular (Blinn-Phong)
+                    vec3 L = normalize(vec3(-0.3, 0.4, 1.0));
+                    vec3 H = normalize(L + V);
+                    float spec = pow(max(dot(N, H), 0.0), 20.0);
+                    vec3 rgb = gl_Color.rgb * base + vec3(0.55 * spec);
+                    // atenuação por profundidade (mistura para o branco)
+                    float depth = -vP.z;
+                    float t = clamp((depth - uFogStart) / max(uFogEnd - uFogStart, 0.0001),
+                                    0.0, 1.0);
+                    float fog = smoothstep(0.0, 1.0, t) * 0.35;
+                    rgb = mix(rgb, vec3(1.0), fog);
+                    gl_FragColor = vec4(min(rgb, vec3(1.0)), gl_Color.a);
+                }
+            """)
+        ], uniforms={'uFogStart': [1.0e9], 'uFogEnd': [2.0e9]})
+    except Exception:
+        return 'shaded'
 
 
 def _site_symbol(site):
@@ -182,13 +230,8 @@ class StructureViewer3D(QWidget):
         self.unit_cell_lines = []
         self._completion_atoms = []   # átomos fora da célula que fecham a coordenação (borda)
 
-        # Iluminação simulada (depth cueing): átomos mais próximos da câmera ficam mais
-        # claros; os do fundo, mais sombreados. Leve — reaplica só quando a câmera para.
-        self._depth_shading = True
-        self._depth_min_bright = 0.6   # brilho do átomo mais distante (1.0 = sem sombra)
-        self._shade_key = None
-        self._shade_change_t = 0.0
-        self._shade_dirty = False
+        # Shader de iluminação (headlight, mais claro) para átomos e ligações
+        self._lit_shader = _make_lit_shader()
 
         # AJUSTE: Tamanho padrão dos átomos em 70% para melhor visualização
         # (antes era 100% = 1.0, agora 70% = 0.7)
@@ -263,6 +306,23 @@ class StructureViewer3D(QWidget):
         control_layout.addStretch()
 
         # Botão de reset da câmera
+        # Botões de orientação: ver ao longo dos eixos a, b, c e vista isométrica
+        for _txt, _i, _tip in (("a", 0, "Ver ao longo do eixo a"),
+                               ("b", 1, "Ver ao longo do eixo b"),
+                               ("c", 2, "Ver ao longo do eixo c")):
+            _ab = QPushButton(_txt)
+            _ab.setFixedSize(26, 28)
+            _ab.setToolTip(ptr(_tip))
+            _ab.setStyleSheet("font-style: italic; font-weight: bold;")
+            _ab.clicked.connect(lambda _checked=False, i=_i: self._view_along_axis(i))
+            control_layout.addWidget(_ab)
+
+        iso_btn = QPushButton("⬡")
+        iso_btn.setFixedSize(28, 28)
+        iso_btn.setToolTip(ptr("Vista isométrica (3D)"))
+        iso_btn.clicked.connect(lambda _checked=False: self._reset_camera())
+        control_layout.addWidget(iso_btn)
+
         reset_btn = QPushButton("↻")
         reset_btn.setFixedSize(28, 28)
         reset_btn.setToolTip(ptr("Resetar visualização da câmera"))
@@ -649,64 +709,34 @@ class StructureViewer3D(QWidget):
         except Exception:
             pass
 
-        # Iluminação simulada: reaplica o sombreamento por profundidade ao parar de girar
+        # Atualizar a névoa de profundidade (fog) conforme a câmera muda
         try:
-            self._maybe_depth_shade()
+            self._update_fog_uniforms()
         except Exception:
             pass
 
-    def _maybe_depth_shade(self):
-        """Reaplica o depth cueing quando a câmera muda e depois estabiliza (~0,2 s),
-        para não pesar durante a rotação em PCs mais fracos."""
-        if not getattr(self, '_depth_shading', True) or not self._atom_info:
+    def _update_fog_uniforms(self):
+        """Atualiza uFogStart/uFogEnd do shader com o intervalo de profundidade (ao longo
+        da direção de visão) dos átomos exibidos, para a névoa clarear o fundo. Os valores
+        vão como LISTA — exigência da API de uniforms do pyqtgraph."""
+        if not isinstance(self._lit_shader, gl.shaders.ShaderProgram) or not self._atom_info:
             return
         try:
-            p = self.view_widget.cameraParams()
-            c = p['center']
-            key = (round(p['azimuth'], 1), round(p['elevation'], 1),
-                   round(p['distance'], 2),
-                   round(c.x(), 2), round(c.y(), 2), round(c.z(), 2))
+            eye = self.view_widget.cameraPosition()
+            center = self.view_widget.opts['center']
+            fwd = np.array([center.x() - eye.x(), center.y() - eye.y(),
+                            center.z() - eye.z()], dtype=float)
+            n = np.linalg.norm(fwd)
+            if n < 1e-9:
+                return
+            fwd /= n
+            eye = np.array([eye.x(), eye.y(), eye.z()], dtype=float)
+            pos = np.array([a['pos'] for a in self._atom_info], dtype=float)
+            depth = (pos - eye) @ fwd
+            self._lit_shader['uFogStart'] = [float(depth.min())]
+            self._lit_shader['uFogEnd'] = [float(depth.max())]
         except Exception:
-            return
-        now = time.time()
-        if key != self._shade_key:
-            self._shade_key = key
-            self._shade_change_t = now
-            self._shade_dirty = True
-            return
-        # câmera estável: aplicar após pequeno atraso (debounce)
-        if self._shade_dirty and (now - self._shade_change_t) > 0.2:
-            self._shade_dirty = False
-            self._apply_depth_shading()
-
-    def _apply_depth_shading(self):
-        """Sombreamento por profundidade: átomos mais próximos da câmera ficam mais
-        claros; os do fundo, mais sombreados (como se a tela iluminasse a estrutura).
-        Modula apenas a cor uniforme de cada esfera — sem recriar geometria."""
-        if not getattr(self, '_depth_shading', True) or not self._atom_info:
-            return
-        try:
-            cam = self.view_widget.cameraPosition()
-            cam = np.array([cam.x(), cam.y(), cam.z()], dtype=float)
-        except Exception:
-            return
-        pos = np.array([a['pos'] for a in self._atom_info], dtype=float)
-        d = np.linalg.norm(pos - cam, axis=1)
-        dmin = float(d.min())
-        span = float(d.max()) - dmin
-        mb = getattr(self, '_depth_min_bright', 0.6)
-        for a, dist in zip(self._atom_info, d):
-            base = a.get('base_color')
-            mesh = a.get('mesh')
-            if base is None or mesh is None:
-                continue
-            t = 0.0 if span < 1e-6 else (float(dist) - dmin) / span   # 0=perto, 1=longe
-            f = 1.0 - (1.0 - mb) * t
-            try:
-                mesh.opts['color'] = (base[0] * f, base[1] * f, base[2] * f, 0.95)
-                mesh.update()
-            except Exception:
-                pass
+            pass
 
     def _start_gizmo_sync_timer(self):
         """Inicia timer para sincronizar o gizmo periodicamente."""
@@ -945,7 +975,7 @@ class StructureViewer3D(QWidget):
                 meshdata=mesh_data,
                 smooth=True,
                 color=(*color, 0.95),
-                shader='shaded',
+                shader=self._lit_shader,
                 glOptions='opaque'
             )
             mesh.translate(pos[0], pos[1], pos[2])
@@ -967,7 +997,7 @@ class StructureViewer3D(QWidget):
                 meshdata=mesh_data,
                 smooth=True,
                 color=(*color, 0.95),
-                shader='shaded',
+                shader=self._lit_shader,
                 glOptions='opaque'
             )
             p = np.asarray(a['pos'], dtype=float)
@@ -980,12 +1010,6 @@ class StructureViewer3D(QWidget):
 
         logging.info(f"✅ Estrutura renderizada: {len(self.atom_meshes)} átomos, "
                     f"{len(self.bond_meshes)} ligações, {len(self.unit_cell_lines)} arestas da célula")
-
-        # Iluminação simulada inicial (depth cueing)
-        try:
-            self._apply_depth_shading()
-        except Exception:
-            pass
 
     def _iter_display_atoms(self):
         """Gera (pos_cartesiana, elemento, base_idx) de todos os átomos a exibir.
@@ -1123,18 +1147,24 @@ class StructureViewer3D(QWidget):
                     if kind == 'p':
                         a, b = (i, ref) if i < ref else (ref, i)
                         pos_b = primary[ref]['pos']
+                        el2 = primary[ref]['element']
                     else:
                         a, b = i, _keep_outside(ref)
                         pos_b = outside[ref]['pos']
+                        el2 = outside[ref]['element']
                     if (a, b) in added_pairs:
                         continue
                     added_pairs.add((a, b))
 
-                    cyl = self._create_bond_cylinder(pos1, pos_b)
+                    # ligação bicolor: cada metade com a cor do respectivo átomo
+                    col1 = self.ATOMIC_COLORS.get(el1, self.ATOMIC_COLORS['default'])
+                    col2 = self.ATOMIC_COLORS.get(el2, self.ATOMIC_COLORS['default'])
+                    cyl = self._create_bond_cylinder(pos1, pos_b, col1, col2)
                     if cyl:
                         self.view_widget.addItem(cyl)
                         self.bond_meshes.append(cyl)
                         cyl._bond_atoms = (a, b)
+                        cyl._colors = (col1, col2)
                         cyl._original_pos1 = np.asarray(combined[a]['pos'], float).copy()
                         cyl._original_pos2 = np.asarray(combined[b]['pos'], float).copy()
 
@@ -1377,100 +1407,69 @@ class StructureViewer3D(QWidget):
 
         return max_distance
 
-    def _create_bond_cylinder(self, pos1, pos2, radius=None):
-        """
-        Cria um cilindro 3D com sombreamento para representar uma ligação atômica.
+    def _create_bond_cylinder(self, pos1, pos2, color1=None, color2=None, radius=None):
+        """Cria a ligação como um cilindro de duas cores (metade da cor de cada átomo)
+        num único mesh, com transição no ponto médio.
 
-        Args:
-            pos1 (np.array): Posição do primeiro átomo [x, y, z]
-            pos2 (np.array): Posição do segundo átomo [x, y, z]
-            radius (float): Raio do cilindro em Angstroms (None = usar self.bond_radius)
-
-        Returns:
-            gl.GLMeshItem: Cilindro 3D com sombreamento
+        color1 no lado de pos1; color2 no lado de pos2. Sem cores, usa cinza. A malha
+        usa 4 anéis (divisão no meio), reduzindo a contagem de vértices.
         """
         try:
-            # Usar raio configurável
             if radius is None:
                 radius = self.bond_radius
+            gray = (0.55, 0.55, 0.55)
+            c1 = tuple(color1) if color1 is not None else gray
+            c2 = tuple(color2) if color2 is not None else c1
+            c1 = (c1[0], c1[1], c1[2], 1.0)
+            c2 = (c2[0], c2[1], c2[2], 1.0)
 
-            # Calcular vetor direção e comprimento
-            direction = pos2 - pos1
-            length = np.linalg.norm(direction)
-
-            if length < 0.01:  # Evitar ligações muito curtas
+            p1 = np.asarray(pos1, dtype=float)
+            p2 = np.asarray(pos2, dtype=float)
+            direction = p2 - p1
+            length = float(np.linalg.norm(direction))
+            if length < 0.01:
                 return None
-
-            # Normalizar direção
             direction = direction / length
 
-            # Criar cilindro orientado ao longo do eixo Z inicialmente
-            rows, cols = 12, 12  # Resolução do cilindro
-            verts = []
+            cols = 14
+            half = length / 2.0
+            verts, colors = [], []
+            # 4 anéis: base(c1), meio(c1), meio(c2), topo(c2) -> divisão nítida no meio
+            for z, col in ((0.0, c1), (half, c1), (half, c2), (length, c2)):
+                for j in range(cols):
+                    theta = (j / cols) * 2.0 * np.pi
+                    verts.append([radius * np.cos(theta), radius * np.sin(theta), z])
+                    colors.append(col)
+
             faces = []
-
-            # Gerar vértices do cilindro
-            for i in range(rows + 1):
-                z = (i / rows) * length
+            for r in (0, 2):  # laterais: anel0->1 (metade c1) e anel2->3 (metade c2)
+                base = r * cols
                 for j in range(cols):
-                    theta = (j / cols) * 2 * np.pi
-                    x = radius * np.cos(theta)
-                    y = radius * np.sin(theta)
-                    verts.append([x, y, z])
-
-            # Gerar faces (triângulos)
-            for i in range(rows):
-                for j in range(cols):
-                    # Índices dos vértices
-                    v0 = i * cols + j
-                    v1 = i * cols + (j + 1) % cols
-                    v2 = (i + 1) * cols + j
-                    v3 = (i + 1) * cols + (j + 1) % cols
-
-                    # Dois triângulos por quadrado
+                    v0 = base + j
+                    v1 = base + (j + 1) % cols
+                    v2 = base + cols + j
+                    v3 = base + cols + (j + 1) % cols
                     faces.append([v0, v1, v2])
                     faces.append([v1, v3, v2])
 
-            verts = np.array(verts)
-            faces = np.array(faces)
+            mesh_data = gl.MeshData(vertexes=np.array(verts),
+                                    faces=np.array(faces),
+                                    vertexColors=np.array(colors))
+            cylinder = gl.GLMeshItem(meshdata=mesh_data, smooth=True,
+                                     shader=self._lit_shader, glOptions='opaque')
 
-            # Criar mesh data
-            mesh_data = gl.MeshData(vertexes=verts, faces=faces)
-
-            # Criar mesh item com sombreamento
-            cylinder = gl.GLMeshItem(
-                meshdata=mesh_data,
-                smooth=True,
-                color=(0.5, 0.5, 0.5, 1.0),  # Cinza médio completamente opaco
-                shader='shaded',  # Shader com iluminação
-                glOptions='opaque'  # Totalmente sólido
-            )
-
-            # Calcular rotação necessária para alinhar com a direção da ligação
-            # Eixo Z padrão
+            # Orientar ao longo da direção da ligação
             z_axis = np.array([0, 0, 1])
-
-            # Vetor perpendicular (eixo de rotação)
             rotation_axis = np.cross(z_axis, direction)
             rotation_axis_norm = np.linalg.norm(rotation_axis)
-
-            if rotation_axis_norm > 1e-6:  # Se não são paralelos
+            if rotation_axis_norm > 1e-6:
                 rotation_axis = rotation_axis / rotation_axis_norm
-
-                # Ângulo de rotação
                 cos_angle = np.dot(z_axis, direction)
-                angle = np.arccos(np.clip(cos_angle, -1.0, 1.0))
-                angle_deg = np.degrees(angle)
-
-                # Aplicar rotação
+                angle_deg = np.degrees(np.arccos(np.clip(cos_angle, -1.0, 1.0)))
                 cylinder.rotate(angle_deg, rotation_axis[0], rotation_axis[1], rotation_axis[2])
-            elif np.dot(z_axis, direction) < 0:  # Direção oposta
-                # Rotação de 180° em torno de X
+            elif np.dot(z_axis, direction) < 0:
                 cylinder.rotate(180, 1, 0, 0)
-
-            # Transladar para a posição inicial
-            cylinder.translate(pos1[0], pos1[1], pos1[2])
-
+            cylinder.translate(p1[0], p1[1], p1[2])
             return cylinder
 
         except Exception as e:
@@ -1549,7 +1548,8 @@ class StructureViewer3D(QWidget):
                     pos=pts,
                     color=(0.2, 0.2, 0.8, 1.0),  # Azul escuro para diferenciar
                     width=2.5,  # Mais grossa para destacar
-                    antialias=True
+                    antialias=True,
+                    glOptions='opaque'  # física: testa/escreve profundidade
                 )
                 self.view_widget.addItem(line)
                 self.unit_cell_lines.append(line)
@@ -1577,7 +1577,8 @@ class StructureViewer3D(QWidget):
                                 pos=pts,
                                 color=(0.0, 0.0, 0.0, 1.0),
                                 width=1.5,
-                                antialias=True
+                                antialias=True,
+                                glOptions='opaque'  # física: testa/escreve profundidade
                             )
                             self.view_widget.addItem(line)
                             self.unit_cell_lines.append(line)
@@ -1797,10 +1798,11 @@ class StructureViewer3D(QWidget):
                 self.info_label.setText(info_html)
                 self.info_label.setTextFormat(Qt.TextFormat.RichText)
 
-    def _reset_camera(self):
+    def _reset_camera(self, *args, azimuth=45, elevation=30):
         """
-        Reseta a posição da câmera para visualização padrão.
-        Centraliza em TODA a supercélula expandida.
+        Reposiciona a câmera enquadrando TODA a supercélula, com a orientação dada
+        (padrão: vista isométrica 45°/30°). Usado pelo reset e pelos botões a/b/c.
+        (*args absorve o argumento 'checked' do sinal clicked dos botões.)
         """
         if self.structure:
             na, nb, nc = self.supercell_expansion
@@ -1828,16 +1830,34 @@ class StructureViewer3D(QWidget):
             self.view_widget.setCameraPosition(
                 pos=pg.Vector(center[0], center[1], center[2]),
                 distance=distance,
-                azimuth=45,
-                elevation=30
+                azimuth=azimuth,
+                elevation=elevation
             )
 
-            logging.info(f"📹 Câmera resetada: centro={center}, distância={distance:.1f} Å (supercélula {na}×{nb}×{nc})")
+            logging.info(f"📹 Câmera: centro={center}, distância={distance:.1f} Å, "
+                         f"az={azimuth:.0f}° el={elevation:.0f}° (supercélula {na}×{nb}×{nc})")
         else:
-            self.view_widget.setCameraPosition(distance=30, azimuth=45, elevation=30)
+            self.view_widget.setCameraPosition(distance=30, azimuth=azimuth, elevation=elevation)
 
         # Sincronizar o gizmo de orientação
         self._sync_orientation_gizmo()
+
+    def _view_along_axis(self, idx):
+        """Orienta a câmera para olhar ao longo do eixo cristalográfico a(0)/b(1)/c(2),
+        enquadrando a estrutura (o eixo escolhido aponta para o observador)."""
+        if not self.structure:
+            return
+        try:
+            A = np.array(self.structure.lattice.matrix[idx], dtype=float)
+            n = np.linalg.norm(A)
+            if n < 1e-9:
+                return
+            A = A / n
+            az = float(np.degrees(np.arctan2(A[1], A[0])))
+            el = float(np.degrees(np.arcsin(np.clip(A[2], -1.0, 1.0))))
+            self._reset_camera(azimuth=az, elevation=el)
+        except Exception as e:
+            logging.warning(f"Erro ao orientar pela direção do eixo: {e}")
 
     # ==================================================================
     # MEDIÇÃO DE DISTÂNCIA INTERATÔMICA (baseada em VESTA, Mercury e outros)

@@ -24,14 +24,22 @@ e versionamento [Semantic Versioning](https://semver.org/lang/pt-BR/) (MAJOR.MIN
 ## [Não publicado]
 
 ### Added
-- Visualizador 3D (PhaseDRX): a célula unitária agora é exibida **completa**. Átomos de
-  face/aresta/canto aparecem em todas as suas imagens de borda, e a coordenação é
-  completada com os vizinhos ligados que caem logo fora da célula (anéis e poliedros
-  fecham), como em VESTA, Mercury e outros. As posições atômicas permanecem exatas.
-- Visualizador 3D (PhaseDRX): **sombreamento por profundidade (depth cueing)** — átomos
-  mais próximos do observador ficam mais claros e os mais ao fundo mais sombreados, dando
-  noção de profundidade. Leve (reaplicado só quando a câmera para; modula apenas a cor,
-  sem recriar geometria) e ajustável.
+- Visualizador 3D (PhaseDRX): exibição completa da célula unitária. Átomos em faces,
+  arestas e vértices são replicados em todas as imagens de borda dentro de [0, N] e a
+  vizinhança ligada imediatamente fora da célula é incluída para fechar anéis e poliedros
+  (convenção adotada por VESTA e Mercury). As posições atômicas não são alteradas.
+- Visualizador 3D (PhaseDRX): shader GLSL para átomos e ligações — iluminação headlight
+  com termo especular e atenuação por profundidade (mistura para o branco conforme a
+  distância à câmera). Executa na GPU; retorna ao shader embutido em falha de compilação.
+- Visualizador 3D (PhaseDRX): ligações em duas cores (metade da cor de cada átomo, com
+  transição no ponto médio), em um único mesh por ligação.
+- Visualizador 3D (PhaseDRX): botões de orientação da câmera ao longo dos eixos
+  cristalográficos a, b e c, e botão de vista isométrica.
+
+### Fixed
+- Visualizador 3D (PhaseDRX): arestas da célula unitária passam a usar
+  glOptions='opaque' (antes 'additive', sem teste de profundidade), corrigindo linhas
+  desenhadas por cima de ligações e átomos.
 
 ---
 
