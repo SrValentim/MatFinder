@@ -589,6 +589,9 @@ class PeakSearchPanel(QWidget):
                         cell.setSelected(True)
         self.table.blockSignals(False)
         self._update_summary(item, peak_list)
+        match_panel = getattr(self.host, "match_panel", None)
+        if match_panel is not None:
+            match_panel.refresh()  # a aba Identificação usa esta lista de picos
 
     def _update_summary(self, item, peak_list):
         stale = False

@@ -24,6 +24,16 @@ e versionamento [Semantic Versioning](https://semver.org/lang/pt-BR/) (MAJOR.MIN
 ## [Não publicado]
 
 ### Added
+- Identificação de fases (PhaseDRX, search-match fase 2): nova aba **Identificação**.
+  Os elementos obrigatórios, possíveis e proibidos são escolhidos numa tabela periódica de
+  três estados (sistema fechado ou aberto) e os candidatos vêm do COD e do Materials
+  Project. Cada candidato é simulado e pontuado de 0 a 100 contra a lista de picos:
+  posições, reflexões fortes achadas (só as esperadas acima do ruído), picos explicados e
+  intensidades, com zero e escala da rede alinhados (faixa maior para as estruturas de DFT
+  do MP). Entradas da mesma fase são agrupadas; a tabela é ordenável, mostra a prévia das
+  reflexões sobre o difratograma, abre a entrada na fonte e envia o CIF para a lista do
+  PhaseDRX. Consultas, CIFs e padrões simulados ficam em cache local; o acesso ao COD faz
+  novas tentativas e usa HTTP quando o HTTPS falha.
 - Busca de picos (PhaseDRX, search-match fase 1): nova aba **Picos** com um detector
   refeito do zero. Detecção multiescala (segunda derivada suavizada em várias larguras)
   com ruído calibrado longe dos picos, fundo SNIP robusto a ruído e a bordas, e ajuste

@@ -2934,5 +2934,289 @@
  "Picos": {
   "en_US": "Peaks",
   "de_DE": "Peaks"
+ },
+ "Consultando o COD": {
+  "en_US": "Querying COD",
+  "de_DE": "COD wird abgefragt"
+ },
+ "Consultando o Materials Project": {
+  "en_US": "Querying Materials Project",
+  "de_DE": "Materials Project wird abgefragt"
+ },
+ "Baixando estruturas": {
+  "en_US": "Downloading structures",
+  "de_DE": "Strukturen werden heruntergeladen"
+ },
+ "Simulando e pontuando": {
+  "en_US": "Simulating and scoring",
+  "de_DE": "Simulation und Bewertung"
+ },
+ "Score": {
+  "en_US": "Score",
+  "de_DE": "Score"
+ },
+ "Fórmula": {
+  "en_US": "Formula",
+  "de_DE": "Formel"
+ },
+ "Fonte": {
+  "en_US": "Source",
+  "de_DE": "Quelle"
+ },
+ "ID": {
+  "en_US": "ID",
+  "de_DE": "ID"
+ },
+ "Linhas": {
+  "en_US": "Lines",
+  "de_DE": "Linien"
+ },
+ "Posições": {
+  "en_US": "Positions",
+  "de_DE": "Positionen"
+ },
+ "Intensid.": {
+  "en_US": "Intens.",
+  "de_DE": "Intens."
+ },
+ "Explicado (%)": {
+  "en_US": "Explained (%)",
+  "de_DE": "Erklärt (%)"
+ },
+ "Zero (°)": {
+  "en_US": "Zero (°)",
+  "de_DE": "Nullpunkt (°)"
+ },
+ "Rede": {
+  "en_US": "Lattice",
+  "de_DE": "Gitter"
+ },
+ "Notas": {
+  "en_US": "Notes",
+  "de_DE": "Hinweise"
+ },
+ "Ir para a aba Picos": {
+  "en_US": "Go to the Peaks tab",
+  "de_DE": "Zum Tab Peaks"
+ },
+ "Picos:": {
+  "en_US": "Peaks:",
+  "de_DE": "Peaks:"
+ },
+ "Escolher elementos...": {
+  "en_US": "Choose elements...",
+  "de_DE": "Elemente wählen..."
+ },
+ "Elementos:": {
+  "en_US": "Elements:",
+  "de_DE": "Elemente:"
+ },
+ "só experimentais": {
+  "en_US": "experimental only",
+  "de_DE": "nur experimentelle"
+ },
+ "Só estruturas do Materials Project ligadas a uma entrada experimental (ICSD).": {
+  "en_US": "Only Materials Project structures linked to an experimental (ICSD) entry.",
+  "de_DE": "Nur Materials-Project-Strukturen mit experimentellem Eintrag (ICSD)."
+ },
+ "Fontes:": {
+  "en_US": "Sources:",
+  "de_DE": "Quellen:"
+ },
+ "Agrupar entradas da mesma fase": {
+  "en_US": "Group entries of the same phase",
+  "de_DE": "Einträge derselben Phase gruppieren"
+ },
+ "Deslocamento de zero (±):": {
+  "en_US": "Zero shift (±):",
+  "de_DE": "Nullpunktverschiebung (±):"
+ },
+ "Variação de rede, experimentais (±):": {
+  "en_US": "Lattice variation, experimental (±):",
+  "de_DE": "Gitteränderung, experimentell (±):"
+ },
+ "Expansão de rede aceita no MP (DFT):": {
+  "en_US": "Accepted MP lattice expansion (DFT):",
+  "de_DE": "Zulässige MP-Gitteraufweitung (DFT):"
+ },
+ "Estabilidade máxima no MP:": {
+  "en_US": "Maximum MP energy above hull:",
+  "de_DE": "Maximale MP-Energie über der Hülle:"
+ },
+ "Máximo de candidatos:": {
+  "en_US": "Maximum candidates:",
+  "de_DE": "Maximale Kandidaten:"
+ },
+ "Peso das posições:": {
+  "en_US": "Weight of positions:",
+  "de_DE": "Gewicht der Positionen:"
+ },
+ "Peso das reflexões fortes:": {
+  "en_US": "Weight of strong reflections:",
+  "de_DE": "Gewicht der starken Reflexe:"
+ },
+ "Peso dos picos explicados:": {
+  "en_US": "Weight of explained peaks:",
+  "de_DE": "Gewicht der erklärten Peaks:"
+ },
+ "Peso das intensidades:": {
+  "en_US": "Weight of intensities:",
+  "de_DE": "Gewicht der Intensitäten:"
+ },
+ "Buscar candidatos": {
+  "en_US": "Search candidates",
+  "de_DE": "Kandidaten suchen"
+ },
+ "Adicionar à lista do PhaseDRX": {
+  "en_US": "Add to the PhaseDRX list",
+  "de_DE": "Zur PhaseDRX-Liste hinzufügen"
+ },
+ "Carrega o CIF do candidato na aba de simulação.": {
+  "en_US": "Loads the candidate's CIF into the simulation tab.",
+  "de_DE": "Lädt die CIF des Kandidaten in den Simulations-Tab."
+ },
+ "Abrir na fonte": {
+  "en_US": "Open at source",
+  "de_DE": "In der Quelle öffnen"
+ },
+ "Exportar candidatos": {
+  "en_US": "Export candidates",
+  "de_DE": "Kandidaten exportieren"
+ },
+ "nenhum (carregue dados na aba Dados Experimentais)": {
+  "en_US": "none (load data in the Experimental Data tab)",
+  "de_DE": "keines (Daten im Tab Experimentelle Daten laden)"
+ },
+ "nenhuma busca de picos neste difratograma": {
+  "en_US": "no peak search on this diffractogram",
+  "de_DE": "keine Peaksuche für dieses Diffraktogramm"
+ },
+ "Configure a chave da API do Materials Project no MatFinder.": {
+  "en_US": "Set the Materials Project API key in MatFinder.",
+  "de_DE": "Legen Sie den Materials-Project-API-Schlüssel in MatFinder fest."
+ },
+ "Chave da API do Materials Project encontrada.": {
+  "en_US": "Materials Project API key found.",
+  "de_DE": "Materials-Project-API-Schlüssel gefunden."
+ },
+ "Identificação": {
+  "en_US": "Identification",
+  "de_DE": "Identifizierung"
+ },
+ "Carregue um difratograma experimental e escolha-o na aba Picos.": {
+  "en_US": "Load an experimental diffractogram and choose it in the Peaks tab.",
+  "de_DE": "Laden Sie ein experimentelles Diffraktogramm und wählen Sie es im Tab Peaks aus."
+ },
+ "Busque os picos na aba Picos antes de buscar candidatos.": {
+  "en_US": "Search the peaks in the Peaks tab before searching candidates.",
+  "de_DE": "Suchen Sie die Peaks im Tab Peaks, bevor Sie Kandidaten suchen."
+ },
+ "Escolha pelo menos uma fonte.": {
+  "en_US": "Choose at least one source.",
+  "de_DE": "Wählen Sie mindestens eine Quelle."
+ },
+ "Nenhuma busca de candidatos neste difratograma.": {
+  "en_US": "No candidate search on this diffractogram.",
+  "de_DE": "Keine Kandidatensuche für dieses Diffraktogramm."
+ },
+ "{} candidatos (COD {}, MP {}) em {} fases": {
+  "en_US": "{} candidates (COD {}, MP {}) in {} phases",
+  "de_DE": "{} Kandidaten (COD {}, MP {}) in {} Phasen"
+ },
+ "lista limitada aos candidatos mais prováveis": {
+  "en_US": "list limited to the most likely candidates",
+  "de_DE": "Liste auf die wahrscheinlichsten Kandidaten begrenzt"
+ },
+ "A busca de candidatos falhou:\n{}": {
+  "en_US": "The candidate search failed:\n{}",
+  "de_DE": "Die Kandidatensuche ist fehlgeschlagen:\n{}"
+ },
+ "melhor: {} ({:.0f})": {
+  "en_US": "best: {} ({:.0f})",
+  "de_DE": "bester: {} ({:.0f})"
+ },
+ "Avisos das fontes:": {
+  "en_US": "Source warnings:",
+  "de_DE": "Hinweise der Quellen:"
+ },
+ "+{} entradas iguais": {
+  "en_US": "+{} identical entries",
+  "de_DE": "+{} gleiche Einträge"
+ },
+ "Entradas iguais: {}": {
+  "en_US": "Identical entries: {}",
+  "de_DE": "Gleiche Einträge: {}"
+ },
+ "Obrigatório": {
+  "en_US": "Required",
+  "de_DE": "Erforderlich"
+ },
+ "Possível": {
+  "en_US": "Possible",
+  "de_DE": "Möglich"
+ },
+ "Proibido": {
+  "en_US": "Forbidden",
+  "de_DE": "Verboten"
+ },
+ "Elementos da amostra": {
+  "en_US": "Sample elements",
+  "de_DE": "Elemente der Probe"
+ },
+ "Clique para alternar: obrigatório, possível, proibido, nenhum. O botão direito limpa o elemento.": {
+  "en_US": "Click to cycle: required, possible, forbidden, none. Right-click clears the element.",
+  "de_DE": "Klicken zum Wechseln: erforderlich, möglich, verboten, keins. Rechtsklick setzt das Element zurück."
+ },
+ "Permitir outros elementos além dos marcados (sistema aberto)": {
+  "en_US": "Allow other elements besides the marked ones (open system)",
+  "de_DE": "Weitere Elemente außer den markierten zulassen (offenes System)"
+ },
+ "Desmarcado: o candidato só pode conter elementos obrigatórios ou possíveis.": {
+  "en_US": "Unchecked: a candidate may only contain required or possible elements.",
+  "de_DE": "Nicht markiert: ein Kandidat darf nur erforderliche oder mögliche Elemente enthalten."
+ },
+ "Limpar": {
+  "en_US": "Clear",
+  "de_DE": "Leeren"
+ },
+ "outros elementos permitidos": {
+  "en_US": "other elements allowed",
+  "de_DE": "weitere Elemente erlaubt"
+ },
+ "Obrigatórios: {}": {
+  "en_US": "Required: {}",
+  "de_DE": "Erforderlich: {}"
+ },
+ "Possíveis: {}": {
+  "en_US": "Possible: {}",
+  "de_DE": "Möglich: {}"
+ },
+ "Proibidos: {}": {
+  "en_US": "Forbidden: {}",
+  "de_DE": "Verboten: {}"
+ },
+ "Marque pelo menos um elemento como obrigatório.": {
+  "en_US": "Mark at least one element as required.",
+  "de_DE": "Markieren Sie mindestens ein Element als erforderlich."
+ },
+ "Um elemento não pode ser obrigatório ou possível e proibido ao mesmo tempo.": {
+  "en_US": "An element cannot be required or possible and forbidden at the same time.",
+  "de_DE": "Ein Element kann nicht gleichzeitig erforderlich oder möglich und verboten sein."
+ },
+ "O COD aceita no máximo 8 elementos obrigatórios.": {
+  "en_US": "COD accepts at most 8 required elements.",
+  "de_DE": "COD akzeptiert höchstens 8 erforderliche Elemente."
+ },
+ "Use no máximo 10 elementos entre obrigatórios e possíveis.": {
+  "en_US": "Use at most 10 elements among required and possible.",
+  "de_DE": "Verwenden Sie höchstens 10 erforderliche und mögliche Elemente."
+ },
+ "São necessários pelo menos 2 picos cristalinos. Busque os picos antes.": {
+  "en_US": "At least 2 crystalline peaks are needed. Search the peaks first.",
+  "de_DE": "Mindestens 2 kristalline Peaks sind nötig. Suchen Sie zuerst die Peaks."
+ },
+ "Chave da API do Materials Project não configurada.": {
+  "en_US": "Materials Project API key not set.",
+  "de_DE": "Materials-Project-API-Schlüssel nicht festgelegt."
  }
 }

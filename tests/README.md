@@ -23,6 +23,8 @@ Tests run headless (`QT_QPA_PLATFORM=offscreen`, set in `conftest.py`).
 | `test_emission_lines.py` | `tools/xrd/emission_lines` (Kα/Kβ lines of the PhaseDRX simulation) |
 | `test_peak_search.py` | `tools/xrd/search_match/peak_search` (robust peak search: synthetic patterns + real SmFeO₃) |
 | `test_peak_list.py` | `tools/xrd/search_match/peak_list` (editable peak list, JSON, CSV) |
+| `test_candidates.py` | `tools/xrd/search_match/candidates` (element filter, COD/MP clients with fake network, cache, duplicates) |
+| `test_scoring.py` | `tools/xrd/search_match/scoring` + `candidate_search` (candidate scoring, alignment, end-to-end search without network) |
 | `test_quimica.py` | `tools/calculator/quimica_calc` (molar mass, conversions) |
 | `test_api_logic.py` | `core/api_logic._normalize_doi` (no network) |
 | `test_translations.py` | `core/translator` (ptr) + translation-file integrity |

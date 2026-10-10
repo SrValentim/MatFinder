@@ -42,6 +42,7 @@ import matplotlib.image as mpimg
 from matfinder.core.translator import ptr
 from matfinder.tools.xrd.emission_lines import ANODE_LINES, radiation_lines, combined_sticks
 from matfinder.tools.xrd.search_match.peak_panel import PeakSearchPanel, draw_peak_overlays
+from matfinder.tools.xrd.search_match.match_panel import MatchPanel, draw_candidate_overlay
 
 # --- Importação para Exportar para Origin ---
 try:
@@ -379,6 +380,12 @@ class PhaseDRXTool(QMainWindow):
         # Aba Picos (search-match, fase 1): busca robusta e edição da lista de picos
         self.peaks_panel = PeakSearchPanel(self)
         self.tab_widget.addTab(self.peaks_panel, ptr("Picos"))
+
+        # Aba Identificação (search-match, fase 2): candidatos do COD e do Materials Project
+        self.match_panel = MatchPanel(self, self.peaks_panel)
+        self.tab_widget.addTab(self.match_panel, ptr("Identificação"))
+        self.tab_widget.currentChanged.connect(
+            lambda _i: self.match_panel.refresh() if self.tab_widget.currentWidget() is self.match_panel else None)
 
         self.main_splitter.addWidget(control_widget)
 
@@ -1909,6 +1916,8 @@ class PhaseDRXTool(QMainWindow):
     def closeEvent(self, event):
         if hasattr(self, "peaks_panel"):
             self.peaks_panel.shutdown()
+        if hasattr(self, "match_panel"):
+            self.match_panel.shutdown()
         # CORREÇÃO: Limpar visualizador 3D ANTES de mostrar diálogo para evitar erro OpenGL
         try:
             if hasattr(self, 'structure_viewer') and self.structure_viewer is not None:
@@ -2300,6 +2309,8 @@ class PhaseDRXTool(QMainWindow):
         self._repopulate_group_table()
         if hasattr(self, "peaks_panel"):
             self.peaks_panel.refresh_items()
+        if hasattr(self, "match_panel"):
+            self.match_panel.refresh()
 
     def _toggle_item_visibility(self, item_id):
         plot_item = self._find_plot_item_by_id(item_id)
@@ -2645,6 +2656,8 @@ class PhaseDRXTool(QMainWindow):
 
                 if item.get("type") == "experimental" and hasattr(self, "peaks_panel"):
                     draw_peak_overlays(ax, item, offset, self.peaks_panel)
+                if item.get("type") == "experimental" and hasattr(self, "match_panel"):
+                    draw_candidate_overlay(ax, item, offset, self.match_panel)
 
             if items_in_group:
                 current_y_offset += (len(items_in_group) - 1) * intra_group_offset
