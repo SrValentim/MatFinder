@@ -11,14 +11,17 @@ normaliza o padrão final.
 import numpy as np
 
 # Comprimentos de onda em Å.
-# - Kα1: os mesmos valores do seletor "Fonte de Radiação Padrão" do PhaseDRX.
-# - Kβ1: os valores da tabela WAVELENGTHS do pymatgen.
+# - Kα1 ("ka"): os mesmos valores do seletor "Fonte de Radiação Padrão" do PhaseDRX.
+# - Kα2 ("ka2") e Kβ1 ("kb"): os valores da tabela WAVELENGTHS do pymatgen.
 ANODE_LINES = {
-    "Cu": {"ka": 1.54056, "kb": 1.39222},
-    "Co": {"ka": 1.78897, "kb": 1.63079},
-    "Fe": {"ka": 1.93604, "kb": 1.75661},
-    "Mo": {"ka": 0.70930, "kb": 0.63229},
+    "Cu": {"ka": 1.54056, "ka2": 1.54439, "kb": 1.39222},
+    "Co": {"ka": 1.78897, "ka2": 1.79285, "kb": 1.63079},
+    "Fe": {"ka": 1.93604, "ka2": 1.93998, "kb": 1.75661},
+    "Mo": {"ka": 0.70930, "ka2": 0.71359, "kb": 0.63229},
 }
+
+# Intensidade de Kα2 relativa a Kα1 (razão padrão usada em XRD de laboratório).
+KA2_TO_KA1_RATIO = 0.5
 
 # Intensidade de Kβ1 relativa a Kα1, aproximada, para tubo SEM filtro de Kβ e
 # sem monocromador. Vem da razão Kβ/Kα total da emissão (~0,14 para Fe, Co e Cu;
@@ -58,6 +61,19 @@ def radiation_lines(anode=None, use_ka=True, use_kb=False, custom_wavelength=Non
     if use_kb:
         lines.append((ANODE_LINES[anode]["kb"], KB_TO_KA1_RATIO[anode]))
     return lines
+
+
+def same_d_two_theta(two_theta, wavelength_from, wavelength_to):
+    """2θ (graus) da mesma distância interplanar d medida com outro comprimento de onda.
+
+    Usado para prever onde cai o Kα2 (ou o Kβ) de um pico de Kα1. Devolve NaN
+    quando a reflexão não existe no outro comprimento de onda (sen θ > 1).
+    """
+    theta = np.radians(np.asarray(two_theta, dtype=float) / 2.0)
+    ratio = np.sin(theta) * (float(wavelength_to) / float(wavelength_from))
+    with np.errstate(invalid="ignore"):
+        out = 2.0 * np.degrees(np.arcsin(np.where(np.abs(ratio) <= 1.0, ratio, np.nan)))
+    return float(out) if np.ndim(out) == 0 else out
 
 
 def combined_sticks(structure, lines, max_2theta):

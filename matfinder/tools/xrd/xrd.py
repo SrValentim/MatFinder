@@ -40,7 +40,8 @@ from matplotlib.widgets import RectangleSelector
 import matplotlib.cm as cm
 import matplotlib.image as mpimg
 from matfinder.core.translator import ptr
-from matfinder.tools.xrd.emission_lines import radiation_lines, combined_sticks
+from matfinder.tools.xrd.emission_lines import ANODE_LINES, radiation_lines, combined_sticks
+from matfinder.tools.xrd.search_match.peak_panel import PeakSearchPanel, draw_peak_overlays
 
 # --- Importação para Exportar para Origin ---
 try:
@@ -375,6 +376,10 @@ class PhaseDRXTool(QMainWindow):
         self._create_simulation_tab()
         self.tab_widget.addTab(self.sim_tab, ptr("Simulação Teórica (de CIF)"))
 
+        # Aba Picos (search-match, fase 1): busca robusta e edição da lista de picos
+        self.peaks_panel = PeakSearchPanel(self)
+        self.tab_widget.addTab(self.peaks_panel, ptr("Picos"))
+
         self.main_splitter.addWidget(control_widget)
 
         # Desabilitar arrastar com o mouse no splitter
@@ -666,6 +671,7 @@ class PhaseDRXTool(QMainWindow):
 
         self.combine_phases_button.clicked.connect(self.create_multiphase_combination)
         self.wavelength_combo.currentIndexChanged.connect(self.on_wavelength_change)
+        self.wavelength_custom_input.textChanged.connect(lambda _text: self.peaks_panel.update_radiation())
         self.ka_checkbox.toggled.connect(
             lambda checked: self._on_radiation_line_toggled(self.ka_checkbox, checked))
         self.kb_checkbox.toggled.connect(
@@ -1300,6 +1306,11 @@ class PhaseDRXTool(QMainWindow):
         logging.debug(f"✅ Zoom aplicado: X[{min(x1,x2):.2f}, {max(x1,x2):.2f}], Y[{min(y1,y2):.2f}, {max(y1,y2):.2f}]")
 
     def _on_mouse_press(self, event):
+        # PRIORIDADE MÁXIMA: edição de picos (aba Picos)
+        if (event.inaxes and event.button == 1 and hasattr(self, "peaks_panel")
+                and self.peaks_panel.edit_mode and self.peaks_panel.handle_plot_click(event.xdata)):
+            return
+
         # PRIORIDADE: Modo de seleção de pico
         if self._peak_selection_mode and event.inaxes and event.button == 1:
             peak_x = event.xdata
@@ -1896,6 +1907,8 @@ class PhaseDRXTool(QMainWindow):
         self.set_dirty(False)
 
     def closeEvent(self, event):
+        if hasattr(self, "peaks_panel"):
+            self.peaks_panel.shutdown()
         # CORREÇÃO: Limpar visualizador 3D ANTES de mostrar diálogo para evitar erro OpenGL
         try:
             if hasattr(self, 'structure_viewer') and self.structure_viewer is not None:
@@ -2285,6 +2298,8 @@ class PhaseDRXTool(QMainWindow):
         for item in cif_items: self._add_item_to_list(self.cif_list_widget, item)
 
         self._repopulate_group_table()
+        if hasattr(self, "peaks_panel"):
+            self.peaks_panel.refresh_items()
 
     def _toggle_item_visibility(self, item_id):
         plot_item = self._find_plot_item_by_id(item_id)
@@ -2627,6 +2642,9 @@ class PhaseDRXTool(QMainWindow):
                     peak_x, peak_y = item["analysis"]["peaks"]
                     peak_y_array = np.array(peak_y)
                     ax.plot(peak_x, peak_y_array + offset, "x", color='red', markersize=5)
+
+                if item.get("type") == "experimental" and hasattr(self, "peaks_panel"):
+                    draw_peak_overlays(ax, item, offset, self.peaks_panel)
 
             if items_in_group:
                 current_y_offset += (len(items_in_group) - 1) * intra_group_offset
@@ -3540,6 +3558,8 @@ class PhaseDRXTool(QMainWindow):
         self.kb_checkbox.setEnabled(not is_custom)
         self.ka_checkbox.setToolTip(custom_tip if is_custom else self._ka_tooltip)
         self.kb_checkbox.setToolTip(custom_tip if is_custom else self._kb_tooltip)
+        if hasattr(self, "peaks_panel"):
+            self.peaks_panel.update_radiation()
 
     def _selected_radiation_lines(self):
         """Linhas (λ em Å, peso) da simulação, conforme a fonte e as opções Kα/Kβ."""
@@ -3547,6 +3567,22 @@ class PhaseDRXTool(QMainWindow):
         if anode is None:  # "Outro": comprimento de onda livre
             return radiation_lines(custom_wavelength=float(self.wavelength_custom_input.text()))
         return radiation_lines(anode, self.ka_checkbox.isChecked(), self.kb_checkbox.isChecked())
+
+    def radiation_info(self):
+        """Comprimentos de onda (Å) da fonte atual, para a busca de picos.
+
+        Returns:
+            dict com anode (None se personalizado), ka1, ka2 e kb (None quando não se aplicam).
+        """
+        anode = self.wavelength_combo.currentData()
+        if anode is None:
+            try:
+                lam = float(self.wavelength_custom_input.text())
+            except ValueError:
+                lam = None
+            return {"anode": None, "ka1": lam if lam and lam > 0 else None, "ka2": None, "kb": None}
+        lines = ANODE_LINES[anode]
+        return {"anode": anode, "ka1": lines["ka"], "ka2": lines["ka2"], "kb": lines["kb"]}
 
     def _on_radiation_line_toggled(self, checkbox, checked):
         """Impede desmarcar a última linha de emissão: Kα ou Kβ deve ficar marcada."""

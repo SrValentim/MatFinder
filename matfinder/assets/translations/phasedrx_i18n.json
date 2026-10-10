@@ -2654,5 +2654,285 @@
  "Selecione pelo menos uma linha de emissão: Kα ou Kβ.": {
   "en_US": "Select at least one emission line: Kα or Kβ.",
   "de_DE": "Wählen Sie mindestens eine Emissionslinie: Kα oder Kβ."
+ },
+ "Estimando o ruído": {
+  "en_US": "Estimating noise",
+  "de_DE": "Rauschen wird geschätzt"
+ },
+ "Detectando picos": {
+  "en_US": "Detecting peaks",
+  "de_DE": "Peaks werden erkannt"
+ },
+ "Estimando o fundo": {
+  "en_US": "Estimating background",
+  "de_DE": "Untergrund wird geschätzt"
+ },
+ "Ajustando halos": {
+  "en_US": "Fitting halos",
+  "de_DE": "Halos werden angepasst"
+ },
+ "Aprendendo a largura dos picos": {
+  "en_US": "Learning peak widths",
+  "de_DE": "Peakbreiten werden ermittelt"
+ },
+ "Ajustando perfis": {
+  "en_US": "Fitting profiles",
+  "de_DE": "Profile werden angepasst"
+ },
+ "Concluído": {
+  "en_US": "Done",
+  "de_DE": "Fertig"
+ },
+ "I rel. (%)": {
+  "en_US": "Rel. I (%)",
+  "de_DE": "Rel. I (%)"
+ },
+ "Altura": {
+  "en_US": "Height",
+  "de_DE": "Höhe"
+ },
+ "Área": {
+  "en_US": "Area",
+  "de_DE": "Fläche"
+ },
+ "Signif.": {
+  "en_US": "Signif.",
+  "de_DE": "Signif."
+ },
+ "Tipo": {
+  "en_US": "Type",
+  "de_DE": "Typ"
+ },
+ "Origem": {
+  "en_US": "Origin",
+  "de_DE": "Herkunft"
+ },
+ "Obs.": {
+  "en_US": "Notes",
+  "de_DE": "Hinweis"
+ },
+ "Difratograma:": {
+  "en_US": "Diffractogram:",
+  "de_DE": "Diffraktogramm:"
+ },
+ "A radiação é escolhida na aba de simulação.": {
+  "en_US": "The radiation is chosen in the simulation tab.",
+  "de_DE": "Die Strahlung wird im Simulations-Tab gewählt."
+ },
+ "Radiação:": {
+  "en_US": "Radiation:",
+  "de_DE": "Strahlung:"
+ },
+ "Padrão": {
+  "en_US": "Standard",
+  "de_DE": "Standard"
+ },
+ "Dados ruidosos": {
+  "en_US": "Noisy data",
+  "de_DE": "Verrauschte Daten"
+ },
+ "Picos largos / amorfo": {
+  "en_US": "Broad peaks / amorphous",
+  "de_DE": "Breite Peaks / amorph"
+ },
+ "Ajusta os parâmetros da busca ao tipo de difratograma.": {
+  "en_US": "Adapts the search parameters to the kind of diffractogram.",
+  "de_DE": "Passt die Suchparameter an die Art des Diffraktogramms an."
+ },
+ "Tipo de dado:": {
+  "en_US": "Data type:",
+  "de_DE": "Datentyp:"
+ },
+ "Limiar de detecção em desvios-padrão do ruído. Menor = encontra picos mais fracos.": {
+  "en_US": "Detection threshold in noise standard deviations. Lower = finds weaker peaks.",
+  "de_DE": "Erkennungsschwelle in Standardabweichungen des Rauschens. Niedriger = findet schwächere Peaks."
+ },
+ "Limiar:": {
+  "en_US": "Threshold:",
+  "de_DE": "Schwelle:"
+ },
+ "Dados com Kα2 (dubleto ajustado junto)": {
+  "en_US": "Data with Kα2 (doublet fitted together)",
+  "de_DE": "Daten mit Kα2 (Dublett gemeinsam angepasst)"
+ },
+ "Ajusta Kα1 e Kα2 juntos e lista só o Kα1. Desmarque para dados com monocromador de Kα1.": {
+  "en_US": "Fits Kα1 and Kα2 together and lists only Kα1. Uncheck for data measured with a Kα1 monochromator.",
+  "de_DE": "Passt Kα1 und Kα2 gemeinsam an und listet nur Kα1. Für Daten mit Kα1-Monochromator abwählen."
+ },
+ "Avançado": {
+  "en_US": "Advanced",
+  "de_DE": "Erweitert"
+ },
+ "automática": {
+  "en_US": "automatic",
+  "de_DE": "automatisch"
+ },
+ "Remover spikes de um ponto": {
+  "en_US": "Remove single-point spikes",
+  "de_DE": "Einzelpunkt-Spikes entfernen"
+ },
+ "Marcar possíveis picos de Kβ": {
+  "en_US": "Flag possible Kβ peaks",
+  "de_DE": "Mögliche Kβ-Peaks markieren"
+ },
+ "Larguras seguem uma tendência suave com 2θ": {
+  "en_US": "Widths follow a smooth trend with 2θ",
+  "de_DE": "Breiten folgen einem glatten Verlauf mit 2θ"
+ },
+ "FWHM mínima:": {
+  "en_US": "Minimum FWHM:",
+  "de_DE": "Minimale FWHM:"
+ },
+ "FWHM máxima:": {
+  "en_US": "Maximum FWHM:",
+  "de_DE": "Maximale FWHM:"
+ },
+ "Janela do fundo:": {
+  "en_US": "Background window:",
+  "de_DE": "Untergrundfenster:"
+ },
+ "Halo a partir de:": {
+  "en_US": "Halo from:",
+  "de_DE": "Halo ab:"
+ },
+ "Buscar picos": {
+  "en_US": "Search peaks",
+  "de_DE": "Peaks suchen"
+ },
+ "Limpar picos": {
+  "en_US": "Clear peaks",
+  "de_DE": "Peaks löschen"
+ },
+ "Adicionar pico": {
+  "en_US": "Add peak",
+  "de_DE": "Peak hinzufügen"
+ },
+ "Clique no gráfico onde está o pico. Esc encerra.": {
+  "en_US": "Click on the plot where the peak is. Esc to finish.",
+  "de_DE": "Klicken Sie im Diagramm auf die Peakposition. Esc beendet."
+ },
+ "Apagar pico": {
+  "en_US": "Delete peak",
+  "de_DE": "Peak entfernen"
+ },
+ "Clique perto do marcador. Apaga só o pico, nunca os dados. Esc encerra.": {
+  "en_US": "Click near the marker. Deletes only the peak, never the data. Esc to finish.",
+  "de_DE": "Klicken Sie nahe der Markierung. Entfernt nur den Peak, nie die Daten. Esc beendet."
+ },
+ "Mostrar ajuste e fundo": {
+  "en_US": "Show fit and background",
+  "de_DE": "Anpassung und Untergrund zeigen"
+ },
+ "Os dados mudaram depois da busca. Busque de novo para atualizar alturas e áreas.": {
+  "en_US": "The data changed after the search. Search again to update heights and areas.",
+  "de_DE": "Die Daten haben sich nach der Suche geändert. Suchen Sie erneut, um Höhen und Flächen zu aktualisieren."
+ },
+ "Apagar selecionados": {
+  "en_US": "Delete selected",
+  "de_DE": "Ausgewählte entfernen"
+ },
+ "Restaurar apagados": {
+  "en_US": "Restore deleted",
+  "de_DE": "Entfernte wiederherstellen"
+ },
+ "Libera os picos apagados e busca de novo.": {
+  "en_US": "Releases the deleted peaks and searches again.",
+  "de_DE": "Gibt die entfernten Peaks frei und sucht erneut."
+ },
+ "Exportar CSV...": {
+  "en_US": "Export CSV...",
+  "de_DE": "CSV exportieren..."
+ },
+ "comprimento de onda inválido": {
+  "en_US": "invalid wavelength",
+  "de_DE": "ungültige Wellenlänge"
+ },
+ "Exportar picos": {
+  "en_US": "Export peaks",
+  "de_DE": "Peaks exportieren"
+ },
+ "Busca de picos": {
+  "en_US": "Peak search",
+  "de_DE": "Peaksuche"
+ },
+ "Carregue um difratograma experimental e escolha-o na lista.": {
+  "en_US": "Load an experimental diffractogram and choose it in the list.",
+  "de_DE": "Laden Sie ein experimentelles Diffraktogramm und wählen Sie es in der Liste aus."
+ },
+ "Escolha um difratograma na aba Picos.": {
+  "en_US": "Choose a diffractogram in the Peaks tab.",
+  "de_DE": "Wählen Sie im Tab Peaks ein Diffraktogramm aus."
+ },
+ "Este difratograma ainda não tem picos.": {
+  "en_US": "This diffractogram has no peaks yet.",
+  "de_DE": "Dieses Diffraktogramm hat noch keine Peaks."
+ },
+ "Nenhum pico perto do clique.": {
+  "en_US": "No peak near the click.",
+  "de_DE": "Kein Peak in der Nähe des Klicks."
+ },
+ "Não há picos para exportar.": {
+  "en_US": "There are no peaks to export.",
+  "de_DE": "Es gibt keine Peaks zum Exportieren."
+ },
+ "Nenhuma busca feita neste difratograma.": {
+  "en_US": "No search done on this diffractogram.",
+  "de_DE": "Für dieses Diffraktogramm wurde noch nicht gesucht."
+ },
+ "Clique dentro da faixa de dados.": {
+  "en_US": "Click inside the data range.",
+  "de_DE": "Klicken Sie innerhalb des Datenbereichs."
+ },
+ "possível Kβ": {
+  "en_US": "possible Kβ",
+  "de_DE": "mögliches Kβ"
+ },
+ "{} picos": {
+  "en_US": "{} peaks",
+  "de_DE": "{} Peaks"
+ },
+ "λ = {} Å (personalizado)": {
+  "en_US": "λ = {} Å (custom)",
+  "de_DE": "λ = {} Å (benutzerdefiniert)"
+ },
+ "A busca falhou:\n{}": {
+  "en_US": "The search failed:\n{}",
+  "de_DE": "Die Suche ist fehlgeschlagen:\n{}"
+ },
+ "halo": {
+  "en_US": "halo",
+  "de_DE": "Halo"
+ },
+ "pico": {
+  "en_US": "peak",
+  "de_DE": "Peak"
+ },
+ "manual": {
+  "en_US": "manual",
+  "de_DE": "manuell"
+ },
+ "auto": {
+  "en_US": "auto",
+  "de_DE": "auto"
+ },
+ "{} halo(s)": {
+  "en_US": "{} halo(s)",
+  "de_DE": "{} Halo(s)"
+ },
+ "cristalinidade {}%": {
+  "en_US": "crystallinity {}%",
+  "de_DE": "Kristallinität {}%"
+ },
+ "ruído ≈ {}": {
+  "en_US": "noise ≈ {}",
+  "de_DE": "Rauschen ≈ {}"
+ },
+ "Não foi possível salvar:\n{}": {
+  "en_US": "Could not save:\n{}",
+  "de_DE": "Speichern nicht möglich:\n{}"
+ },
+ "Picos": {
+  "en_US": "Peaks",
+  "de_DE": "Peaks"
  }
 }

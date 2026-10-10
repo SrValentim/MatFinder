@@ -11,7 +11,7 @@ from pymatgen.analysis.diffraction.xrd import WAVELENGTHS, XRDCalculator  # noqa
 from pymatgen.core import Structure  # noqa: E402
 
 from matfinder.tools.xrd.emission_lines import (  # noqa: E402
-    ANODE_LINES, KB_TO_KA1_RATIO, combined_sticks, radiation_lines,
+    ANODE_LINES, KB_TO_KA1_RATIO, combined_sticks, radiation_lines, same_d_two_theta,
 )
 
 
@@ -88,3 +88,17 @@ def test_both_lines_are_summed_with_weight(fe_structure):
 def test_combined_sticks_requires_lines(fe_structure):
     with pytest.raises(ValueError):
         combined_sticks(fe_structure, [], 100)
+
+
+def test_ka2_wavelengths_match_pymatgen_table():
+    for anode, lines in ANODE_LINES.items():
+        assert lines["ka2"] == pytest.approx(WAVELENGTHS[f"{anode}Ka2"], abs=1e-6)
+
+
+def test_same_d_two_theta_between_lines():
+    lam1, lam2 = ANODE_LINES["Cu"]["ka"], ANODE_LINES["Cu"]["ka2"]
+    t2 = same_d_two_theta(88.4, lam1, lam2)
+    assert t2 == pytest.approx(88.677, abs=1e-3)       # Kα2 de 88,4° (Cu)
+    assert same_d_two_theta(t2, lam2, lam1) == pytest.approx(88.4, abs=1e-9)
+    assert math.isnan(same_d_two_theta(170.0, 1.0, 1.2))  # sen θ > 1: não existe
+    assert np.allclose(same_d_two_theta(np.array([30.0, 60.0]), lam1, lam1), [30.0, 60.0])

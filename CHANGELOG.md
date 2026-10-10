@@ -24,6 +24,18 @@ e versionamento [Semantic Versioning](https://semver.org/lang/pt-BR/) (MAJOR.MIN
 ## [Não publicado]
 
 ### Added
+- Busca de picos (PhaseDRX, search-match fase 1): nova aba **Picos** com um detector
+  refeito do zero. Detecção multiescala (segunda derivada suavizada em várias larguras)
+  com ruído calibrado longe dos picos, fundo SNIP robusto a ruído e a bordas, e ajuste
+  por pseudo-Voigt assimétrica com dubleto Kα2, tendência de largura (Caglioti) e
+  seleção de modelo para ombros. Mostra 2θ com incerteza, d, intensidade relativa,
+  altura, área, FWHM e significância; marca possíveis picos de Kβ; no modo "Picos
+  largos / amorfo" separa halos amorfos e estima a cristalinidade. A busca roda em
+  segundo plano, com progresso e cancelamento.
+- Edição da lista de picos (PhaseDRX): adicionar pico com um clique (ajuste local),
+  apagar pico pelo gráfico ou pela tabela (só o pico, nunca os dados), picos apagados
+  continuam apagados numa nova busca até serem restaurados, exportação em CSV. A lista
+  fica salva no projeto e entra no desfazer/refazer.
 - Simulação (PhaseDRX): opções **Kα** e **Kβ** na aba de simulação para escolher as
   linhas de emissão do tubo que entram no padrão calculado. Pelo menos uma fica sempre
   marcada. O Kβ1 entra com a razão de intensidade aproximada de um tubo sem filtro, e as
