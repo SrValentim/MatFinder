@@ -20,6 +20,7 @@ Tests run headless (`QT_QPA_PLATFORM=offscreen`, set in `conftest.py`).
 | `test_normalization.py` | `tools/xrd/normalization_dialog` (normalization math) |
 | `test_background.py` | `tools/xrd/background_removal` (SNIP / arPLS / dispatch) |
 | `test_xrd_math.py` | `tools/xrd/xrd_math_tools` (smoothing, peak detection) |
+| `test_emission_lines.py` | `tools/xrd/emission_lines` (Kα/Kβ lines of the PhaseDRX simulation) |
 | `test_quimica.py` | `tools/calculator/quimica_calc` (molar mass, conversions) |
 | `test_api_logic.py` | `core/api_logic._normalize_doi` (no network) |
 | `test_translations.py` | `core/translator` (ptr) + translation-file integrity |

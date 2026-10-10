@@ -27,7 +27,7 @@ from PySide6.QtWidgets import (
     QHeaderView, QMessageBox, QDialogButtonBox, QTabWidget, QWidget,
     QGroupBox, QFormLayout, QLineEdit, QLabel, QComboBox, QDoubleSpinBox,
     QSplitter, QListWidget, QListWidgetItem, QColorDialog, QCheckBox,
-    QSpinBox, QAbstractItemView, QScrollArea, QSlider
+    QSpinBox, QAbstractItemView, QScrollArea, QSlider, QToolTip
 )
 from PySide6.QtCore import Qt, QPoint, Signal, Slot, QSize
 from PySide6.QtGui import QAction, QPainter, QColor, QPen, QIcon
@@ -40,6 +40,7 @@ from matplotlib.widgets import RectangleSelector
 import matplotlib.cm as cm
 import matplotlib.image as mpimg
 from matfinder.core.translator import ptr
+from matfinder.tools.xrd.emission_lines import radiation_lines, combined_sticks
 
 # --- Importação para Exportar para Origin ---
 try:
@@ -601,6 +602,23 @@ class PhaseDRXTool(QMainWindow):
         wavelength_layout.addWidget(self.wavelength_combo)
         wavelength_layout.addWidget(self.wavelength_custom_input)
         form_layout.addRow(ptr("Fonte de Radiação Padrão:"), wavelength_layout)
+        # Ânodo de cada item do seletor (independe da tradução do texto).
+        for index, anode in enumerate(("Cu", "Co", "Fe", "Mo")):
+            self.wavelength_combo.setItemData(index, anode)
+        # Linhas de emissão do tubo incluídas na simulação (pelo menos uma).
+        self._ka_tooltip = ptr("Inclui a linha Kα1 do tubo na simulação.")
+        self._kb_tooltip = ptr("Inclui a linha Kβ1 do tubo na simulação. Ela aparece em medidas feitas sem filtro de Kβ ou monocromador.")
+        self.ka_checkbox = QCheckBox("Kα")
+        self.ka_checkbox.setChecked(True)
+        self.ka_checkbox.setToolTip(self._ka_tooltip)
+        self.kb_checkbox = QCheckBox("Kβ")
+        self.kb_checkbox.setChecked(False)
+        self.kb_checkbox.setToolTip(self._kb_tooltip)
+        lines_layout = QHBoxLayout()
+        lines_layout.addWidget(self.ka_checkbox)
+        lines_layout.addWidget(self.kb_checkbox)
+        lines_layout.addStretch()
+        form_layout.addRow(ptr("Linhas de Emissão:"), lines_layout)
         self.max_2theta_spin = QDoubleSpinBox()
         self.max_2theta_spin.setRange(10.0, 180.0)
         self.max_2theta_spin.setValue(100.0)
@@ -647,6 +665,10 @@ class PhaseDRXTool(QMainWindow):
 
         self.combine_phases_button.clicked.connect(self.create_multiphase_combination)
         self.wavelength_combo.currentIndexChanged.connect(self.on_wavelength_change)
+        self.ka_checkbox.toggled.connect(
+            lambda checked: self._on_radiation_line_toggled(self.ka_checkbox, checked))
+        self.kb_checkbox.toggled.connect(
+            lambda checked: self._on_radiation_line_toggled(self.kb_checkbox, checked))
         self.calculate_sim_button.clicked.connect(self.run_simulation_for_selected)
 
         self.customize_plot_button.clicked.connect(self.open_plot_customization_dialog)
@@ -950,9 +972,7 @@ class PhaseDRXTool(QMainWindow):
         if not component_ids or not weights: return
 
         try:
-            wl_text = self.wavelength_combo.currentText()
-            wavelength = float(self.wavelength_custom_input.text()) if wl_text == ptr("Outro") else float(
-                wl_text.split('(')[1].split(' ')[0])
+            lines = self._selected_radiation_lines()
             max_2theta = self.max_2theta_spin.value()
         except (ValueError, IndexError):
             return
@@ -963,10 +983,13 @@ class PhaseDRXTool(QMainWindow):
             if component and component.get("type") == "cif":
                 try:
                     structure = Structure.from_str(component["cif_content"], fmt="cif")
-                    calculator = XRDCalculator(wavelength=wavelength)
-                    pattern = calculator.get_pattern(structure, two_theta_range=(0, max_2theta))
+                    peaks_2theta, peaks_intensity = combined_sticks(structure, lines, max_2theta)
+                    # Cada fase na escala 0-100, como o scaled=True do pymatgen, para que
+                    # os pesos da combinação mantenham o mesmo significado de antes.
+                    if peaks_intensity.size and peaks_intensity.max() > 0:
+                        peaks_intensity = peaks_intensity * (100.0 / peaks_intensity.max())
 
-                    for peak_2theta, peak_intensity in zip(pattern.x, pattern.y):
+                    for peak_2theta, peak_intensity in zip(peaks_2theta, peaks_intensity):
                         all_peaks.append((peak_2theta, peak_intensity * weights[i]))
                 except Exception as e:
                     logging.warning(f"Não foi possível obter picos para {component['label']}: {e}")
@@ -2160,9 +2183,7 @@ class PhaseDRXTool(QMainWindow):
     def run_simulation_for_item(self, plot_item):
         if self.simulation_engine == "none": return
         try:
-            wl_text = self.wavelength_combo.currentText()
-            wavelength = float(self.wavelength_custom_input.text()) if wl_text == ptr("Outro") else float(
-                wl_text.split('(')[1].split(' ')[0])
+            lines = self._selected_radiation_lines()
             max_2theta, peak_width = self.max_2theta_spin.value(), self.peak_width_spin.value()
         except (ValueError, IndexError) as e:
             QMessageBox.critical(self, ptr("Erro de Parâmetro"), ptr("Valor inválido: {}").format(e))
@@ -2170,9 +2191,9 @@ class PhaseDRXTool(QMainWindow):
 
         try:
             if self.simulation_engine == "pyobjcryst":
-                ttheta, intensity = self._calculate_with_pyobjcryst(plot_item, wavelength, max_2theta, peak_width)
+                ttheta, intensity = self._calculate_with_pyobjcryst(plot_item, lines, max_2theta, peak_width)
             else:
-                ttheta, intensity = self._calculate_with_pymatgen(plot_item, wavelength, max_2theta)
+                ttheta, intensity = self._calculate_with_pymatgen(plot_item, lines, max_2theta)
             plot_item["data"] = [ttheta, intensity]
 
             self._redraw_all_plots()
@@ -2185,10 +2206,10 @@ class PhaseDRXTool(QMainWindow):
             QMessageBox.critical(self, ptr("Erro na Simulação"),
                                  ptr("Ocorreu um erro ao calcular para {}:\n{}").format(plot_item['label'], e))
 
-    def _calculate_with_pymatgen(self, cif_info, wavelength, max_2theta_deg):
+    def _calculate_with_pymatgen(self, cif_info, lines, max_2theta_deg):
+        """Padrão simulado somando as linhas de emissão escolhidas (Kα e/ou Kβ)."""
         structure = Structure.from_str(cif_info["cif_content"], fmt="cif")
-        calculator = XRDCalculator(wavelength=wavelength)
-        pattern = calculator.get_pattern(structure, two_theta_range=(0, max_2theta_deg))
+        peaks_2theta, peaks_intensity = combined_sticks(structure, lines, max_2theta_deg)
 
         num_points = 4000
         ttheta_range = np.linspace(0, max_2theta_deg, num_points)
@@ -2200,7 +2221,7 @@ class PhaseDRXTool(QMainWindow):
         apply_mode = sim_params.get("apply_mode", "Padrão Inteiro")
         ranges = sim_params.get("ranges", [])
 
-        for peak_2theta, peak_intensity in zip(pattern.x, pattern.y):
+        for peak_2theta, peak_intensity in zip(peaks_2theta, peaks_intensity):
             apply_convolution = False
             if apply_mode == "Padrão Inteiro":
                 apply_convolution = True
@@ -2229,21 +2250,24 @@ class PhaseDRXTool(QMainWindow):
 
         return ttheta_range, intensities
 
-    def _calculate_with_pyobjcryst(self, cif_info, wavelength, max_2theta_deg, peak_width_deg):
+    def _calculate_with_pyobjcryst(self, cif_info, lines, max_2theta_deg, peak_width_deg):
+        """Perfil simulado pelo pyobjcryst, somando as linhas de emissão escolhidas."""
         temp_cif_path = "temp_cif_for_pyobjcryst.cif"
         with open(temp_cif_path, "w", encoding='utf-8') as f:
             f.write(cif_info["cif_content"])
         crystal = pyobjcryst.loadCrystal(temp_cif_path)
         os.remove(temp_cif_path)
-        pattern_data = pyobjcryst.powderpattern.PowderPattern()
-        pattern_data.SetWavelength(wavelength)
         numpoints, deg_to_rad = 4000, np.pi / 180.0
         ttheta_rad = np.linspace(0, max_2theta_deg * deg_to_rad, numpoints)
-        pattern_data.SetPowderPatternX(ttheta_rad)
-        diff_data = pattern_data.AddPowderPatternDiffraction(crystal)
-        diff_data.SetReflectionProfilePar(pyobjcryst.powderpattern.ReflectionProfileType.PROFILE_PSEUDO_VOIGT,
-                                          (peak_width_deg * deg_to_rad) ** 2)
-        intensity = pattern_data.GetPowderPatternCalc()
+        intensity = np.zeros(numpoints)
+        for wavelength, weight in lines:
+            pattern_data = pyobjcryst.powderpattern.PowderPattern()
+            pattern_data.SetWavelength(wavelength)
+            pattern_data.SetPowderPatternX(ttheta_rad)
+            diff_data = pattern_data.AddPowderPatternDiffraction(crystal)
+            diff_data.SetReflectionProfilePar(pyobjcryst.powderpattern.ReflectionProfileType.PROFILE_PSEUDO_VOIGT,
+                                              (peak_width_deg * deg_to_rad) ** 2)
+            intensity += weight * np.asarray(pattern_data.GetPowderPatternCalc(), dtype=float)
         if intensity.max() > 0: intensity /= intensity.max()
         return ttheta_rad / deg_to_rad, intensity
 
@@ -3505,7 +3529,31 @@ class PhaseDRXTool(QMainWindow):
         return color
 
     def on_wavelength_change(self, index):
-        self.wavelength_custom_input.setVisible(self.wavelength_combo.currentText() == ptr("Outro"))
+        is_custom = self.wavelength_combo.currentText() == ptr("Outro")
+        self.wavelength_custom_input.setVisible(is_custom)
+        # Comprimento de onda personalizado é uma linha única: Kα/Kβ não se aplicam.
+        custom_tip = ptr("Com comprimento de onda personalizado, a simulação usa só o valor informado.")
+        self.ka_checkbox.setEnabled(not is_custom)
+        self.kb_checkbox.setEnabled(not is_custom)
+        self.ka_checkbox.setToolTip(custom_tip if is_custom else self._ka_tooltip)
+        self.kb_checkbox.setToolTip(custom_tip if is_custom else self._kb_tooltip)
+
+    def _selected_radiation_lines(self):
+        """Linhas (λ em Å, peso) da simulação, conforme a fonte e as opções Kα/Kβ."""
+        anode = self.wavelength_combo.currentData()
+        if anode is None:  # "Outro": comprimento de onda livre
+            return radiation_lines(custom_wavelength=float(self.wavelength_custom_input.text()))
+        return radiation_lines(anode, self.ka_checkbox.isChecked(), self.kb_checkbox.isChecked())
+
+    def _on_radiation_line_toggled(self, checkbox, checked):
+        """Impede desmarcar a última linha de emissão: Kα ou Kβ deve ficar marcada."""
+        if checked or self.ka_checkbox.isChecked() or self.kb_checkbox.isChecked():
+            return
+        checkbox.blockSignals(True)
+        checkbox.setChecked(True)
+        checkbox.blockSignals(False)
+        QToolTip.showText(checkbox.mapToGlobal(QPoint(0, checkbox.height())),
+                          ptr("Selecione pelo menos uma linha de emissão: Kα ou Kβ."), checkbox)
 
     def _add_state_to_history(self):
         state = {

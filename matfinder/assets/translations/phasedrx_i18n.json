@@ -2634,5 +2634,25 @@
  "Nenhuma versao de acesso aberto (Unpaywall/OpenAlex) foi encontrada para este DOI.": {
   "en_US": "No open-access version (Unpaywall/OpenAlex) was found for this DOI.",
   "de_DE": "Es wurde keine Open-Access-Version (Unpaywall/OpenAlex) für diese DOI gefunden."
+ },
+ "Linhas de Emissão:": {
+  "en_US": "Emission Lines:",
+  "de_DE": "Emissionslinien:"
+ },
+ "Inclui a linha Kα1 do tubo na simulação.": {
+  "en_US": "Includes the tube's Kα1 line in the simulation.",
+  "de_DE": "Bezieht die Kα1-Linie der Röhre in die Simulation ein."
+ },
+ "Inclui a linha Kβ1 do tubo na simulação. Ela aparece em medidas feitas sem filtro de Kβ ou monocromador.": {
+  "en_US": "Includes the tube's Kβ1 line in the simulation. It appears in measurements taken without a Kβ filter or monochromator.",
+  "de_DE": "Bezieht die Kβ1-Linie der Röhre in die Simulation ein. Sie tritt bei Messungen ohne Kβ-Filter oder Monochromator auf."
+ },
+ "Com comprimento de onda personalizado, a simulação usa só o valor informado.": {
+  "en_US": "With a custom wavelength, the simulation uses only the value entered.",
+  "de_DE": "Bei einer benutzerdefinierten Wellenlänge verwendet die Simulation nur den eingegebenen Wert."
+ },
+ "Selecione pelo menos uma linha de emissão: Kα ou Kβ.": {
+  "en_US": "Select at least one emission line: Kα or Kβ.",
+  "de_DE": "Wählen Sie mindestens eine Emissionslinie: Kα oder Kβ."
  }
 }

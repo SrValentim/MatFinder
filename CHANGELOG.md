@@ -24,6 +24,11 @@ e versionamento [Semantic Versioning](https://semver.org/lang/pt-BR/) (MAJOR.MIN
 ## [Não publicado]
 
 ### Added
+- Simulação (PhaseDRX): opções **Kα** e **Kβ** na aba de simulação para escolher as
+  linhas de emissão do tubo que entram no padrão calculado. Pelo menos uma fica sempre
+  marcada. O Kβ1 entra com a razão de intensidade aproximada de um tubo sem filtro, e as
+  opções ficam desativadas com comprimento de onda personalizado. Com só o Kα marcado, o
+  resultado é idêntico ao de antes.
 - Visualizador 3D (PhaseDRX): exibição completa da célula unitária. Átomos em faces,
   arestas e vértices são replicados em todas as imagens de borda dentro de [0, N] e a
   vizinhança ligada imediatamente fora da célula é incluída para fechar anéis e poliedros
