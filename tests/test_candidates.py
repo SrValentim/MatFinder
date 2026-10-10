@@ -8,7 +8,7 @@ import requests
 
 from matfinder.tools.xrd.search_match import candidates as cm
 from matfinder.tools.xrd.search_match.candidates import (
-    Candidate, ElementFilter, clean_spacegroup, cod_query_params, fetch_cod_cifs, formula_elements,
+    Candidate, ElementFilter, clean_spacegroup, cod_query_plans, fetch_cod_cifs, formula_elements,
     group_duplicates, mp_query_kwargs, pretty_formula, search_cod, search_mp,
 )
 
@@ -91,11 +91,13 @@ def test_formula_and_spacegroup_helpers():
     assert clean_spacegroup("P 1") == "P1"
 
 
-def test_cod_query_params():
-    params = cod_query_params(ElementFilter(required=["Ce", "O"], possible=["Zr"], forbidden=["H"]))
-    assert params["el1"] == "Ce" and params["el2"] == "O" and params["nel1"] == "H"
-    assert params["strictmin"] == 2 and params["strictmax"] == 3
-    assert "strictmax" not in cod_query_params(ElementFilter(required=["Ce"], allow_others=True))
+def test_cod_query_plans():
+    plans = cod_query_plans(ElementFilter(required=["O"], possible=["Sm", "Fe"]))
+    systems = sorted("-".join(p[k] for k in sorted(p) if k.startswith("el")) for p in plans)
+    assert systems == ["Fe-O", "Fe-O-Sm", "O", "O-Sm"]          # uma consulta exata por sistema
+    assert all(p["strictmin"] == p["strictmax"] for p in plans)
+    (opened,) = cod_query_plans(ElementFilter(required=["Ce"], forbidden=["H"], allow_others=True))
+    assert opened["el1"] == "Ce" and opened["nel1"] == "H" and opened["strictmax"] == 3
 
 
 def test_search_cod_filters_rows_and_uses_cache():

@@ -68,3 +68,19 @@ def match(found, truth, tol):
         else:
             missed.append(t)
     return pairs, missed, remaining
+
+
+def peaks_from_sticks(two_theta, intensity, height_per_unit=10.0, fwhm=0.12, min_intensity=3.0, lo=10.0, hi=90.0,
+                      sigma=0.003, merge=0.05):
+    """Lista de Peak "observados" a partir de reflexões (2θ, I 0-100); junta as mais próximas que ``merge``."""
+    from matfinder.tools.xrd.search_match.peak_list import Peak
+    pts = sorted((float(t), height_per_unit * float(i)) for t, i in zip(two_theta, intensity)
+                 if i >= min_intensity and lo <= t <= hi)
+    merged = []
+    for t, h in pts:
+        if merged and t - merged[-1][0] < merge:
+            t0, h0 = merged[-1]
+            merged[-1] = ((t0 * h0 + t * h) / (h0 + h), h0 + h)
+        else:
+            merged.append((t, h))
+    return [Peak(two_theta=t, height=h, fwhm=fwhm, two_theta_err=sigma) for t, h in merged]

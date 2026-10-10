@@ -113,7 +113,7 @@ def test_find_candidates_end_to_end_without_network(examples_dir, example_cifs, 
     """COD e MP substituídos por candidatos locais: a busca completa ordena e agrupa."""
     from matfinder.tools.xrd.search_match import candidate_search as cs
 
-    def fake_cod(flt, cancel=None, session=None):
+    def fake_cod(flt, cancel=None, session=None, errors=None):
         return [Candidate("COD", "1", "SmFeO3", ("Fe", "O", "Sm"), "Pbnm", 62, cif=cif_of(example_cifs, "SmFeO3")),
                 Candidate("COD", "2", "Sm2O3", ("O", "Sm"), "Ia-3", 206, cif=cif_of(example_cifs, "Sm2O3")),
                 Candidate("COD", "3", "SmFeO3", ("Fe", "O", "Sm"), "Pbnm", 62, cif=cif_of(example_cifs, "SmFeO3")),

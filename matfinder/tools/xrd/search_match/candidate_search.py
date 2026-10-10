@@ -9,7 +9,8 @@ from .candidates import (
     ElementFilter, SearchCancelled, describe_error, fetch_cod_cifs, find_mp_api_key, group_duplicates,
     search_cod, search_mp,
 )
-from .scoring import ObservedPeaks, ScoreSettings, reference_pattern, score_candidate
+from .phase_analysis import rescore
+from .scoring import ObservedPeaks, ScoreSettings, reference_pattern
 
 logger = logging.getLogger(__name__)
 
@@ -43,6 +44,7 @@ class CandidateSearchResult:
     all_candidates: list        # todos os candidatos pontuados
     errors: dict                # fonte -> mensagem de erro
     info: dict
+    pool: list = field(default_factory=list)  # todos os simulados, inclusive aceitos (para reavaliar)
 
 
 def _prioritize(candidates, limit):
@@ -55,7 +57,8 @@ def _prioritize(candidates, limit):
 
 
 def find_candidates(peaks, element_filter, wavelength, two_theta_range, settings=None, noise=None,
-                    mp_api_key=None, progress=None, cancel=None, cod_session=None, mp_rester_factory=None):
+                    mp_api_key=None, progress=None, cancel=None, cod_session=None, mp_rester_factory=None,
+                    accepted=None, profile_ctx=None, score_mode="auto"):
     """Busca, simula e pontua candidatos para uma lista de picos.
 
     Args:
@@ -64,6 +67,9 @@ def find_candidates(peaks, element_filter, wavelength, two_theta_range, settings
         wavelength: comprimento de onda (Kα1) em Å.
         two_theta_range: (mín, máx) de 2θ medidos.
         noise: ruído típico dos dados (limite de detecção das reflexões esperadas).
+        accepted: fases já aceitas (AcceptedPhase); os candidatos são pontuados contra o resíduo.
+        profile_ctx: contexto de perfil (quantify.build_profile_context) para o score de perfil.
+        score_mode: "auto", "peaks", "profile" ou "both".
 
     Raises:
         ValueError: filtro inválido ou picos insuficientes.
@@ -91,7 +97,10 @@ def find_candidates(peaks, element_filter, wavelength, two_theta_range, settings
     if s.use_cod:
         report(0.02, "consultando o COD")
         try:
-            found += search_cod(flt, cancel=cancel, session=cod_session)
+            partial = []
+            found += search_cod(flt, cancel=cancel, session=cod_session, errors=partial)
+            if partial:
+                errors["COD"] = "; ".join(partial)
         except SearchCancelled:
             raise
         except Exception as exc:  # noqa: BLE001 - a outra fonte ainda pode responder
@@ -117,33 +126,30 @@ def find_candidates(peaks, element_filter, wavelength, two_theta_range, settings
     fetch_cod_cifs(candidates, progress=lambda f: report(0.25 + 0.3 * f, "baixando estruturas"),
                    cancel=cancel, session=cod_session)
 
-    scored = []
+    simulated = []
     total = max(1, len(candidates))
     for i, cand in enumerate(candidates):
-        report(0.55 + 0.43 * i / total, "simulando e pontuando")
+        report(0.55 + 0.38 * i / total, "simulando e pontuando")
         if not cand.cif:
             cand.error = cand.error or "sem CIF"
             continue
         try:
-            ref = reference_pattern(cand.cif, wavelength, (obs.lo, obs.hi), s.score.min_ref_intensity)
-            match = score_candidate(ref, obs, s.score, cand.source)
+            cand.reference = reference_pattern(cand.cif, wavelength, (obs.lo, obs.hi), s.score.min_ref_intensity)
         except SearchCancelled:
             raise
         except Exception as exc:  # noqa: BLE001 - CIF problemático: o candidato fica de fora
             cand.error = describe_error(exc)
             continue
-        cand.match = match
-        cand.score = match.score
-        cand.subscores = dict(match.subscores)
-        scored.append(cand)
-
-    scored.sort(key=lambda c: -c.score)
+        simulated.append(cand)
+    report(0.94, "simulando e pontuando")
+    scored, used_mode = rescore(simulated, obs, list(accepted or []), s.score, profile_ctx=profile_ctx,
+                                mode=score_mode, cancel=cancel)
     representatives = group_duplicates(scored) if s.group_duplicates else list(scored)
     report(1.0, "concluído")
     info = {
         "n_found": len(found), "n_scored": len(scored), "n_groups": len(representatives),
         "truncated": truncated, "by_source": {src: sum(1 for c in scored if c.source == src) for src in ("COD", "MP")},
         "failed": sum(1 for c in candidates if c.error), "elapsed_s": time.perf_counter() - t0,
-        "filter": flt.to_dict(), "settings": s.to_dict(),
+        "filter": flt.to_dict(), "settings": s.to_dict(), "score_mode": used_mode,
     }
-    return CandidateSearchResult(representatives, scored, errors, info)
+    return CandidateSearchResult(representatives, scored, errors, info, simulated)

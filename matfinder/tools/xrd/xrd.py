@@ -2080,17 +2080,26 @@ class PhaseDRXTool(QMainWindow):
         self._repopulate_all_lists()
         self.set_dirty()
 
-    def load_cif_from_data(self, cif_content: str, filename: str):
+    def load_cif_from_data(self, cif_content: str, filename: str, record_history: bool = True):
+        """Adiciona um CIF (texto) à lista e simula o padrão.
+
+        Args:
+            record_history: False quando quem chama já registrou o histórico (ação composta).
+
+        Returns:
+            O item criado, ou None se não foi adicionado.
+        """
         if not PYMATGEN_AVAILABLE:
             QMessageBox.critical(self, ptr("Dependência Faltando"),
                                  ptr("A biblioteca 'pymatgen' é necessária para processar arquivos CIF."))
-            return
+            return None
 
         if any(c["label"] == filename for c in self.plot_items):
             QMessageBox.information(self, ptr("CIF Já Carregado"), ptr("O arquivo CIF '{}' já está na lista.").format(filename))
-            return
+            return None
 
-        self._add_state_to_history()
+        if record_history:
+            self._add_state_to_history()
         try:
             Structure.from_str(cif_content, fmt="cif")
             item_id = str(uuid.uuid4())
@@ -2120,9 +2129,11 @@ class PhaseDRXTool(QMainWindow):
             self.activateWindow();
             self.raise_()
             self.set_dirty()
+            return new_item
         except Exception as e:
             QMessageBox.critical(self, ptr("Erro no CIF"),
                                  ptr("O conteúdo do CIF recebido para '{}' é inválido.\n\nErro: {}").format(filename, e))
+            return None
 
     def _parse_data_file(self, file_path):
         temp_data = []

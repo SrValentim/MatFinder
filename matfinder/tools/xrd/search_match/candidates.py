@@ -29,6 +29,8 @@ logger = logging.getLogger(__name__)
 
 COD_HOSTS = ("https://www.crystallography.net", "http://www.crystallography.net")
 CACHE_TTL_DAYS = 7
+MAX_COD_QUERIES = 16          # consultas exatas por sistema químico numa busca
+OPEN_SYSTEM_EXTRA_ELEMENTS = 2  # sistema aberto: até 2 elementos além dos obrigatórios
 MAX_CLOSED_SYSTEM_ELEMENTS = 10
 _FORMULA_TOKEN = re.compile(r"([A-Z][a-z]?)(\d*\.?\d*)")
 
@@ -134,6 +136,9 @@ class Candidate:
     match: object = None
     group_members: list = field(default_factory=list)
     error: str = ""
+    reference: object = None         # padrão de referência simulado (para reavaliar sem simular de novo)
+    peak_score: float = 0.0          # score só pela lista de picos
+    profile_explained: float = None  # fração do perfil explicada (0-1), quando calculada
 
     @property
     def key(self):
@@ -279,17 +284,33 @@ def _http_get(path, params=None, timeout=60, cancel=None, retries=2, session=Non
 # COD
 # =============================================================================
 
-def cod_query_params(flt):
-    """Parâmetros da consulta por elementos do COD para este filtro."""
-    params = {"format": "json"}
-    for i, element in enumerate(flt.required[:8]):
-        params[f"el{i + 1}"] = element
-    for i, element in enumerate(flt.forbidden[:8]):
-        params[f"nel{i + 1}"] = element
-    params["strictmin"] = len(flt.required)
-    if not flt.allow_others:
-        params["strictmax"] = len(set(flt.required) | set(flt.possible))
-    return params
+def cod_query_plans(flt):
+    """Consultas ao COD para este filtro.
+
+    Sistema fechado: uma consulta EXATA por sistema químico permitido (todos os
+    elementos do sistema e nenhum outro). Uma consulta ampla, como "tudo que tem
+    oxigênio e até 3 elementos", traz dezenas de milhares de entradas e o servidor
+    do COD corta a resposta. Sistema aberto: os obrigatórios, sem os proibidos, com
+    até OPEN_SYSTEM_EXTRA_ELEMENTS elementos a mais.
+    """
+    if flt.allow_others:
+        params = {"format": "json", "strictmin": len(flt.required),
+                  "strictmax": len(flt.required) + OPEN_SYSTEM_EXTRA_ELEMENTS}
+        for i, element in enumerate(flt.required[:8]):
+            params[f"el{i + 1}"] = element
+        for i, element in enumerate(flt.forbidden[:8]):
+            params[f"nel{i + 1}"] = element
+        return [params]
+    plans = []
+    for system in flt.chemsys_list():
+        elements = system.split("-")
+        if len(elements) > 8:
+            continue  # o COD aceita até 8 elementos por consulta
+        params = {"format": "json", "strictmin": len(elements), "strictmax": len(elements)}
+        for i, element in enumerate(elements):
+            params[f"el{i + 1}"] = element
+        plans.append(params)
+    return plans[:MAX_COD_QUERIES]
 
 
 def _cod_cell(row):
@@ -299,16 +320,39 @@ def _cod_cell(row):
         return ()
 
 
-def search_cod(flt, cancel=None, use_cache=True, session=None):
-    """Candidatos do COD (só entradas com coordenadas atômicas e que passam no filtro)."""
-    params = cod_query_params(flt)
-    rows = _read_query_cache("cod", params) if use_cache else None
-    if rows is None:
-        response = _http_get("/cod/result", params=params, timeout=120, cancel=cancel, session=session)
-        rows = response.json() if response.content.strip() else []
-        if not isinstance(rows, list):
-            rows = []
-        _write_query_cache("cod", params, rows)
+def search_cod(flt, cancel=None, use_cache=True, session=None, errors=None):
+    """Candidatos do COD (só entradas com coordenadas atômicas e que passam no filtro).
+
+    Consultas que falham entram em ``errors`` (lista) e a busca segue com as
+    outras; só levanta erro se todas falharem.
+    """
+    plans = cod_query_plans(flt)
+    rows, failures, seen = [], [], set()
+    for params in plans:
+        _check_cancel(cancel)
+        part = _read_query_cache("cod", params) if use_cache else None
+        if part is None:
+            try:
+                response = _http_get("/cod/result", params=params, timeout=120, cancel=cancel, session=session)
+                part = response.json() if response.content.strip() else []
+            except SearchCancelled:
+                raise
+            except Exception as exc:  # noqa: BLE001 - as outras consultas ainda podem responder
+                failures.append(f"{_system_of(params)}: {describe_error(exc)}")
+                continue
+            if not isinstance(part, list):
+                part = []
+            _write_query_cache("cod", params, part)
+        for row in part:
+            key = str(row.get("file"))
+            if key not in seen:
+                seen.add(key)
+                rows.append(row)
+    if failures:
+        if len(failures) == len(plans):
+            raise ConnectionError("; ".join(failures))
+        if errors is not None:
+            errors.extend(failures)
     out = []
     for row in rows:
         if "has coordinates" not in str(row.get("flags") or ""):
@@ -330,6 +374,10 @@ def search_cod(flt, cancel=None, use_cache=True, session=None):
             meta={"chemname": row.get("chemname"), "doi": row.get("doi"), "title": row.get("title")},
         ))
     return out
+
+
+def _system_of(params):
+    return "-".join(params[k] for k in sorted(params) if k.startswith("el") and not k.startswith("nel"))
 
 
 def fetch_cod_cif(cod_id, cancel=None, session=None):

@@ -204,11 +204,19 @@ def _nearest(sorted_obs, values):
     return np.where(np.abs(values - left) <= np.abs(values - right), idx - 1, idx)
 
 
-def align(ref_tt, ref_i, obs, shift_range, scale_range):
-    """Melhor (escala da rede, deslocamento de zero) por busca em grade vetorizada."""
+def align(ref_tt, ref_i, obs, shift_range, scale_range, shift_center=None):
+    """Melhor (escala da rede, deslocamento de zero) por busca em grade vetorizada.
+
+    Com shift_center (zero já determinado pelas fases aceitas), o deslocamento só
+    varia ±0,02° em torno dele: o zero é do instrumento, comum a todas as fases.
+    """
     if len(ref_tt) == 0 or len(obs) == 0:
-        return 1.0, 0.0
-    shifts = np.arange(-shift_range, shift_range + 1e-9, 0.01) if shift_range > 0 else np.array([0.0])
+        return 1.0, 0.0 if shift_center is None else float(shift_center)
+    if shift_center is not None:
+        shifts = float(shift_center) + np.arange(-0.02, 0.02 + 1e-9, 0.005)
+        shift_range = 0.02
+    else:
+        shifts = np.arange(-shift_range, shift_range + 1e-9, 0.01) if shift_range > 0 else np.array([0.0])
     scales = np.arange(scale_range[0], scale_range[1] + 1e-9, 0.0005)
     if len(scales) == 0:
         scales = np.array([1.0])
@@ -219,14 +227,22 @@ def align(ref_tt, ref_i, obs, shift_range, scale_range):
     dist = np.abs(pred.ravel() - obs.two_theta[nearest]) / obs.tolerance[nearest]
     gain = (ref_i[None, None, :] * np.exp(-dist.reshape(pred.shape) ** 2)).sum(axis=2)          # (S, D)
     span = max(abs(scale_range[0] - 1.0), abs(scale_range[1] - 1.0), 1e-6)
+    center = 0.0 if shift_center is None else float(shift_center)
     prior = 0.05 * float(np.sum(ref_i)) * (((scales[:, None] - 1.0) / span) ** 2
-                                           + (shifts[None, :] / max(shift_range, 1e-6)) ** 2)
+                                           + ((shifts[None, :] - center) / max(shift_range, 1e-6)) ** 2)
     k_s, k_d = np.unravel_index(int(np.argmax(gain - prior)), gain.shape)
     return float(scales[k_s]), float(shifts[k_d])
 
 
-def score_candidate(ref, obs, settings=None, source="COD"):
-    """Pontua um padrão de referência contra os picos observados."""
+def score_candidate(ref, obs, settings=None, source="COD", residual=None, shift_center=None):
+    """Pontua um padrão de referência contra os picos observados.
+
+    Com ``residual`` (altura de cada pico ainda NÃO explicada pelas fases já
+    aceitas), a nota "observado" e a concordância de intensidades usam só o que
+    sobrou: um candidato que só repete picos já explicados não ganha pontos. As
+    posições e as reflexões esperadas continuam contra todos os picos, porque um
+    pico compartilhado entre duas fases continua existindo.
+    """
     s = settings or ScoreSettings()
     inside = (ref.two_theta >= obs.lo - 2.0) & (ref.two_theta <= obs.hi + 2.0) & (ref.intensity >= s.min_ref_intensity)
     ref_in = ReferencePattern(ref.two_theta[inside], ref.intensity[inside],
@@ -236,7 +252,7 @@ def score_candidate(ref, obs, settings=None, source="COD"):
 
     strong = merged.intensity >= 2.0
     scale, shift = align(merged.two_theta[strong], merged.intensity[strong], obs, s.shift_range,
-                         s.scale_range(source))
+                         s.scale_range(source), shift_center)
     pred = _predict(merged.two_theta, scale, shift)
     in_range = (pred >= obs.lo) & (pred <= obs.hi)
     pred, inten = pred[in_range], merged.intensity[in_range]
@@ -256,7 +272,14 @@ def score_candidate(ref, obs, settings=None, source="COD"):
     if not pairs:
         return empty
 
-    ratios = np.array([obs.height[c] / inten[r] for r, c, _ in pairs])
+    if residual is not None:
+        residual = np.clip(np.asarray(residual, dtype=float), 0.0, None)
+        fresh = [(r, c, d) for r, c, d in pairs if residual[c] >= 0.25 * obs.height[c]]
+    else:
+        fresh = pairs
+    target = residual if residual is not None else obs.height
+    basis = fresh if fresh else pairs
+    ratios = np.array([max(target[c], 1e-12) / inten[r] for r, c, _ in basis])
     k = float(np.median(ratios))
     if obs.noise:
         limit = s.detection_sigma * float(obs.noise)
@@ -272,14 +295,14 @@ def score_candidate(ref, obs, settings=None, source="COD"):
     exp_total = float(np.sum(inten[expected]))
     reference = float(np.sum(inten[expected & matched_ref]) / exp_total) if exp_total > 0 else 0.0
     explain = obs.explainable
-    obs_total = float(np.sum(obs.height[explain]))
+    obs_total = float(np.sum(target[explain]))
     matched_obs = np.zeros(len(obs), bool)
     matched_obs[[c for _, c, _ in pairs]] = True
-    observed = float(np.sum(obs.height[explain & matched_obs]) / obs_total) if obs_total > 0 else 0.0
+    observed = float(np.sum(target[explain & matched_obs]) / obs_total) if obs_total > 0 else 0.0
     agree, weights = [], []
-    for r, c, _ in pairs:
+    for r, c, _ in (fresh if residual is not None else pairs):
         if expected[r]:
-            ratio = obs.height[c] / (k * inten[r])
+            ratio = max(target[c], 1e-12) / (k * inten[r])
             agree.append(min(ratio, 1.0 / ratio))
             weights.append(inten[r])
     intensity = float(np.average(agree, weights=weights)) if agree else 0.0

@@ -3218,5 +3218,177 @@
  "Chave da API do Materials Project não configurada.": {
   "en_US": "Materials Project API key not set.",
   "de_DE": "Materials-Project-API-Schlüssel nicht festgelegt."
+ },
+ "Automático: só os picos quando a lista de picos é boa; picos e perfil inteiro quando há poucos picos ou picos largos (dados ruidosos, nanocristalinos).\nPerfil: ajusta o padrão simulado de cada candidato ao difratograma sem fundo.": {
+  "en_US": "Automatic: peaks only when the peak list is good; peaks and full profile when there are few or broad peaks (noisy, nanocrystalline data).\nProfile: fits each candidate's simulated pattern to the background-subtracted diffractogram.",
+  "de_DE": "Automatisch: nur Peaks, wenn die Peakliste gut ist; Peaks und volles Profil bei wenigen oder breiten Peaks (verrauschte, nanokristalline Daten).\nProfil: passt das simulierte Muster jedes Kandidaten an das untergrundkorrigierte Diffraktogramm an."
+ },
+ "Pontuação:": {
+  "en_US": "Scoring:",
+  "de_DE": "Bewertung:"
+ },
+ "Automático": {
+  "en_US": "Automatic",
+  "de_DE": "Automatisch"
+ },
+ "Perfil": {
+  "en_US": "Profile",
+  "de_DE": "Profil"
+ },
+ "Picos e perfil": {
+  "en_US": "Peaks and profile",
+  "de_DE": "Peaks und Profil"
+ },
+ "picos": {
+  "en_US": "peaks",
+  "de_DE": "Peaks"
+ },
+ "perfil": {
+  "en_US": "profile",
+  "de_DE": "Profil"
+ },
+ "picos e perfil": {
+  "en_US": "peaks and profile",
+  "de_DE": "Peaks und Profil"
+ },
+ "Preparando o perfil": {
+  "en_US": "Preparing the profile",
+  "de_DE": "Profil wird vorbereitet"
+ },
+ "Perfil (%)": {
+  "en_US": "Profile (%)",
+  "de_DE": "Profil (%)"
+ },
+ "Reflexões fortes encontradas / esperadas acima do limite de detecção.": {
+  "en_US": "Strong reflections found / expected above the detection limit.",
+  "de_DE": "Gefundene / erwartete starke Reflexe oberhalb der Nachweisgrenze."
+ },
+ "Parte da intensidade dos picos explicada pelo candidato. Com fases aceitas, parte do que sobrou.": {
+  "en_US": "Share of the peak intensity explained by the candidate. With accepted phases, share of what remains.",
+  "de_DE": "Anteil der Peakintensität, den der Kandidat erklärt. Mit akzeptierten Phasen: Anteil des Rests."
+ },
+ "Parte do difratograma sem fundo explicada pelo padrão simulado do candidato (score de perfil).": {
+  "en_US": "Share of the background-subtracted diffractogram explained by the candidate's simulated pattern (profile score).",
+  "de_DE": "Anteil des untergrundkorrigierten Diffraktogramms, den das simulierte Muster des Kandidaten erklärt (Profil-Score)."
+ },
+ "Deslocamento de zero que alinha a referência aos picos.": {
+  "en_US": "Zero shift that aligns the reference with the peaks.",
+  "de_DE": "Nullpunktverschiebung, die die Referenz an die Peaks angleicht."
+ },
+ "Fator de escala da rede aplicado à referência (1 = sem mudança).": {
+  "en_US": "Lattice scale factor applied to the reference (1 = unchanged).",
+  "de_DE": "Auf die Referenz angewandter Gitterskalenfaktor (1 = unverändert)."
+ },
+ "Fase": {
+  "en_US": "Phase",
+  "de_DE": "Phase"
+ },
+ "Massa (%)": {
+  "en_US": "Mass (%)",
+  "de_DE": "Masse (%)"
+ },
+ "Escala": {
+  "en_US": "Scale",
+  "de_DE": "Skala"
+ },
+ "Score do candidato quando foi aceito.": {
+  "en_US": "Candidate score when it was accepted.",
+  "de_DE": "Score des Kandidaten bei der Akzeptanz."
+ },
+ "Fração em massa semiquantitativa pelo método RIR (I/Ic calculado da estrutura). É uma estimativa: textura, microabsorção e fase amorfa não entram.": {
+  "en_US": "Semi-quantitative mass fraction by the RIR method (I/Ic computed from the structure). It is an estimate: texture, microabsorption and amorphous phase are not taken into account.",
+  "de_DE": "Semiquantitativer Massenanteil nach der RIR-Methode (I/Ic aus der Struktur berechnet). Nur eine Schätzung: Textur, Mikroabsorption und amorphe Phase werden nicht berücksichtigt."
+ },
+ "Altura observada por unidade de intensidade da referência (ajuste conjunto das fases aceitas).": {
+  "en_US": "Observed height per unit of reference intensity (joint fit of the accepted phases).",
+  "de_DE": "Beobachtete Höhe pro Einheit Referenzintensität (gemeinsame Anpassung der akzeptierten Phasen)."
+ },
+ "Picos em que esta fase é a maior contribuição.": {
+  "en_US": "Peaks where this phase is the largest contribution.",
+  "de_DE": "Peaks, bei denen diese Phase den größten Beitrag liefert."
+ },
+ "Aceitar fase": {
+  "en_US": "Accept phase",
+  "de_DE": "Phase akzeptieren"
+ },
+ "Aceita o candidato selecionado. As escalas das fases aceitas são ajustadas juntas e os outros candidatos são pontuados de novo contra os picos que sobraram.": {
+  "en_US": "Accepts the selected candidate. The scales of the accepted phases are fitted together and the other candidates are rescored against the remaining peaks.",
+  "de_DE": "Akzeptiert den ausgewählten Kandidaten. Die Skalen der akzeptierten Phasen werden gemeinsam angepasst und die übrigen Kandidaten gegen die verbleibenden Peaks neu bewertet."
+ },
+ "Fases aceitas": {
+  "en_US": "Accepted phases",
+  "de_DE": "Akzeptierte Phasen"
+ },
+ "Remover fase": {
+  "en_US": "Remove phase",
+  "de_DE": "Phase entfernen"
+ },
+ "Remove as fases selecionadas (tecla Delete) e pontua os candidatos de novo.": {
+  "en_US": "Removes the selected phases (Delete key) and rescores the candidates.",
+  "de_DE": "Entfernt die ausgewählten Phasen (Entf-Taste) und bewertet die Kandidaten neu."
+ },
+ "Enviar fases aceitas para a lista": {
+  "en_US": "Send accepted phases to the list",
+  "de_DE": "Akzeptierte Phasen in die Liste übernehmen"
+ },
+ "Carrega os CIFs das fases aceitas na aba de simulação e cria uma combinação com as proporções ajustadas.": {
+  "en_US": "Loads the CIFs of the accepted phases into the simulation tab and creates a combination with the fitted proportions.",
+  "de_DE": "Lädt die CIFs der akzeptierten Phasen in den Simulations-Tab und erstellt eine Kombination mit den angepassten Anteilen."
+ },
+ "Nenhuma fase aceita. Selecione um candidato e clique em Aceitar fase.": {
+  "en_US": "No accepted phase. Select a candidate and click Accept phase.",
+  "de_DE": "Keine akzeptierte Phase. Wählen Sie einen Kandidaten und klicken Sie auf Phase akzeptieren."
+ },
+ "A radiação mudou: busque os candidatos de novo.": {
+  "en_US": "The radiation changed: search the candidates again.",
+  "de_DE": "Die Strahlung hat sich geändert: Suchen Sie die Kandidaten erneut."
+ },
+ "Fase enviada para a lista.": {
+  "en_US": "Phase sent to the list.",
+  "de_DE": "Phase in die Liste übernommen."
+ },
+ "Nenhuma fase foi enviada.": {
+  "en_US": "No phase was sent.",
+  "de_DE": "Es wurde keine Phase übernommen."
+ },
+ "pontuados contra os picos que sobraram": {
+  "en_US": "scored against the remaining peaks",
+  "de_DE": "gegen die verbleibenden Peaks bewertet"
+ },
+ "Fases enviadas para a lista, com a combinação {}.": {
+  "en_US": "Phases sent to the list, with the combination {}.",
+  "de_DE": "Phasen in die Liste übernommen, mit der Kombination {}."
+ },
+ "Não foi possível simular esta fase.": {
+  "en_US": "This phase could not be simulated.",
+  "de_DE": "Diese Phase konnte nicht simuliert werden."
+ },
+ "calculando o RIR...": {
+  "en_US": "computing RIR...",
+  "de_DE": "RIR wird berechnet..."
+ },
+ "pontuação: {}": {
+  "en_US": "scoring: {}",
+  "de_DE": "Bewertung: {}"
+ },
+ "RIR (I/Ic) calculado da estrutura: {}": {
+  "en_US": "RIR (I/Ic) computed from the structure: {}",
+  "de_DE": "RIR (I/Ic) aus der Struktur berechnet: {}"
+ },
+ "As fases aceitas explicam {}% da intensidade dos picos": {
+  "en_US": "The accepted phases explain {}% of the peak intensity",
+  "de_DE": "Die akzeptierten Phasen erklären {}% der Peakintensität"
+ },
+ "picos sem fase: {}": {
+  "en_US": "peaks without a phase: {}",
+  "de_DE": "Peaks ohne Phase: {}"
+ },
+ "zero global {}°": {
+  "en_US": "global zero {}°",
+  "de_DE": "globaler Nullpunkt {}°"
+ },
+ "perfil explicado: {}%": {
+  "en_US": "profile explained: {}%",
+  "de_DE": "erklärtes Profil: {}%"
  }
 }
