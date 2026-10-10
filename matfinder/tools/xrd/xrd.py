@@ -211,6 +211,7 @@ class PhaseDRXTool(QMainWindow):
 
         self.history_stack = []
         self.history_index = -1
+        self._redo_stack = []
 
         self.group_settings = {"count": 1, "spacing": {}}
 
@@ -1714,6 +1715,7 @@ class PhaseDRXTool(QMainWindow):
 
                 self.history_stack = []
                 self.history_index = -1
+                self._redo_stack = []
 
                 self.plot_items = project_data.get("plot_items", [])
                 project_dir = os.path.dirname(path)
@@ -1888,6 +1890,7 @@ class PhaseDRXTool(QMainWindow):
         self.plot_settings = self._get_default_plot_settings()
         self.history_stack = []
         self.history_index = -1
+        self._redo_stack = []
         self._add_state_to_history()
         self._restore_state_from_history()
         self.set_dirty(False)
@@ -3555,22 +3558,27 @@ class PhaseDRXTool(QMainWindow):
         QToolTip.showText(checkbox.mapToGlobal(QPoint(0, checkbox.height())),
                           ptr("Selecione pelo menos uma linha de emissão: Kα ou Kβ."), checkbox)
 
-    def _add_state_to_history(self):
-        state = {
+    def _snapshot_state(self):
+        return {
             "plot_items": copy.deepcopy(self.plot_items),
             "plot_settings": copy.deepcopy(self.plot_settings),
             "group_settings": copy.deepcopy(self.group_settings)
         }
+
+    def _add_state_to_history(self):
+        """Guarda o estado ANTES de uma alteração (as ações chamam isto antes de mudar algo)."""
         self.history_stack = self.history_stack[:self.history_index + 1]
-        self.history_stack.append(state)
+        self.history_stack.append(self._snapshot_state())
         self.history_index += 1
+        self._redo_stack = []
         self._update_undo_redo_buttons()
 
     def _restore_state_from_history(self):
         if not (0 <= self.history_index < len(self.history_stack)):
             return
+        self._apply_history_state(self.history_stack[self.history_index])
 
-        state = self.history_stack[self.history_index]
+    def _apply_history_state(self, state):
         self.plot_items = copy.deepcopy(state["plot_items"])
         self.plot_settings = copy.deepcopy(state["plot_settings"])
         self.group_settings = copy.deepcopy(state["group_settings"])
@@ -3692,18 +3700,28 @@ class PhaseDRXTool(QMainWindow):
             )
 
     def undo_action(self):
-        if self.history_index > 0:
-            self.history_index -= 1
-            self._restore_state_from_history()
+        """Volta ao estado anterior à última ação; o estado atual vai para o refazer.
+
+        A pilha guarda o estado de ANTES de cada ação (índice 0 = estado base da
+        sessão). A versão anterior recuava duas ações por clique.
+        """
+        if self.history_index < 1:
+            return
+        self._redo_stack.append(self._snapshot_state())
+        state = self.history_stack.pop()
+        self.history_index = len(self.history_stack) - 1
+        self._apply_history_state(state)
 
     def redo_action(self):
-        if self.history_index < len(self.history_stack) - 1:
-            self.history_index += 1
-            self._restore_state_from_history()
+        if not self._redo_stack:
+            return
+        self.history_stack.append(self._snapshot_state())
+        self.history_index = len(self.history_stack) - 1
+        self._apply_history_state(self._redo_stack.pop())
 
     def _update_undo_redo_buttons(self):
-        self.undo_button.setEnabled(self.history_index > 0)
-        self.redo_button.setEnabled(self.history_index < len(self.history_stack) - 1)
+        self.undo_button.setEnabled(self.history_index >= 1)
+        self.redo_button.setEnabled(bool(getattr(self, "_redo_stack", [])))
 
 
 class PlotCustomizationDialog(QDialog):

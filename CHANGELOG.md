@@ -59,6 +59,8 @@ e versionamento [Semantic Versioning](https://semver.org/lang/pt-BR/) (MAJOR.MIN
   documentos vazios.
 
 ### Fixed
+- PhaseDRX: o Desfazer recuava duas ações por clique (e o Refazer devolvia só uma);
+  agora cada clique desfaz ou refaz exatamente uma ação.
 - Visualizador 3D (PhaseDRX): arestas da célula unitária passam a usar
   glOptions='opaque' (antes 'additive', sem teste de profundidade), corrigindo linhas
   desenhadas por cima de ligações e átomos.
