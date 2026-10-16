@@ -32,6 +32,25 @@
 
 O MatFinder é uma aplicação desktop completa para buscar, visualizar e analisar estruturas de materiais cristalinos. Desenvolvido na Universidade Federal do Amazonas (UFAM), Brasil, integra múltiplos bancos de dados cristalográficos e ferramentas de análise de difração de raios X.
 
+###  Destaque: identificação automática de fases (search-match)
+
+O PhaseDRX identifica as fases cristalinas de um difratograma com um fluxo de search-match
+como o dos programas comerciais de DRX, mas **gratuito e só com bases de dados abertas**:
+
+- **Busca robusta de picos**: detecção multiescala, ajuste do dubleto Kα2, marcação de Kβ e
+  um modo para padrões largos ou amorfos. A lista de picos pode ser editada sem mexer nos dados.
+- **Candidatos de bases abertas**: o [Crystallography Open Database (COD)](https://www.crystallography.net/)
+  e o [Materials Project](https://next-gen.materialsproject.org/) (chave de API gratuita), com
+  filtro de elementos na tabela periódica. Nenhuma base paga ou licença é necessária.
+- **Pontuação de 0 a 100** que pesa posições dos picos, reflexões fortes esperadas e
+  intensidades, com entradas duplicadas agrupadas e as reflexões sobrepostas ao seu difratograma.
+- **Aceitar e reavaliar**: as fases aceitas são ajustadas juntas, os outros candidatos são
+  pontuados de novo contra a intensidade que ainda não foi explicada, e os picos sem fase ficam marcados.
+- **Frações em massa semiquantitativas** (RIR) e um clique para enviar as fases aceitas à
+  simulação como combinação multifásica.
+
+Passo a passo (em inglês): [guia de identificação de fases](https://srvalentim.github.io/MatFinder/guide/search-match/).
+
 ###  Suporte multilíngue
 
 O MatFinder está disponível em:
@@ -44,6 +63,8 @@ O MatFinder está disponível em:
 
 - **Busca integrada**: Materials Project, COD (Crystallography Open Database), OQMD, ROD (Raman Open Database)
 - **Análise de DRX**: simulação e comparação de padrões de difração
+- **Identificação de fases (search-match)**: identificação automática das fases de um padrão
+  de DRX, com candidatos do COD e do Materials Project
 - **Ferramentas de análise**:
   - Editor de arquivos CIF
   - Calculadora estequiométrica
@@ -269,9 +290,10 @@ Este projeto está licenciado sob a **GNU General Public License v3.0** — veja
 
 🟢 **Ativo** — em desenvolvimento e manutenção.
 
-**Versão atual:** 3.27.0 — veja o [`CHANGELOG.md`](../CHANGELOG.md) para o histórico completo.
+**Versão atual:** 3.28.0 — veja o [`CHANGELOG.md`](../CHANGELOG.md) para o histórico completo.
 
 Destaques recentes:
+- Identificação automática de fases (search-match) com as bases abertas COD e Materials Project
 - Tradução completa da interface (português, inglês, alemão)
 - PhaseDRX como aplicativo autônomo (`PhaseDRX.exe`) com exportação de CIF entre aplicativos
 - Recuperação de artigos de acesso aberto por DOI (OpenAlex/Unpaywall)

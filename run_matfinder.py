@@ -101,7 +101,7 @@ def _selftest():
         "pymatgen.symmetry.analyzer", "pymatgen.analysis.diffraction.xrd",
         "mp_api.client", "emmet.core", "monty.json", "monty.serialization",
         "spglib", "pydantic", "pydantic_core",
-        "PIL.Image", "openpyxl", "bs4", "chempy", "cloudscraper", "requests",
+        "PIL.Image", "openpyxl", "bs4", "chempy", "requests",
         "pywt", "pandas",
     ]
     for name in third_party:

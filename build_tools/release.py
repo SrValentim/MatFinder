@@ -159,9 +159,9 @@ def main():
 
     step("6/6  Publicando Release no GitHub")
     token = get_token()
-    notes = (f"MatFinder {new} (Windows x64).\\n\\n"
-             f"- **{setup_name}** - instalador (recomendado).\\n"
-             f"- **{zip_name}** - portatil (extrair e rodar MatFinder.exe ou PhaseDRX.exe).\\n\\n"
+    notes = (f"MatFinder {new} (Windows x64).\n\n"
+             f"- **{setup_name}** - instalador (recomendado).\n"
+             f"- **{zip_name}** - portatil (extrair e rodar MatFinder.exe ou PhaseDRX.exe).\n\n"
              f"Mudancas: ver CHANGELOG.md.")
     rel = api("POST", f"{API}/releases", token,
               payload={"tag_name": tag, "name": f"MatFinder {tag}", "body": notes})

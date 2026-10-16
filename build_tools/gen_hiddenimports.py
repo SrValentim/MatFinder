@@ -50,7 +50,7 @@ SEEDS = [
     "pymatgen.symmetry.analyzer", "pymatgen.analysis.diffraction.xrd",
     "mp_api.client", "emmet.core", "monty.json", "monty.serialization",
     "spglib", "pydantic", "PIL.Image", "openpyxl", "bs4", "chempy",
-    "cloudscraper", "requests", "pywt", "pandas",
+    "requests", "pywt", "pandas",
 ]
 
 

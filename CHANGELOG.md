@@ -23,6 +23,10 @@ e versionamento [Semantic Versioning](https://semver.org/lang/pt-BR/) (MAJOR.MIN
 
 ## [Não publicado]
 
+---
+
+## [3.28.0] - 2026-10-16
+
 ### Added
 - Ciclo de identificação no estilo do HighScore (PhaseDRX, search-match fase 3): **Aceitar fase**
   leva o candidato para a tabela de fases aceitas. As escalas das fases aceitas são ajustadas
@@ -64,17 +68,6 @@ e versionamento [Semantic Versioning](https://semver.org/lang/pt-BR/) (MAJOR.MIN
   marcada. O Kβ1 entra com a razão de intensidade aproximada de um tubo sem filtro, e as
   opções ficam desativadas com comprimento de onda personalizado. Com só o Kα marcado, o
   resultado é idêntico ao de antes.
-- Visualizador 3D (PhaseDRX): exibição completa da célula unitária. Átomos em faces,
-  arestas e vértices são replicados em todas as imagens de borda dentro de [0, N] e a
-  vizinhança ligada imediatamente fora da célula é incluída para fechar anéis e poliedros
-  (convenção adotada por VESTA e Mercury). As posições atômicas não são alteradas.
-- Visualizador 3D (PhaseDRX): shader GLSL para átomos e ligações — iluminação headlight
-  com termo especular e atenuação por profundidade (mistura para o branco conforme a
-  distância à câmera). Executa na GPU; retorna ao shader embutido em falha de compilação.
-- Visualizador 3D (PhaseDRX): ligações em duas cores (metade da cor de cada átomo, com
-  transição no ponto médio), em um único mesh por ligação.
-- Visualizador 3D (PhaseDRX): botões de orientação da câmera ao longo dos eixos
-  cristalográficos a, b e c, e botão de vista isométrica.
 
 ### Changed
 - Organização do repositório: a raiz ficou só com o essencial. Os READMEs em português e
@@ -84,6 +77,8 @@ e versionamento [Semantic Versioning](https://semver.org/lang/pt-BR/) (MAJOR.MIN
   ser `LICENSE` na raiz e as dependências de teste ficam em `tests/requirements.txt`. O
   relatório do selftest do build agora é gravado em `build/selftest_report.txt`.
 - `version_manager.py` também atualiza a versão nos READMEs em português e alemão.
+- O README (em inglês, português e alemão) e a página inicial do site destacam a
+  identificação automática de fases, feita só com bases de dados abertas.
 
 ### Removed
 - Arquivos obsoletos: `setup.py` (cx_Freeze), a pasta `scripts/` (hooks antigos do
@@ -96,11 +91,35 @@ e versionamento [Semantic Versioning](https://semver.org/lang/pt-BR/) (MAJOR.MIN
 ### Fixed
 - PhaseDRX: o Desfazer recuava duas ações por clique (e o Refazer devolvia só uma);
   agora cada clique desfaz ou refaz exatamente uma ação.
+- *Sobre ▸ Licença* rodando pelo código-fonte: o texto da licença não era encontrado
+  (o app procurava `LICENSE_FULL.txt` na raiz, mas o arquivo ficava em `licenses/`).
+- CI: o `requirements-build.lock.txt` volta a instalar no Linux e no macOS (o `pywinpty`,
+  que só existe para Windows, ganhou o marcador `sys_platform == "win32"`), e o selftest
+  não exige mais o `cloudscraper`, que já tinha saído do lock. Os testes e o build de
+  release voltam a rodar no GitHub Actions.
+- `build_tools/release.py`: as notas do Release saíam com `\n` literal no texto.
+
+---
+
+## [3.27.0] - 2026-07-13
+
+### Added
+- Visualizador 3D (PhaseDRX): exibição completa da célula unitária. Átomos em faces,
+  arestas e vértices são replicados em todas as imagens de borda dentro de [0, N] e a
+  vizinhança ligada imediatamente fora da célula é incluída para fechar anéis e poliedros
+  (convenção adotada por VESTA e Mercury). As posições atômicas não são alteradas.
+- Visualizador 3D (PhaseDRX): shader GLSL para átomos e ligações — iluminação headlight
+  com termo especular e atenuação por profundidade (mistura para o branco conforme a
+  distância à câmera). Executa na GPU; retorna ao shader embutido em falha de compilação.
+- Visualizador 3D (PhaseDRX): ligações em duas cores (metade da cor de cada átomo, com
+  transição no ponto médio), em um único mesh por ligação.
+- Visualizador 3D (PhaseDRX): botões de orientação da câmera ao longo dos eixos
+  cristalográficos a, b e c, e botão de vista isométrica.
+
+### Fixed
 - Visualizador 3D (PhaseDRX): arestas da célula unitária passam a usar
   glOptions='opaque' (antes 'additive', sem teste de profundidade), corrigindo linhas
   desenhadas por cima de ligações e átomos.
-- *Sobre ▸ Licença* rodando pelo código-fonte: o texto da licença não era encontrado
-  (o app procurava `LICENSE_FULL.txt` na raiz, mas o arquivo ficava em `licenses/`).
 
 ---
 

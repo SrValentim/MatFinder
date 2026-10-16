@@ -32,6 +32,25 @@
 
 MatFinder is a complete desktop application for searching, visualizing, and analyzing crystalline material structures. Developed at the Federal University of Amazonas (UFAM), Brazil, it integrates multiple crystallographic databases and X-ray diffraction analysis tools.
 
+###  Highlight: automatic phase identification (search-match)
+
+PhaseDRX identifies the crystalline phases in a diffractogram with a search-match
+workflow like the ones in commercial XRD software — **free, and using open databases only**:
+
+- **Robust peak search**: multi-scale detection, Kα2 doublet fitting, Kβ flags and a mode
+  for broad or amorphous patterns. The peak list can be edited without touching the data.
+- **Candidates from open databases**: the [Crystallography Open Database (COD)](https://www.crystallography.net/)
+  and the [Materials Project](https://next-gen.materialsproject.org/) (free API key), filtered
+  with a periodic-table element selector. No paid database or license is required.
+- **Scores from 0 to 100** that weigh peak positions, expected strong reflections and
+  intensities, with duplicate entries grouped and the reflections previewed over your pattern.
+- **Accept and rescore**: accepted phases are fitted together, the remaining candidates are
+  rescored against the intensity that is still unexplained, and unexplained peaks are flagged.
+- **Semi-quantitative mass fractions** (RIR), and one click to send the accepted phases to
+  the simulation as a multiphase combination.
+
+Step by step: [Phase identification guide](https://srvalentim.github.io/MatFinder/guide/search-match/).
+
 ###  Multilingual Support
 
 MatFinder is available in:
@@ -44,6 +63,8 @@ MatFinder is available in:
 
 - **Integrated Search**: Materials Project, COD (Crystallography Open Database), OQMD, ROD (Raman Open Database)
 - **XRD Analysis**: Diffraction pattern simulation and comparison
+- **Phase Identification (search-match)**: automatic identification of the phases in an XRD
+  pattern, with candidates from COD and the Materials Project
 - **Analysis Tools**:
   - CIF file editor
   - Stoichiometric calculator
@@ -269,9 +290,10 @@ This project is licensed under the **GNU General Public License v3.0** - see the
 
 🟢 **Active** — under development and maintenance.
 
-**Current version:** 3.27.0 — see the [`CHANGELOG.md`](CHANGELOG.md) for the full history.
+**Current version:** 3.28.0 — see the [`CHANGELOG.md`](CHANGELOG.md) for the full history.
 
 Recent highlights:
+- Automatic phase identification (search-match) using the open COD and Materials Project databases
 - Full UI translation (Portuguese, English, German)
 - PhaseDRX as a standalone app (`PhaseDRX.exe`) with cross-app CIF export
 - Open-access article retrieval by DOI (OpenAlex/Unpaywall)

@@ -29,6 +29,12 @@ compare diffraction patterns, and visualize crystal structures in 3D. Its analys
 module, **PhaseDRX**, loads experimental diffractograms, cleans them and overlays
 simulated patterns for qualitative phase identification.
 
+!!! success "Automatic phase identification (search-match)"
+    PhaseDRX finds the crystalline phases in a diffractogram for you: a robust peak
+    search, candidates from the open COD and Materials Project databases, 0–100 scores
+    and an accept-and-rescore cycle, with semi-quantitative mass fractions. No paid
+    database or license is needed. [See how it works](guide/search-match.md).
+
 Developed at the Federal University of Amazonas (UFAM), Brazil.
 
 [Read the overview](overview/index.md){ .md-button }
