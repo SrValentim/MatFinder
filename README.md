@@ -6,11 +6,11 @@
   **Crystalline Materials Search and Analysis**
   
   [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20778195.svg)](https://doi.org/10.5281/zenodo.20778195)
-  [![License](https://img.shields.io/badge/license-GPL%20v3-blue.svg)](licenses/LICENSE)
+  [![License](https://img.shields.io/badge/license-GPL%20v3-blue.svg)](LICENSE)
   [![Python](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/)
   [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey.svg)](#get-matfinder)
   
-  🌐 **English** · [Português](README.pt-BR.md) · [Deutsch](README.de.md)
+  🌐 **English** · [Português](docs/README.pt-BR.md) · [Deutsch](docs/README.de.md)
 
   <br/><br/>
 
@@ -23,7 +23,7 @@
 
   <br/><br/>
 
-  ###  [Overview](README.md) ·  [Screenshots](SCREENSHOTS.md)
+  ###  [Overview](README.md) ·  [Screenshots](docs/SCREENSHOTS.md)
 </div>
 
 ---
@@ -85,24 +85,27 @@ python3.11 -m venv .venv
 ```
 
 > Requires **Python 3.11 (64-bit)**. The pinned `build_tools/requirements-build.lock.txt`
-> is the reproducible dependency set (the root `requirements.txt` is a full env freeze).
-> Running from source works on all three platforms; the pre-built `.exe`/installer
-> are Windows-only.
+> is the reproducible dependency set. Running from source works on all three
+> platforms; the pre-built `.exe`/installer are Windows-only.
 
 ###  Option 3 — Compile your own optimized `.exe`
 
-1. Double-click **`INSTALAR_REQUISITOS.bat`** — installs Python 3.11 + dependencies (once).
-2. Double-click **`COMPILAR.bat`** — produces `dist/MatFinder/` with `MatFinder.exe`
+1. Double-click **`build_tools/INSTALAR_REQUISITOS.bat`** — installs Python 3.11 + dependencies (once).
+2. Double-click **`build_tools/COMPILAR.bat`** — produces `dist/MatFinder/` with `MatFinder.exe`
    and `PhaseDRX.exe` (~450 MB, shared `_internal`).
 
-Full guide: **[`COMO_COMPILAR.md`](COMO_COMPILAR.md)** · [`docs/compilation/GUIA_COMPILACAO.md`](docs/compilation/GUIA_COMPILACAO.md)
+Full guide: **[`COMO_COMPILAR.md`](docs/compilation/COMO_COMPILAR.md)** · [`GUIA_COMPILACAO.md`](docs/compilation/GUIA_COMPILACAO.md)
 
 ---
 
 ## Documentation
 
-- **Compilation Guide**: [`docs/compilation/`](docs/compilation/)
-- **GPL v3 License**: [`licenses/LICENSE_FULL.txt`](licenses/LICENSE_FULL.txt)
+- **User guide (website)**: <https://srvalentim.github.io/MatFinder/> — source in [`website/`](website/)
+- **Screenshots**: [`docs/SCREENSHOTS.md`](docs/SCREENSHOTS.md)
+- **Compilation guides** (PT): [`docs/compilation/`](docs/compilation/)
+- **Technical notes and validation reports** (PT): [`docs/dev/`](docs/dev/)
+- **Examples** (sample CIFs + real XRD data): [`examples/`](examples/)
+- **GPL v3 License**: [`LICENSE`](LICENSE)
 
 ---
 
@@ -112,47 +115,62 @@ Full guide: **[`COMO_COMPILAR.md`](COMO_COMPILAR.md)** · [`docs/compilation/GUI
 
 ```
 MatFinder/
-├── matfinder/                       # Main source code
-│   ├── core/                       # Core modules
-│   ├── data/                       # Data handling (CIF, APIs)
-│   ├── tools/                      # Tools (calculator, XRD, etc.)
-│   └── assets/                     # Resources (icons, logos, configs)
-├── build_tools/
-│   ├── MatFinder.spec              # PyInstaller config (collect_all + Qt DLL filter)
-│   ├── build_clean.py              # Build pipeline: map imports + build + selftest
-│   ├── gen_hiddenimports.py        # Maps the app's real import closure
-│   ├── requirements-build.lock.txt # Exact, reproducible deps (Python 3.11)
-│   └── requirements-build.txt      # Readable/minimal deps
-├── .github/workflows/
-│   └── build-release.yml           # CI: build (Windows/Linux/macOS) + publish Release
-├── docs/                           # Documentation (incl. compilation guide)
-├── licenses/                       # License files
-├── tests/                          # Tests
-├── INSTALAR_REQUISITOS.bat         # 1-click: install Python 3.11 + deps
-├── COMPILAR.bat                    # 1-click: compile the .exe
-├── COMO_COMPILAR.md                # Build walkthrough (PT)
-├── run_matfinder.py                # Entry point (supports --selftest)
-└── requirements.txt                # Full environment freeze (not for building)
+├── matfinder/                       # Source code
+│   ├── core/                        # Core modules (database APIs, translator, favorites, history)
+│   ├── data/                        # Data handling (CIF editor/handler, COD API)
+│   ├── tools/                       # Tools: calculator, periodic table, XRD suite (PhaseDRX)
+│   └── assets/                      # Icons, logos and translations
+├── tests/                           # Automated tests (pytest) + their requirements.txt
+├── examples/                        # Sample CIFs and real XRD data (also used by the tests)
+├── docs/                            # Documentation
+│   ├── README.pt-BR.md              # This README in Portuguese
+│   ├── README.de.md                 # This README in German
+│   ├── SCREENSHOTS.md               # Visual tour (images in screenshots/)
+│   ├── compilation/                 # Build guides (PT)
+│   └── dev/                         # Technical notes and validation reports (PT)
+├── website/                         # Documentation site (MkDocs -> GitHub Pages)
+├── build_tools/                     # Build, installer and release tooling
+│   ├── INSTALAR_REQUISITOS.bat      # 1-click: install Python 3.11 + deps
+│   ├── COMPILAR.bat                 # 1-click: compile the .exe
+│   ├── build_clean.py               # Build pipeline: map imports + build + selftest
+│   ├── gen_hiddenimports.py         # Maps the app's real import closure
+│   ├── MatFinder.spec               # PyInstaller config (collect_all + Qt DLL filter)
+│   ├── MatFinder.iss                # Windows installer (Inno Setup)
+│   ├── release.py                   # Local release in one command
+│   ├── version_manager.py           # Syncs the version number in every file
+│   ├── requirements-build.lock.txt  # Exact, reproducible deps (Python 3.11)
+│   └── requirements-build.txt       # Readable/minimal deps
+├── .github/                         # CI workflows, issue templates, contributing guide, code of conduct
+├── run_matfinder.py                 # Entry point: MatFinder (supports --selftest)
+├── run_phasedrx.py                  # Entry point: PhaseDRX (standalone XRD suite)
+├── CHANGELOG.md                     # Version history
+├── CITATION.cff                     # Citation metadata (Zenodo)
+├── LICENSE                          # GPL v3 license
+├── pytest.ini                       # Test configuration
+└── VERSION                          # Current version number
 ```
 
 ### Compilation
 
 Optimized build (~450 MB, two exes sharing `_internal`, no "missing module" loop).
-One-time setup with `INSTALAR_REQUISITOS.bat`, then `COMPILAR.bat` to build:
+One-time setup with `INSTALAR_REQUISITOS.bat`, then `COMPILAR.bat` to build (both in
+`build_tools/`):
 
 ```bat
-INSTALAR_REQUISITOS.bat       :: 1x: Python 3.11 + deps (from the lock)
-COMPILAR.bat                  :: build -> dist\MatFinder\MatFinder.exe
-COMPILAR.bat --clean          :: pristine rebuild (clears the cache)
+build_tools\INSTALAR_REQUISITOS.bat   :: 1x: Python 3.11 + deps (from the lock)
+build_tools\COMPILAR.bat              :: build -> dist\MatFinder\MatFinder.exe
+build_tools\COMPILAR.bat --clean      :: pristine rebuild (clears the cache)
 ```
 
 - Self-check after a build (lists any missing module at once): `MatFinder.exe --selftest`
+- **Tests:** `python -m pip install -r tests/requirements.txt`, then `python -m pytest`
+  (see [`tests/README.md`](tests/README.md)).
 - **CI:** pushing a tag `vX.Y.Z` triggers `.github/workflows/build-release.yml`,
   which builds on **Windows, Linux and macOS** and publishes a Release with the
   Windows installer + `.zip`, a Linux `.tar.gz` and a macOS `.zip`.
 
-For details, see **[`COMO_COMPILAR.md`](COMO_COMPILAR.md)** and
-[`docs/compilation/GUIA_COMPILACAO.md`](docs/compilation/GUIA_COMPILACAO.md).
+For details, see **[`COMO_COMPILAR.md`](docs/compilation/COMO_COMPILAR.md)** and
+[`GUIA_COMPILACAO.md`](docs/compilation/GUIA_COMPILACAO.md).
 
 ### Technologies Used
 
@@ -170,9 +188,9 @@ For details, see **[`COMO_COMPILAR.md`](COMO_COMPILAR.md)** and
 ##  Contributing
 
 Contributions are welcome — bug reports, feature ideas, docs, translations and
-code. Please read **[`CONTRIBUTING.md`](CONTRIBUTING.md)** (dev setup, coding and
+code. Please read **[`CONTRIBUTING.md`](.github/CONTRIBUTING.md)** (dev setup, coding and
 translation guidelines, PR process) and our
-**[`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md)**.
+**[`CODE_OF_CONDUCT.md`](.github/CODE_OF_CONDUCT.md)**.
 
 Quick version:
 
@@ -214,7 +232,7 @@ If you use MatFinder in your research, please cite it (archived on **Zenodo**):
 
 ##  License
 
-This project is licensed under the **GNU General Public License v3.0** - see the [`licenses/LICENSE`](licenses/LICENSE) file for details.
+This project is licensed under the **GNU General Public License v3.0** - see the [`LICENSE`](LICENSE) file for details.
 
 ### License Summary
 
@@ -264,7 +282,7 @@ Recent highlights:
 ## Report Issues
 
 Found a bug? Have a suggestion? Open an [issue](https://github.com/SrValentim/MatFinder/issues)
-(templates available) — see [`CONTRIBUTING.md`](CONTRIBUTING.md) for what to include.
+(templates available) — see [`CONTRIBUTING.md`](.github/CONTRIBUTING.md) for what to include.
 
 ---
 

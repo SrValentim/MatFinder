@@ -4,7 +4,7 @@
 ; Gera um setup.exe com: pagina de TERMOS (InfoBefore) + LICENCA GPL (aceite) +
 ; escolha de pasta + atalhos (Menu Iniciar / Area de Trabalho) + desinstalador.
 ;
-; Pre-requisito: o build precisa existir em ..\dist\MatFinder (rode COMPILAR.bat).
+; Pre-requisito: o build precisa existir em ..\dist\MatFinder (rode build_tools\COMPILAR.bat).
 ; Compilar (da raiz do projeto):
 ;   "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" build_tools\MatFinder.iss
 ; Saida: ..\dist\installer\MatFinder-<versao>-Setup.exe
@@ -32,7 +32,7 @@ OutputBaseFilename=MatFinder-{#AppVersion}-Setup
 OutputDir=..\dist\installer
 SetupIconFile=..\matfinder\assets\icons\polvo.ico
 UninstallDisplayIcon={app}\{#AppExe}
-LicenseFile=..\licenses\LICENSE_FULL.txt
+LicenseFile=..\LICENSE
 InfoBeforeFile=installer_terms.txt
 Compression=lzma2/max
 SolidCompression=yes

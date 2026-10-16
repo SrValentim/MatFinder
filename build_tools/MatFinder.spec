@@ -58,7 +58,7 @@ datas = [
     # NÃO empacotar 'assets/config': continha a MP_API_KEY (config.txt) e o
     # language.json com de_DE. A chave agora fica em pasta gravável do usuário.
     (os.path.join(base_path, 'matfinder', 'assets', 'translations'), os.path.join('matfinder', 'assets', 'translations')),
-    (os.path.join(base_path, 'licenses', 'LICENSE_FULL.txt'), '.'),
+    (os.path.join(base_path, 'LICENSE'), '.'),
     (os.path.join(base_path, 'VERSION'), '.'),
 ]
 binaries = []
@@ -206,7 +206,7 @@ a = Analysis(
     binaries=binaries,
     datas=datas,
     hiddenimports=sorted(set(hiddenimports)),
-    hookspath=[],          # NÃO usar os hooks antigos de scripts/hooks (substituídos por collect_all)
+    hookspath=[],          # sem hooks próprios: os antigos foram substituídos por collect_all
     hooksconfig={},
     runtime_hooks=[],
     excludes=excludes,

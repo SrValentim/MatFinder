@@ -61,11 +61,11 @@ python run_matfinder.py
 The packaged `.exe`/installer are Windows-only (PyInstaller + Inno Setup):
 
 ```bat
-INSTALAR_REQUISITOS.bat        :: one-time: Python 3.11 + deps
-COMPILAR.bat                   :: build -> dist\MatFinder\MatFinder.exe
+build_tools\INSTALAR_REQUISITOS.bat   :: one-time: Python 3.11 + deps
+build_tools\COMPILAR.bat              :: build -> dist\MatFinder\MatFinder.exe
 ```
 
-See [`COMO_COMPILAR.md`](COMO_COMPILAR.md) for details. Running from source
+See [`COMO_COMPILAR.md`](../docs/compilation/COMO_COMPILAR.md) for details. Running from source
 (above) works on any platform and is all you need to develop or review.
 
 ## Coding guidelines
@@ -85,14 +85,14 @@ See [`COMO_COMPILAR.md`](COMO_COMPILAR.md) for details. Running from source
 The core logic has an automated test suite (pytest):
 
 ```bash
-python -m pip install -r requirements-dev.txt
+python -m pip install -r tests/requirements.txt
 python -m pytest
 ```
 
-Tests run headless and live in [`tests/`](tests/) (see `tests/README.md`). They
+Tests run headless and live in [`tests/`](../tests/) (see `tests/README.md`). They
 also run in CI on every push/PR (`.github/workflows/tests.yml`). Please add or
 update tests when you change core logic, and reuse the sample data in
-[`examples/`](examples/) as fixtures when relevant.
+[`examples/`](../examples/) as fixtures when relevant.
 
 ## Translations
 
@@ -103,7 +103,7 @@ UI text lives in `matfinder/assets/translations/`:
 - `elements.json` — chemical element names per language.
 
 Add the same key/entry to every language file. To bump the displayed version
-everywhere, use `python version_manager.py --set X.Y.Z`.
+everywhere, use `python build_tools/version_manager.py --set X.Y.Z`.
 
 ## Pull request process
 
@@ -113,12 +113,12 @@ everywhere, use `python version_manager.py --set X.Y.Z`.
 3. Make sure the app still runs and `--selftest` passes.
 4. Open a Pull Request describing **what** and **why**.
 5. For user-visible changes, add an entry under **[Não publicado]** in
-   [`CHANGELOG.md`](CHANGELOG.md).
+   [`CHANGELOG.md`](../CHANGELOG.md).
 
 ## Releases
 
 Releases follow [Semantic Versioning](https://semver.org). The process (version
 bump, build, installer, tag, GitHub Release) is documented in
-[`CHANGELOG.md`](CHANGELOG.md). Published tags are immutable.
+[`CHANGELOG.md`](../CHANGELOG.md). Published tags are immutable.
 
 Thank you for helping make MatFinder better!

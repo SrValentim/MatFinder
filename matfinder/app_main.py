@@ -3345,7 +3345,7 @@ class MaterialsApp(QMainWindow):
                 logging.error(f"Erro ao abrir Leiame.txt ({abs_readme_path}): {e}")
 
     def open_license(self):
-        license_path = self.resource_path('LICENSE_FULL.txt')
+        license_path = self.resource_path('LICENSE')
         if not os.path.exists(license_path):
             QMessageBox.warning(
                 self,
@@ -3362,7 +3362,7 @@ class MaterialsApp(QMainWindow):
                 ptr("Erro ao Ler Licença"),
                 ptr("Não foi possível ler o arquivo de licença:\n{}").format(e)
             )
-            logging.error(f"Erro ao ler LICENSE_FULL.txt: {e}")
+            logging.error(f"Erro ao ler LICENSE: {e}")
             return
         from matfinder.ui_dialogs import GplLicenseDialog
         dialog = GplLicenseDialog(license_text, self)

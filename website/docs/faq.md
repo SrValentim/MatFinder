@@ -45,5 +45,5 @@ study, modify and redistribute it under that license.
 ## How do I report a bug or request a feature?
 
 Open an [issue on GitHub](https://github.com/SrValentim/MatFinder/issues) (templates
-are available). See [`CONTRIBUTING.md`](https://github.com/SrValentim/MatFinder/blob/main/CONTRIBUTING.md)
+are available). See [`CONTRIBUTING.md`](https://github.com/SrValentim/MatFinder/blob/main/.github/CONTRIBUTING.md)
 for what to include.

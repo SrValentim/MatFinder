@@ -1,6 +1,7 @@
 @echo off
 title MatFinder - Compilar
-cd /d "%~dp0"
+REM Este .bat fica em build_tools\; tudo roda a partir da raiz do projeto.
+cd /d "%~dp0.."
 
 echo(
 echo ============================================================
@@ -8,13 +9,13 @@ echo   MatFinder - Compilar  (clique e compile)
 echo ============================================================
 echo(
 
-REM Ambiente de build: dev usa ..\.venv-build; padrao .venv-build aqui
+REM Ambiente de build: .venv-build na raiz do projeto (ou ..\.venv-build, fora dela)
 set "VENV=.venv-build"
 if exist "..\.venv-build\Scripts\python.exe" set "VENV=..\.venv-build"
 
 if not exist "%VENV%\Scripts\python.exe" (
   echo [ERRO] Ambiente de build nao encontrado.
-  echo        Rode primeiro:  INSTALAR_REQUISITOS.bat
+  echo        Rode primeiro:  build_tools\INSTALAR_REQUISITOS.bat
   echo(
   pause
   exit /b 1
@@ -24,13 +25,13 @@ REM Confere que as dependencias estao instaladas
 "%VENV%\Scripts\python" -c "import PyInstaller, PySide6, pymatgen" >nul 2>&1
 if errorlevel 1 (
   echo [ERRO] Dependencias ausentes ou incompletas no ambiente de build.
-  echo        Rode:  INSTALAR_REQUISITOS.bat
+  echo        Rode:  build_tools\INSTALAR_REQUISITOS.bat
   echo(
   pause
   exit /b 1
 )
 
-echo Compilando...  ^(rebuild limpo, se precisar:  COMPILAR.bat --clean^)
+echo Compilando...  ^(rebuild limpo, se precisar:  build_tools\COMPILAR.bat --clean^)
 echo(
 "%VENV%\Scripts\python" "build_tools\build_clean.py" %*
 set "RC=%ERRORLEVEL%"

@@ -2,8 +2,8 @@
 # requirements-build.txt - Dependências MÍNIMAS para compilar o MatFinder
 # =============================================================================
 # Versões ALINHADAS ao venv que comprovadamente roda o app (PyCharm "venv",
-# Python 3.11.9). NÃO use o requirements.txt da raiz (pip freeze do ambiente
-# inteiro, com jupyter/jax/opencv/PyQt5/boto3 que o app NÃO usa).
+# Python 3.11.9), sem o resto daquele ambiente (jupyter/jax/opencv/PyQt5/boto3,
+# que o app NÃO usa). O ambiente exato fica em requirements-build.lock.txt.
 #
 # IMPORTANTE: a cadeia pymatgen <-> emmet-core <-> mp-api é FRÁGIL. Estas
 # versões casam entre si (pymatgen 2024.10.29 + emmet-core 0.84.7rc1). Pular

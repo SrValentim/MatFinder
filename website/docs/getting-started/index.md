@@ -51,11 +51,11 @@ the pre-built `.exe`/installer are Windows-only.
 
 ## Option 3 — Compile your own optimized `.exe`
 
-1. Double-click **`INSTALAR_REQUISITOS.bat`** — installs Python 3.11 + dependencies (once).
-2. Double-click **`COMPILAR.bat`** — produces `dist/MatFinder/` with `MatFinder.exe`
+1. Double-click **`build_tools/INSTALAR_REQUISITOS.bat`** — installs Python 3.11 + dependencies (once).
+2. Double-click **`build_tools/COMPILAR.bat`** — produces `dist/MatFinder/` with `MatFinder.exe`
    and `PhaseDRX.exe` (~450 MB, shared `_internal`).
 
-Full guide: [`COMO_COMPILAR.md`](https://github.com/SrValentim/MatFinder/blob/main/COMO_COMPILAR.md).
+Full guide: [`COMO_COMPILAR.md`](https://github.com/SrValentim/MatFinder/blob/main/docs/compilation/COMO_COMPILAR.md).
 
 ---
 

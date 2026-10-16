@@ -5,7 +5,7 @@ Copyright (C) 2025 Raynner Valentim (UFAM)
 Sistema centralizado de versionamento
 """
 
-# Versão do programa - ALTERE APENAS AQUI OU USE version_manager.py
+# Versão do programa - ALTERE APENAS AQUI OU USE build_tools/version_manager.py
 __version__ = "3.27.0"
 __version_info__ = (3, 27, 0)  # (major, minor, patch)
 

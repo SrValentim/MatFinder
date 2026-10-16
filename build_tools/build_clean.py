@@ -93,8 +93,9 @@ def main():
         print(f"\n[X] Executável não encontrado em {EXE}")
         return 1
 
-    # 2) Smoke test headless do .exe congelado
-    report = os.path.join(ROOT, "selftest_report.txt")
+    # 2) Smoke test headless do .exe congelado (relatório em build/, fora da raiz)
+    report = os.path.join(ROOT, "build", "selftest_report.txt")
+    os.makedirs(os.path.dirname(report), exist_ok=True)
     if os.path.exists(report):
         os.remove(report)
     env = dict(os.environ, QT_QPA_PLATFORM="offscreen", MATFINDER_SELFTEST_REPORT=report)

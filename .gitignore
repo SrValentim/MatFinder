@@ -16,35 +16,27 @@ ENV/
 *.swp
 *.swo
 
-# Build e Compilação
+# Build e Compilação (build_tools/build_clean.py)
 /dist/
 /build/
 *.msi
 *.cab
 *.exe
-/scripts/dist/
-/scripts/build/
 /build_tools/build/
 /build_tools/dist/
-# Manter .spec no repositório
-!build_tools/MatFinder.spec
-!build_tools/COMPILE.bat
 
-# Log e Dados do Usuário
+# Dados que o app grava ao rodar pelo código-fonte (pasta de dados = raiz do projeto)
 *.log
-matfinder.log
 historico_buscas.json
 favorites.json
-
-# Configurações locais do usuário
 settings.json
 /config.txt
+/temp_cifs/
 matfinder/assets/config/config.txt
 matfinder/assets/config/config_test.txt
 matfinder/assets/config/config_console_test.txt
 
 # Arquivos Temporários
-temp_cifs/*.cif
 selftest_report.txt
 temp_cif_for_pyobjcryst.cif
 # gerado automaticamente pelo build (gen_hiddenimports.py)
