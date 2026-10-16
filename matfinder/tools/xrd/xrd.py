@@ -27,7 +27,7 @@ from PySide6.QtWidgets import (
     QHeaderView, QMessageBox, QDialogButtonBox, QTabWidget, QWidget,
     QGroupBox, QFormLayout, QLineEdit, QLabel, QComboBox, QDoubleSpinBox,
     QSplitter, QListWidget, QListWidgetItem, QColorDialog, QCheckBox,
-    QSpinBox, QAbstractItemView, QScrollArea, QSlider
+    QSpinBox, QAbstractItemView, QScrollArea, QSlider, QToolTip
 )
 from PySide6.QtCore import Qt, QPoint, Signal, Slot, QSize
 from PySide6.QtGui import QAction, QPainter, QColor, QPen, QIcon
@@ -40,6 +40,9 @@ from matplotlib.widgets import RectangleSelector
 import matplotlib.cm as cm
 import matplotlib.image as mpimg
 from matfinder.core.translator import ptr
+from matfinder.tools.xrd.emission_lines import ANODE_LINES, radiation_lines, combined_sticks
+from matfinder.tools.xrd.search_match.peak_panel import PeakSearchPanel, draw_peak_overlays
+from matfinder.tools.xrd.search_match.match_panel import MatchPanel, draw_candidate_overlay
 
 # --- Importação para Exportar para Origin ---
 try:
@@ -210,6 +213,7 @@ class PhaseDRXTool(QMainWindow):
 
         self.history_stack = []
         self.history_index = -1
+        self._redo_stack = []
 
         self.group_settings = {"count": 1, "spacing": {}}
 
@@ -372,6 +376,16 @@ class PhaseDRXTool(QMainWindow):
         self.sim_tab = QWidget()
         self._create_simulation_tab()
         self.tab_widget.addTab(self.sim_tab, ptr("Simulação Teórica (de CIF)"))
+
+        # Aba Picos (search-match, fase 1): busca robusta e edição da lista de picos
+        self.peaks_panel = PeakSearchPanel(self)
+        self.tab_widget.addTab(self.peaks_panel, ptr("Picos"))
+
+        # Aba Identificação (search-match, fase 2): candidatos do COD e do Materials Project
+        self.match_panel = MatchPanel(self, self.peaks_panel)
+        self.tab_widget.addTab(self.match_panel, ptr("Identificação"))
+        self.tab_widget.currentChanged.connect(
+            lambda _i: self.match_panel.refresh() if self.tab_widget.currentWidget() is self.match_panel else None)
 
         self.main_splitter.addWidget(control_widget)
 
@@ -601,6 +615,23 @@ class PhaseDRXTool(QMainWindow):
         wavelength_layout.addWidget(self.wavelength_combo)
         wavelength_layout.addWidget(self.wavelength_custom_input)
         form_layout.addRow(ptr("Fonte de Radiação Padrão:"), wavelength_layout)
+        # Ânodo de cada item do seletor (independe da tradução do texto).
+        for index, anode in enumerate(("Cu", "Co", "Fe", "Mo")):
+            self.wavelength_combo.setItemData(index, anode)
+        # Linhas de emissão do tubo incluídas na simulação (pelo menos uma).
+        self._ka_tooltip = ptr("Inclui a linha Kα1 do tubo na simulação.")
+        self._kb_tooltip = ptr("Inclui a linha Kβ1 do tubo na simulação. Ela aparece em medidas feitas sem filtro de Kβ ou monocromador.")
+        self.ka_checkbox = QCheckBox("Kα")
+        self.ka_checkbox.setChecked(True)
+        self.ka_checkbox.setToolTip(self._ka_tooltip)
+        self.kb_checkbox = QCheckBox("Kβ")
+        self.kb_checkbox.setChecked(False)
+        self.kb_checkbox.setToolTip(self._kb_tooltip)
+        lines_layout = QHBoxLayout()
+        lines_layout.addWidget(self.ka_checkbox)
+        lines_layout.addWidget(self.kb_checkbox)
+        lines_layout.addStretch()
+        form_layout.addRow(ptr("Linhas de Emissão:"), lines_layout)
         self.max_2theta_spin = QDoubleSpinBox()
         self.max_2theta_spin.setRange(10.0, 180.0)
         self.max_2theta_spin.setValue(100.0)
@@ -647,6 +678,11 @@ class PhaseDRXTool(QMainWindow):
 
         self.combine_phases_button.clicked.connect(self.create_multiphase_combination)
         self.wavelength_combo.currentIndexChanged.connect(self.on_wavelength_change)
+        self.wavelength_custom_input.textChanged.connect(lambda _text: self.peaks_panel.update_radiation())
+        self.ka_checkbox.toggled.connect(
+            lambda checked: self._on_radiation_line_toggled(self.ka_checkbox, checked))
+        self.kb_checkbox.toggled.connect(
+            lambda checked: self._on_radiation_line_toggled(self.kb_checkbox, checked))
         self.calculate_sim_button.clicked.connect(self.run_simulation_for_selected)
 
         self.customize_plot_button.clicked.connect(self.open_plot_customization_dialog)
@@ -950,9 +986,7 @@ class PhaseDRXTool(QMainWindow):
         if not component_ids or not weights: return
 
         try:
-            wl_text = self.wavelength_combo.currentText()
-            wavelength = float(self.wavelength_custom_input.text()) if wl_text == ptr("Outro") else float(
-                wl_text.split('(')[1].split(' ')[0])
+            lines = self._selected_radiation_lines()
             max_2theta = self.max_2theta_spin.value()
         except (ValueError, IndexError):
             return
@@ -963,10 +997,13 @@ class PhaseDRXTool(QMainWindow):
             if component and component.get("type") == "cif":
                 try:
                     structure = Structure.from_str(component["cif_content"], fmt="cif")
-                    calculator = XRDCalculator(wavelength=wavelength)
-                    pattern = calculator.get_pattern(structure, two_theta_range=(0, max_2theta))
+                    peaks_2theta, peaks_intensity = combined_sticks(structure, lines, max_2theta)
+                    # Cada fase na escala 0-100, como o scaled=True do pymatgen, para que
+                    # os pesos da combinação mantenham o mesmo significado de antes.
+                    if peaks_intensity.size and peaks_intensity.max() > 0:
+                        peaks_intensity = peaks_intensity * (100.0 / peaks_intensity.max())
 
-                    for peak_2theta, peak_intensity in zip(pattern.x, pattern.y):
+                    for peak_2theta, peak_intensity in zip(peaks_2theta, peaks_intensity):
                         all_peaks.append((peak_2theta, peak_intensity * weights[i]))
                 except Exception as e:
                     logging.warning(f"Não foi possível obter picos para {component['label']}: {e}")
@@ -1276,6 +1313,11 @@ class PhaseDRXTool(QMainWindow):
         logging.debug(f"✅ Zoom aplicado: X[{min(x1,x2):.2f}, {max(x1,x2):.2f}], Y[{min(y1,y2):.2f}, {max(y1,y2):.2f}]")
 
     def _on_mouse_press(self, event):
+        # PRIORIDADE MÁXIMA: edição de picos (aba Picos)
+        if (event.inaxes and event.button == 1 and hasattr(self, "peaks_panel")
+                and self.peaks_panel.edit_mode and self.peaks_panel.handle_plot_click(event.xdata)):
+            return
+
         # PRIORIDADE: Modo de seleção de pico
         if self._peak_selection_mode and event.inaxes and event.button == 1:
             peak_x = event.xdata
@@ -1691,6 +1733,7 @@ class PhaseDRXTool(QMainWindow):
 
                 self.history_stack = []
                 self.history_index = -1
+                self._redo_stack = []
 
                 self.plot_items = project_data.get("plot_items", [])
                 project_dir = os.path.dirname(path)
@@ -1865,11 +1908,16 @@ class PhaseDRXTool(QMainWindow):
         self.plot_settings = self._get_default_plot_settings()
         self.history_stack = []
         self.history_index = -1
+        self._redo_stack = []
         self._add_state_to_history()
         self._restore_state_from_history()
         self.set_dirty(False)
 
     def closeEvent(self, event):
+        if hasattr(self, "peaks_panel"):
+            self.peaks_panel.shutdown()
+        if hasattr(self, "match_panel"):
+            self.match_panel.shutdown()
         # CORREÇÃO: Limpar visualizador 3D ANTES de mostrar diálogo para evitar erro OpenGL
         try:
             if hasattr(self, 'structure_viewer') and self.structure_viewer is not None:
@@ -2032,17 +2080,26 @@ class PhaseDRXTool(QMainWindow):
         self._repopulate_all_lists()
         self.set_dirty()
 
-    def load_cif_from_data(self, cif_content: str, filename: str):
+    def load_cif_from_data(self, cif_content: str, filename: str, record_history: bool = True):
+        """Adiciona um CIF (texto) à lista e simula o padrão.
+
+        Args:
+            record_history: False quando quem chama já registrou o histórico (ação composta).
+
+        Returns:
+            O item criado, ou None se não foi adicionado.
+        """
         if not PYMATGEN_AVAILABLE:
             QMessageBox.critical(self, ptr("Dependência Faltando"),
                                  ptr("A biblioteca 'pymatgen' é necessária para processar arquivos CIF."))
-            return
+            return None
 
         if any(c["label"] == filename for c in self.plot_items):
             QMessageBox.information(self, ptr("CIF Já Carregado"), ptr("O arquivo CIF '{}' já está na lista.").format(filename))
-            return
+            return None
 
-        self._add_state_to_history()
+        if record_history:
+            self._add_state_to_history()
         try:
             Structure.from_str(cif_content, fmt="cif")
             item_id = str(uuid.uuid4())
@@ -2072,9 +2129,11 @@ class PhaseDRXTool(QMainWindow):
             self.activateWindow();
             self.raise_()
             self.set_dirty()
+            return new_item
         except Exception as e:
             QMessageBox.critical(self, ptr("Erro no CIF"),
                                  ptr("O conteúdo do CIF recebido para '{}' é inválido.\n\nErro: {}").format(filename, e))
+            return None
 
     def _parse_data_file(self, file_path):
         temp_data = []
@@ -2160,9 +2219,7 @@ class PhaseDRXTool(QMainWindow):
     def run_simulation_for_item(self, plot_item):
         if self.simulation_engine == "none": return
         try:
-            wl_text = self.wavelength_combo.currentText()
-            wavelength = float(self.wavelength_custom_input.text()) if wl_text == ptr("Outro") else float(
-                wl_text.split('(')[1].split(' ')[0])
+            lines = self._selected_radiation_lines()
             max_2theta, peak_width = self.max_2theta_spin.value(), self.peak_width_spin.value()
         except (ValueError, IndexError) as e:
             QMessageBox.critical(self, ptr("Erro de Parâmetro"), ptr("Valor inválido: {}").format(e))
@@ -2170,9 +2227,9 @@ class PhaseDRXTool(QMainWindow):
 
         try:
             if self.simulation_engine == "pyobjcryst":
-                ttheta, intensity = self._calculate_with_pyobjcryst(plot_item, wavelength, max_2theta, peak_width)
+                ttheta, intensity = self._calculate_with_pyobjcryst(plot_item, lines, max_2theta, peak_width)
             else:
-                ttheta, intensity = self._calculate_with_pymatgen(plot_item, wavelength, max_2theta)
+                ttheta, intensity = self._calculate_with_pymatgen(plot_item, lines, max_2theta)
             plot_item["data"] = [ttheta, intensity]
 
             self._redraw_all_plots()
@@ -2185,10 +2242,10 @@ class PhaseDRXTool(QMainWindow):
             QMessageBox.critical(self, ptr("Erro na Simulação"),
                                  ptr("Ocorreu um erro ao calcular para {}:\n{}").format(plot_item['label'], e))
 
-    def _calculate_with_pymatgen(self, cif_info, wavelength, max_2theta_deg):
+    def _calculate_with_pymatgen(self, cif_info, lines, max_2theta_deg):
+        """Padrão simulado somando as linhas de emissão escolhidas (Kα e/ou Kβ)."""
         structure = Structure.from_str(cif_info["cif_content"], fmt="cif")
-        calculator = XRDCalculator(wavelength=wavelength)
-        pattern = calculator.get_pattern(structure, two_theta_range=(0, max_2theta_deg))
+        peaks_2theta, peaks_intensity = combined_sticks(structure, lines, max_2theta_deg)
 
         num_points = 4000
         ttheta_range = np.linspace(0, max_2theta_deg, num_points)
@@ -2200,7 +2257,7 @@ class PhaseDRXTool(QMainWindow):
         apply_mode = sim_params.get("apply_mode", "Padrão Inteiro")
         ranges = sim_params.get("ranges", [])
 
-        for peak_2theta, peak_intensity in zip(pattern.x, pattern.y):
+        for peak_2theta, peak_intensity in zip(peaks_2theta, peaks_intensity):
             apply_convolution = False
             if apply_mode == "Padrão Inteiro":
                 apply_convolution = True
@@ -2229,21 +2286,24 @@ class PhaseDRXTool(QMainWindow):
 
         return ttheta_range, intensities
 
-    def _calculate_with_pyobjcryst(self, cif_info, wavelength, max_2theta_deg, peak_width_deg):
+    def _calculate_with_pyobjcryst(self, cif_info, lines, max_2theta_deg, peak_width_deg):
+        """Perfil simulado pelo pyobjcryst, somando as linhas de emissão escolhidas."""
         temp_cif_path = "temp_cif_for_pyobjcryst.cif"
         with open(temp_cif_path, "w", encoding='utf-8') as f:
             f.write(cif_info["cif_content"])
         crystal = pyobjcryst.loadCrystal(temp_cif_path)
         os.remove(temp_cif_path)
-        pattern_data = pyobjcryst.powderpattern.PowderPattern()
-        pattern_data.SetWavelength(wavelength)
         numpoints, deg_to_rad = 4000, np.pi / 180.0
         ttheta_rad = np.linspace(0, max_2theta_deg * deg_to_rad, numpoints)
-        pattern_data.SetPowderPatternX(ttheta_rad)
-        diff_data = pattern_data.AddPowderPatternDiffraction(crystal)
-        diff_data.SetReflectionProfilePar(pyobjcryst.powderpattern.ReflectionProfileType.PROFILE_PSEUDO_VOIGT,
-                                          (peak_width_deg * deg_to_rad) ** 2)
-        intensity = pattern_data.GetPowderPatternCalc()
+        intensity = np.zeros(numpoints)
+        for wavelength, weight in lines:
+            pattern_data = pyobjcryst.powderpattern.PowderPattern()
+            pattern_data.SetWavelength(wavelength)
+            pattern_data.SetPowderPatternX(ttheta_rad)
+            diff_data = pattern_data.AddPowderPatternDiffraction(crystal)
+            diff_data.SetReflectionProfilePar(pyobjcryst.powderpattern.ReflectionProfileType.PROFILE_PSEUDO_VOIGT,
+                                              (peak_width_deg * deg_to_rad) ** 2)
+            intensity += weight * np.asarray(pattern_data.GetPowderPatternCalc(), dtype=float)
         if intensity.max() > 0: intensity /= intensity.max()
         return ttheta_rad / deg_to_rad, intensity
 
@@ -2258,6 +2318,10 @@ class PhaseDRXTool(QMainWindow):
         for item in cif_items: self._add_item_to_list(self.cif_list_widget, item)
 
         self._repopulate_group_table()
+        if hasattr(self, "peaks_panel"):
+            self.peaks_panel.refresh_items()
+        if hasattr(self, "match_panel"):
+            self.match_panel.refresh()
 
     def _toggle_item_visibility(self, item_id):
         plot_item = self._find_plot_item_by_id(item_id)
@@ -2600,6 +2664,11 @@ class PhaseDRXTool(QMainWindow):
                     peak_x, peak_y = item["analysis"]["peaks"]
                     peak_y_array = np.array(peak_y)
                     ax.plot(peak_x, peak_y_array + offset, "x", color='red', markersize=5)
+
+                if item.get("type") == "experimental" and hasattr(self, "peaks_panel"):
+                    draw_peak_overlays(ax, item, offset, self.peaks_panel)
+                if item.get("type") == "experimental" and hasattr(self, "match_panel"):
+                    draw_candidate_overlay(ax, item, offset, self.match_panel)
 
             if items_in_group:
                 current_y_offset += (len(items_in_group) - 1) * intra_group_offset
@@ -3505,24 +3574,71 @@ class PhaseDRXTool(QMainWindow):
         return color
 
     def on_wavelength_change(self, index):
-        self.wavelength_custom_input.setVisible(self.wavelength_combo.currentText() == ptr("Outro"))
+        is_custom = self.wavelength_combo.currentText() == ptr("Outro")
+        self.wavelength_custom_input.setVisible(is_custom)
+        # Comprimento de onda personalizado é uma linha única: Kα/Kβ não se aplicam.
+        custom_tip = ptr("Com comprimento de onda personalizado, a simulação usa só o valor informado.")
+        self.ka_checkbox.setEnabled(not is_custom)
+        self.kb_checkbox.setEnabled(not is_custom)
+        self.ka_checkbox.setToolTip(custom_tip if is_custom else self._ka_tooltip)
+        self.kb_checkbox.setToolTip(custom_tip if is_custom else self._kb_tooltip)
+        if hasattr(self, "peaks_panel"):
+            self.peaks_panel.update_radiation()
 
-    def _add_state_to_history(self):
-        state = {
+    def _selected_radiation_lines(self):
+        """Linhas (λ em Å, peso) da simulação, conforme a fonte e as opções Kα/Kβ."""
+        anode = self.wavelength_combo.currentData()
+        if anode is None:  # "Outro": comprimento de onda livre
+            return radiation_lines(custom_wavelength=float(self.wavelength_custom_input.text()))
+        return radiation_lines(anode, self.ka_checkbox.isChecked(), self.kb_checkbox.isChecked())
+
+    def radiation_info(self):
+        """Comprimentos de onda (Å) da fonte atual, para a busca de picos.
+
+        Returns:
+            dict com anode (None se personalizado), ka1, ka2 e kb (None quando não se aplicam).
+        """
+        anode = self.wavelength_combo.currentData()
+        if anode is None:
+            try:
+                lam = float(self.wavelength_custom_input.text())
+            except ValueError:
+                lam = None
+            return {"anode": None, "ka1": lam if lam and lam > 0 else None, "ka2": None, "kb": None}
+        lines = ANODE_LINES[anode]
+        return {"anode": anode, "ka1": lines["ka"], "ka2": lines["ka2"], "kb": lines["kb"]}
+
+    def _on_radiation_line_toggled(self, checkbox, checked):
+        """Impede desmarcar a última linha de emissão: Kα ou Kβ deve ficar marcada."""
+        if checked or self.ka_checkbox.isChecked() or self.kb_checkbox.isChecked():
+            return
+        checkbox.blockSignals(True)
+        checkbox.setChecked(True)
+        checkbox.blockSignals(False)
+        QToolTip.showText(checkbox.mapToGlobal(QPoint(0, checkbox.height())),
+                          ptr("Selecione pelo menos uma linha de emissão: Kα ou Kβ."), checkbox)
+
+    def _snapshot_state(self):
+        return {
             "plot_items": copy.deepcopy(self.plot_items),
             "plot_settings": copy.deepcopy(self.plot_settings),
             "group_settings": copy.deepcopy(self.group_settings)
         }
+
+    def _add_state_to_history(self):
+        """Guarda o estado ANTES de uma alteração (as ações chamam isto antes de mudar algo)."""
         self.history_stack = self.history_stack[:self.history_index + 1]
-        self.history_stack.append(state)
+        self.history_stack.append(self._snapshot_state())
         self.history_index += 1
+        self._redo_stack = []
         self._update_undo_redo_buttons()
 
     def _restore_state_from_history(self):
         if not (0 <= self.history_index < len(self.history_stack)):
             return
+        self._apply_history_state(self.history_stack[self.history_index])
 
-        state = self.history_stack[self.history_index]
+    def _apply_history_state(self, state):
         self.plot_items = copy.deepcopy(state["plot_items"])
         self.plot_settings = copy.deepcopy(state["plot_settings"])
         self.group_settings = copy.deepcopy(state["group_settings"])
@@ -3644,18 +3760,28 @@ class PhaseDRXTool(QMainWindow):
             )
 
     def undo_action(self):
-        if self.history_index > 0:
-            self.history_index -= 1
-            self._restore_state_from_history()
+        """Volta ao estado anterior à última ação; o estado atual vai para o refazer.
+
+        A pilha guarda o estado de ANTES de cada ação (índice 0 = estado base da
+        sessão). A versão anterior recuava duas ações por clique.
+        """
+        if self.history_index < 1:
+            return
+        self._redo_stack.append(self._snapshot_state())
+        state = self.history_stack.pop()
+        self.history_index = len(self.history_stack) - 1
+        self._apply_history_state(state)
 
     def redo_action(self):
-        if self.history_index < len(self.history_stack) - 1:
-            self.history_index += 1
-            self._restore_state_from_history()
+        if not self._redo_stack:
+            return
+        self.history_stack.append(self._snapshot_state())
+        self.history_index = len(self.history_stack) - 1
+        self._apply_history_state(self._redo_stack.pop())
 
     def _update_undo_redo_buttons(self):
-        self.undo_button.setEnabled(self.history_index > 0)
-        self.redo_button.setEnabled(self.history_index < len(self.history_stack) - 1)
+        self.undo_button.setEnabled(self.history_index >= 1)
+        self.redo_button.setEnabled(bool(getattr(self, "_redo_stack", [])))
 
 
 class PlotCustomizationDialog(QDialog):

@@ -18,6 +18,12 @@ A concise map of what MatFinder can do. For step-by-step usage, see the
 - **Simulate** diffraction patterns from CIF files for a chosen radiation source.
 - **Overlay and compare** calculated vs. measured patterns for qualitative phase
   identification.
+- **Robust peak search** with Kα2 doublet fitting, Kβ flags and an amorphous mode;
+  the peak list can be edited without touching the data.
+- **Phase identification (search-match)** against COD and the Materials Project,
+  with a periodic-table element filter, 0–100 scores, accept-and-rescore cycles and
+  semi-quantitative mass fractions. See
+  [Phase identification](../guide/search-match.md).
 - **Read per-peak** 2θ, intensity and d-spacing.
 - **Interactive 3D viewer** of the crystal structure (positions and bonds from
   `pymatgen`): complete unit cell, two-colour bonds, interatomic-distance measurement

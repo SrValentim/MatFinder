@@ -2634,5 +2634,761 @@
  "Nenhuma versao de acesso aberto (Unpaywall/OpenAlex) foi encontrada para este DOI.": {
   "en_US": "No open-access version (Unpaywall/OpenAlex) was found for this DOI.",
   "de_DE": "Es wurde keine Open-Access-Version (Unpaywall/OpenAlex) für diese DOI gefunden."
+ },
+ "Linhas de Emissão:": {
+  "en_US": "Emission Lines:",
+  "de_DE": "Emissionslinien:"
+ },
+ "Inclui a linha Kα1 do tubo na simulação.": {
+  "en_US": "Includes the tube's Kα1 line in the simulation.",
+  "de_DE": "Bezieht die Kα1-Linie der Röhre in die Simulation ein."
+ },
+ "Inclui a linha Kβ1 do tubo na simulação. Ela aparece em medidas feitas sem filtro de Kβ ou monocromador.": {
+  "en_US": "Includes the tube's Kβ1 line in the simulation. It appears in measurements taken without a Kβ filter or monochromator.",
+  "de_DE": "Bezieht die Kβ1-Linie der Röhre in die Simulation ein. Sie tritt bei Messungen ohne Kβ-Filter oder Monochromator auf."
+ },
+ "Com comprimento de onda personalizado, a simulação usa só o valor informado.": {
+  "en_US": "With a custom wavelength, the simulation uses only the value entered.",
+  "de_DE": "Bei einer benutzerdefinierten Wellenlänge verwendet die Simulation nur den eingegebenen Wert."
+ },
+ "Selecione pelo menos uma linha de emissão: Kα ou Kβ.": {
+  "en_US": "Select at least one emission line: Kα or Kβ.",
+  "de_DE": "Wählen Sie mindestens eine Emissionslinie: Kα oder Kβ."
+ },
+ "Estimando o ruído": {
+  "en_US": "Estimating noise",
+  "de_DE": "Rauschen wird geschätzt"
+ },
+ "Detectando picos": {
+  "en_US": "Detecting peaks",
+  "de_DE": "Peaks werden erkannt"
+ },
+ "Estimando o fundo": {
+  "en_US": "Estimating background",
+  "de_DE": "Untergrund wird geschätzt"
+ },
+ "Ajustando halos": {
+  "en_US": "Fitting halos",
+  "de_DE": "Halos werden angepasst"
+ },
+ "Aprendendo a largura dos picos": {
+  "en_US": "Learning peak widths",
+  "de_DE": "Peakbreiten werden ermittelt"
+ },
+ "Ajustando perfis": {
+  "en_US": "Fitting profiles",
+  "de_DE": "Profile werden angepasst"
+ },
+ "Concluído": {
+  "en_US": "Done",
+  "de_DE": "Fertig"
+ },
+ "I rel. (%)": {
+  "en_US": "Rel. I (%)",
+  "de_DE": "Rel. I (%)"
+ },
+ "Altura": {
+  "en_US": "Height",
+  "de_DE": "Höhe"
+ },
+ "Área": {
+  "en_US": "Area",
+  "de_DE": "Fläche"
+ },
+ "Signif.": {
+  "en_US": "Signif.",
+  "de_DE": "Signif."
+ },
+ "Tipo": {
+  "en_US": "Type",
+  "de_DE": "Typ"
+ },
+ "Origem": {
+  "en_US": "Origin",
+  "de_DE": "Herkunft"
+ },
+ "Obs.": {
+  "en_US": "Notes",
+  "de_DE": "Hinweis"
+ },
+ "Difratograma:": {
+  "en_US": "Diffractogram:",
+  "de_DE": "Diffraktogramm:"
+ },
+ "A radiação é escolhida na aba de simulação.": {
+  "en_US": "The radiation is chosen in the simulation tab.",
+  "de_DE": "Die Strahlung wird im Simulations-Tab gewählt."
+ },
+ "Radiação:": {
+  "en_US": "Radiation:",
+  "de_DE": "Strahlung:"
+ },
+ "Padrão": {
+  "en_US": "Standard",
+  "de_DE": "Standard"
+ },
+ "Dados ruidosos": {
+  "en_US": "Noisy data",
+  "de_DE": "Verrauschte Daten"
+ },
+ "Picos largos / amorfo": {
+  "en_US": "Broad peaks / amorphous",
+  "de_DE": "Breite Peaks / amorph"
+ },
+ "Ajusta os parâmetros da busca ao tipo de difratograma.": {
+  "en_US": "Adapts the search parameters to the kind of diffractogram.",
+  "de_DE": "Passt die Suchparameter an die Art des Diffraktogramms an."
+ },
+ "Tipo de dado:": {
+  "en_US": "Data type:",
+  "de_DE": "Datentyp:"
+ },
+ "Limiar de detecção em desvios-padrão do ruído. Menor = encontra picos mais fracos.": {
+  "en_US": "Detection threshold in noise standard deviations. Lower = finds weaker peaks.",
+  "de_DE": "Erkennungsschwelle in Standardabweichungen des Rauschens. Niedriger = findet schwächere Peaks."
+ },
+ "Limiar:": {
+  "en_US": "Threshold:",
+  "de_DE": "Schwelle:"
+ },
+ "Dados com Kα2 (dubleto ajustado junto)": {
+  "en_US": "Data with Kα2 (doublet fitted together)",
+  "de_DE": "Daten mit Kα2 (Dublett gemeinsam angepasst)"
+ },
+ "Ajusta Kα1 e Kα2 juntos e lista só o Kα1. Desmarque para dados com monocromador de Kα1.": {
+  "en_US": "Fits Kα1 and Kα2 together and lists only Kα1. Uncheck for data measured with a Kα1 monochromator.",
+  "de_DE": "Passt Kα1 und Kα2 gemeinsam an und listet nur Kα1. Für Daten mit Kα1-Monochromator abwählen."
+ },
+ "Avançado": {
+  "en_US": "Advanced",
+  "de_DE": "Erweitert"
+ },
+ "automática": {
+  "en_US": "automatic",
+  "de_DE": "automatisch"
+ },
+ "Remover spikes de um ponto": {
+  "en_US": "Remove single-point spikes",
+  "de_DE": "Einzelpunkt-Spikes entfernen"
+ },
+ "Marcar possíveis picos de Kβ": {
+  "en_US": "Flag possible Kβ peaks",
+  "de_DE": "Mögliche Kβ-Peaks markieren"
+ },
+ "Larguras seguem uma tendência suave com 2θ": {
+  "en_US": "Widths follow a smooth trend with 2θ",
+  "de_DE": "Breiten folgen einem glatten Verlauf mit 2θ"
+ },
+ "FWHM mínima:": {
+  "en_US": "Minimum FWHM:",
+  "de_DE": "Minimale FWHM:"
+ },
+ "FWHM máxima:": {
+  "en_US": "Maximum FWHM:",
+  "de_DE": "Maximale FWHM:"
+ },
+ "Janela do fundo:": {
+  "en_US": "Background window:",
+  "de_DE": "Untergrundfenster:"
+ },
+ "Halo a partir de:": {
+  "en_US": "Halo from:",
+  "de_DE": "Halo ab:"
+ },
+ "Buscar picos": {
+  "en_US": "Search peaks",
+  "de_DE": "Peaks suchen"
+ },
+ "Limpar picos": {
+  "en_US": "Clear peaks",
+  "de_DE": "Peaks löschen"
+ },
+ "Adicionar pico": {
+  "en_US": "Add peak",
+  "de_DE": "Peak hinzufügen"
+ },
+ "Clique no gráfico onde está o pico. Esc encerra.": {
+  "en_US": "Click on the plot where the peak is. Esc to finish.",
+  "de_DE": "Klicken Sie im Diagramm auf die Peakposition. Esc beendet."
+ },
+ "Apagar pico": {
+  "en_US": "Delete peak",
+  "de_DE": "Peak entfernen"
+ },
+ "Clique perto do marcador. Apaga só o pico, nunca os dados. Esc encerra.": {
+  "en_US": "Click near the marker. Deletes only the peak, never the data. Esc to finish.",
+  "de_DE": "Klicken Sie nahe der Markierung. Entfernt nur den Peak, nie die Daten. Esc beendet."
+ },
+ "Mostrar ajuste e fundo": {
+  "en_US": "Show fit and background",
+  "de_DE": "Anpassung und Untergrund zeigen"
+ },
+ "Os dados mudaram depois da busca. Busque de novo para atualizar alturas e áreas.": {
+  "en_US": "The data changed after the search. Search again to update heights and areas.",
+  "de_DE": "Die Daten haben sich nach der Suche geändert. Suchen Sie erneut, um Höhen und Flächen zu aktualisieren."
+ },
+ "Apagar selecionados": {
+  "en_US": "Delete selected",
+  "de_DE": "Ausgewählte entfernen"
+ },
+ "Restaurar apagados": {
+  "en_US": "Restore deleted",
+  "de_DE": "Entfernte wiederherstellen"
+ },
+ "Libera os picos apagados e busca de novo.": {
+  "en_US": "Releases the deleted peaks and searches again.",
+  "de_DE": "Gibt die entfernten Peaks frei und sucht erneut."
+ },
+ "Exportar CSV...": {
+  "en_US": "Export CSV...",
+  "de_DE": "CSV exportieren..."
+ },
+ "comprimento de onda inválido": {
+  "en_US": "invalid wavelength",
+  "de_DE": "ungültige Wellenlänge"
+ },
+ "Exportar picos": {
+  "en_US": "Export peaks",
+  "de_DE": "Peaks exportieren"
+ },
+ "Busca de picos": {
+  "en_US": "Peak search",
+  "de_DE": "Peaksuche"
+ },
+ "Carregue um difratograma experimental e escolha-o na lista.": {
+  "en_US": "Load an experimental diffractogram and choose it in the list.",
+  "de_DE": "Laden Sie ein experimentelles Diffraktogramm und wählen Sie es in der Liste aus."
+ },
+ "Escolha um difratograma na aba Picos.": {
+  "en_US": "Choose a diffractogram in the Peaks tab.",
+  "de_DE": "Wählen Sie im Tab Peaks ein Diffraktogramm aus."
+ },
+ "Este difratograma ainda não tem picos.": {
+  "en_US": "This diffractogram has no peaks yet.",
+  "de_DE": "Dieses Diffraktogramm hat noch keine Peaks."
+ },
+ "Nenhum pico perto do clique.": {
+  "en_US": "No peak near the click.",
+  "de_DE": "Kein Peak in der Nähe des Klicks."
+ },
+ "Não há picos para exportar.": {
+  "en_US": "There are no peaks to export.",
+  "de_DE": "Es gibt keine Peaks zum Exportieren."
+ },
+ "Nenhuma busca feita neste difratograma.": {
+  "en_US": "No search done on this diffractogram.",
+  "de_DE": "Für dieses Diffraktogramm wurde noch nicht gesucht."
+ },
+ "Clique dentro da faixa de dados.": {
+  "en_US": "Click inside the data range.",
+  "de_DE": "Klicken Sie innerhalb des Datenbereichs."
+ },
+ "possível Kβ": {
+  "en_US": "possible Kβ",
+  "de_DE": "mögliches Kβ"
+ },
+ "{} picos": {
+  "en_US": "{} peaks",
+  "de_DE": "{} Peaks"
+ },
+ "λ = {} Å (personalizado)": {
+  "en_US": "λ = {} Å (custom)",
+  "de_DE": "λ = {} Å (benutzerdefiniert)"
+ },
+ "A busca falhou:\n{}": {
+  "en_US": "The search failed:\n{}",
+  "de_DE": "Die Suche ist fehlgeschlagen:\n{}"
+ },
+ "halo": {
+  "en_US": "halo",
+  "de_DE": "Halo"
+ },
+ "pico": {
+  "en_US": "peak",
+  "de_DE": "Peak"
+ },
+ "manual": {
+  "en_US": "manual",
+  "de_DE": "manuell"
+ },
+ "auto": {
+  "en_US": "auto",
+  "de_DE": "auto"
+ },
+ "{} halo(s)": {
+  "en_US": "{} halo(s)",
+  "de_DE": "{} Halo(s)"
+ },
+ "cristalinidade {}%": {
+  "en_US": "crystallinity {}%",
+  "de_DE": "Kristallinität {}%"
+ },
+ "ruído ≈ {}": {
+  "en_US": "noise ≈ {}",
+  "de_DE": "Rauschen ≈ {}"
+ },
+ "Não foi possível salvar:\n{}": {
+  "en_US": "Could not save:\n{}",
+  "de_DE": "Speichern nicht möglich:\n{}"
+ },
+ "Picos": {
+  "en_US": "Peaks",
+  "de_DE": "Peaks"
+ },
+ "Consultando o COD": {
+  "en_US": "Querying COD",
+  "de_DE": "COD wird abgefragt"
+ },
+ "Consultando o Materials Project": {
+  "en_US": "Querying Materials Project",
+  "de_DE": "Materials Project wird abgefragt"
+ },
+ "Baixando estruturas": {
+  "en_US": "Downloading structures",
+  "de_DE": "Strukturen werden heruntergeladen"
+ },
+ "Simulando e pontuando": {
+  "en_US": "Simulating and scoring",
+  "de_DE": "Simulation und Bewertung"
+ },
+ "Score": {
+  "en_US": "Score",
+  "de_DE": "Score"
+ },
+ "Fórmula": {
+  "en_US": "Formula",
+  "de_DE": "Formel"
+ },
+ "Fonte": {
+  "en_US": "Source",
+  "de_DE": "Quelle"
+ },
+ "ID": {
+  "en_US": "ID",
+  "de_DE": "ID"
+ },
+ "Linhas": {
+  "en_US": "Lines",
+  "de_DE": "Linien"
+ },
+ "Posições": {
+  "en_US": "Positions",
+  "de_DE": "Positionen"
+ },
+ "Intensid.": {
+  "en_US": "Intens.",
+  "de_DE": "Intens."
+ },
+ "Explicado (%)": {
+  "en_US": "Explained (%)",
+  "de_DE": "Erklärt (%)"
+ },
+ "Zero (°)": {
+  "en_US": "Zero (°)",
+  "de_DE": "Nullpunkt (°)"
+ },
+ "Rede": {
+  "en_US": "Lattice",
+  "de_DE": "Gitter"
+ },
+ "Notas": {
+  "en_US": "Notes",
+  "de_DE": "Hinweise"
+ },
+ "Ir para a aba Picos": {
+  "en_US": "Go to the Peaks tab",
+  "de_DE": "Zum Tab Peaks"
+ },
+ "Picos:": {
+  "en_US": "Peaks:",
+  "de_DE": "Peaks:"
+ },
+ "Escolher elementos...": {
+  "en_US": "Choose elements...",
+  "de_DE": "Elemente wählen..."
+ },
+ "Elementos:": {
+  "en_US": "Elements:",
+  "de_DE": "Elemente:"
+ },
+ "só experimentais": {
+  "en_US": "experimental only",
+  "de_DE": "nur experimentelle"
+ },
+ "Só estruturas do Materials Project ligadas a uma entrada experimental (ICSD).": {
+  "en_US": "Only Materials Project structures linked to an experimental (ICSD) entry.",
+  "de_DE": "Nur Materials-Project-Strukturen mit experimentellem Eintrag (ICSD)."
+ },
+ "Fontes:": {
+  "en_US": "Sources:",
+  "de_DE": "Quellen:"
+ },
+ "Agrupar entradas da mesma fase": {
+  "en_US": "Group entries of the same phase",
+  "de_DE": "Einträge derselben Phase gruppieren"
+ },
+ "Deslocamento de zero (±):": {
+  "en_US": "Zero shift (±):",
+  "de_DE": "Nullpunktverschiebung (±):"
+ },
+ "Variação de rede, experimentais (±):": {
+  "en_US": "Lattice variation, experimental (±):",
+  "de_DE": "Gitteränderung, experimentell (±):"
+ },
+ "Expansão de rede aceita no MP (DFT):": {
+  "en_US": "Accepted MP lattice expansion (DFT):",
+  "de_DE": "Zulässige MP-Gitteraufweitung (DFT):"
+ },
+ "Estabilidade máxima no MP:": {
+  "en_US": "Maximum MP energy above hull:",
+  "de_DE": "Maximale MP-Energie über der Hülle:"
+ },
+ "Máximo de candidatos:": {
+  "en_US": "Maximum candidates:",
+  "de_DE": "Maximale Kandidaten:"
+ },
+ "Peso das posições:": {
+  "en_US": "Weight of positions:",
+  "de_DE": "Gewicht der Positionen:"
+ },
+ "Peso das reflexões fortes:": {
+  "en_US": "Weight of strong reflections:",
+  "de_DE": "Gewicht der starken Reflexe:"
+ },
+ "Peso dos picos explicados:": {
+  "en_US": "Weight of explained peaks:",
+  "de_DE": "Gewicht der erklärten Peaks:"
+ },
+ "Peso das intensidades:": {
+  "en_US": "Weight of intensities:",
+  "de_DE": "Gewicht der Intensitäten:"
+ },
+ "Buscar candidatos": {
+  "en_US": "Search candidates",
+  "de_DE": "Kandidaten suchen"
+ },
+ "Adicionar à lista do PhaseDRX": {
+  "en_US": "Add to the PhaseDRX list",
+  "de_DE": "Zur PhaseDRX-Liste hinzufügen"
+ },
+ "Carrega o CIF do candidato na aba de simulação.": {
+  "en_US": "Loads the candidate's CIF into the simulation tab.",
+  "de_DE": "Lädt die CIF des Kandidaten in den Simulations-Tab."
+ },
+ "Abrir na fonte": {
+  "en_US": "Open at source",
+  "de_DE": "In der Quelle öffnen"
+ },
+ "Exportar candidatos": {
+  "en_US": "Export candidates",
+  "de_DE": "Kandidaten exportieren"
+ },
+ "nenhum (carregue dados na aba Dados Experimentais)": {
+  "en_US": "none (load data in the Experimental Data tab)",
+  "de_DE": "keines (Daten im Tab Experimentelle Daten laden)"
+ },
+ "nenhuma busca de picos neste difratograma": {
+  "en_US": "no peak search on this diffractogram",
+  "de_DE": "keine Peaksuche für dieses Diffraktogramm"
+ },
+ "Configure a chave da API do Materials Project no MatFinder.": {
+  "en_US": "Set the Materials Project API key in MatFinder.",
+  "de_DE": "Legen Sie den Materials-Project-API-Schlüssel in MatFinder fest."
+ },
+ "Chave da API do Materials Project encontrada.": {
+  "en_US": "Materials Project API key found.",
+  "de_DE": "Materials-Project-API-Schlüssel gefunden."
+ },
+ "Identificação": {
+  "en_US": "Identification",
+  "de_DE": "Identifizierung"
+ },
+ "Carregue um difratograma experimental e escolha-o na aba Picos.": {
+  "en_US": "Load an experimental diffractogram and choose it in the Peaks tab.",
+  "de_DE": "Laden Sie ein experimentelles Diffraktogramm und wählen Sie es im Tab Peaks aus."
+ },
+ "Busque os picos na aba Picos antes de buscar candidatos.": {
+  "en_US": "Search the peaks in the Peaks tab before searching candidates.",
+  "de_DE": "Suchen Sie die Peaks im Tab Peaks, bevor Sie Kandidaten suchen."
+ },
+ "Escolha pelo menos uma fonte.": {
+  "en_US": "Choose at least one source.",
+  "de_DE": "Wählen Sie mindestens eine Quelle."
+ },
+ "Nenhuma busca de candidatos neste difratograma.": {
+  "en_US": "No candidate search on this diffractogram.",
+  "de_DE": "Keine Kandidatensuche für dieses Diffraktogramm."
+ },
+ "{} candidatos (COD {}, MP {}) em {} fases": {
+  "en_US": "{} candidates (COD {}, MP {}) in {} phases",
+  "de_DE": "{} Kandidaten (COD {}, MP {}) in {} Phasen"
+ },
+ "lista limitada aos candidatos mais prováveis": {
+  "en_US": "list limited to the most likely candidates",
+  "de_DE": "Liste auf die wahrscheinlichsten Kandidaten begrenzt"
+ },
+ "A busca de candidatos falhou:\n{}": {
+  "en_US": "The candidate search failed:\n{}",
+  "de_DE": "Die Kandidatensuche ist fehlgeschlagen:\n{}"
+ },
+ "melhor: {} ({:.0f})": {
+  "en_US": "best: {} ({:.0f})",
+  "de_DE": "bester: {} ({:.0f})"
+ },
+ "Avisos das fontes:": {
+  "en_US": "Source warnings:",
+  "de_DE": "Hinweise der Quellen:"
+ },
+ "+{} entradas iguais": {
+  "en_US": "+{} identical entries",
+  "de_DE": "+{} gleiche Einträge"
+ },
+ "Entradas iguais: {}": {
+  "en_US": "Identical entries: {}",
+  "de_DE": "Gleiche Einträge: {}"
+ },
+ "Obrigatório": {
+  "en_US": "Required",
+  "de_DE": "Erforderlich"
+ },
+ "Possível": {
+  "en_US": "Possible",
+  "de_DE": "Möglich"
+ },
+ "Proibido": {
+  "en_US": "Forbidden",
+  "de_DE": "Verboten"
+ },
+ "Elementos da amostra": {
+  "en_US": "Sample elements",
+  "de_DE": "Elemente der Probe"
+ },
+ "Clique para alternar: obrigatório, possível, proibido, nenhum. O botão direito limpa o elemento.": {
+  "en_US": "Click to cycle: required, possible, forbidden, none. Right-click clears the element.",
+  "de_DE": "Klicken zum Wechseln: erforderlich, möglich, verboten, keins. Rechtsklick setzt das Element zurück."
+ },
+ "Permitir outros elementos além dos marcados (sistema aberto)": {
+  "en_US": "Allow other elements besides the marked ones (open system)",
+  "de_DE": "Weitere Elemente außer den markierten zulassen (offenes System)"
+ },
+ "Desmarcado: o candidato só pode conter elementos obrigatórios ou possíveis.": {
+  "en_US": "Unchecked: a candidate may only contain required or possible elements.",
+  "de_DE": "Nicht markiert: ein Kandidat darf nur erforderliche oder mögliche Elemente enthalten."
+ },
+ "Limpar": {
+  "en_US": "Clear",
+  "de_DE": "Leeren"
+ },
+ "outros elementos permitidos": {
+  "en_US": "other elements allowed",
+  "de_DE": "weitere Elemente erlaubt"
+ },
+ "Obrigatórios: {}": {
+  "en_US": "Required: {}",
+  "de_DE": "Erforderlich: {}"
+ },
+ "Possíveis: {}": {
+  "en_US": "Possible: {}",
+  "de_DE": "Möglich: {}"
+ },
+ "Proibidos: {}": {
+  "en_US": "Forbidden: {}",
+  "de_DE": "Verboten: {}"
+ },
+ "Marque pelo menos um elemento como obrigatório.": {
+  "en_US": "Mark at least one element as required.",
+  "de_DE": "Markieren Sie mindestens ein Element als erforderlich."
+ },
+ "Um elemento não pode ser obrigatório ou possível e proibido ao mesmo tempo.": {
+  "en_US": "An element cannot be required or possible and forbidden at the same time.",
+  "de_DE": "Ein Element kann nicht gleichzeitig erforderlich oder möglich und verboten sein."
+ },
+ "O COD aceita no máximo 8 elementos obrigatórios.": {
+  "en_US": "COD accepts at most 8 required elements.",
+  "de_DE": "COD akzeptiert höchstens 8 erforderliche Elemente."
+ },
+ "Use no máximo 10 elementos entre obrigatórios e possíveis.": {
+  "en_US": "Use at most 10 elements among required and possible.",
+  "de_DE": "Verwenden Sie höchstens 10 erforderliche und mögliche Elemente."
+ },
+ "São necessários pelo menos 2 picos cristalinos. Busque os picos antes.": {
+  "en_US": "At least 2 crystalline peaks are needed. Search the peaks first.",
+  "de_DE": "Mindestens 2 kristalline Peaks sind nötig. Suchen Sie zuerst die Peaks."
+ },
+ "Chave da API do Materials Project não configurada.": {
+  "en_US": "Materials Project API key not set.",
+  "de_DE": "Materials-Project-API-Schlüssel nicht festgelegt."
+ },
+ "Automático: só os picos quando a lista de picos é boa; picos e perfil inteiro quando há poucos picos ou picos largos (dados ruidosos, nanocristalinos).\nPerfil: ajusta o padrão simulado de cada candidato ao difratograma sem fundo.": {
+  "en_US": "Automatic: peaks only when the peak list is good; peaks and full profile when there are few or broad peaks (noisy, nanocrystalline data).\nProfile: fits each candidate's simulated pattern to the background-subtracted diffractogram.",
+  "de_DE": "Automatisch: nur Peaks, wenn die Peakliste gut ist; Peaks und volles Profil bei wenigen oder breiten Peaks (verrauschte, nanokristalline Daten).\nProfil: passt das simulierte Muster jedes Kandidaten an das untergrundkorrigierte Diffraktogramm an."
+ },
+ "Pontuação:": {
+  "en_US": "Scoring:",
+  "de_DE": "Bewertung:"
+ },
+ "Automático": {
+  "en_US": "Automatic",
+  "de_DE": "Automatisch"
+ },
+ "Perfil": {
+  "en_US": "Profile",
+  "de_DE": "Profil"
+ },
+ "Picos e perfil": {
+  "en_US": "Peaks and profile",
+  "de_DE": "Peaks und Profil"
+ },
+ "picos": {
+  "en_US": "peaks",
+  "de_DE": "Peaks"
+ },
+ "perfil": {
+  "en_US": "profile",
+  "de_DE": "Profil"
+ },
+ "picos e perfil": {
+  "en_US": "peaks and profile",
+  "de_DE": "Peaks und Profil"
+ },
+ "Preparando o perfil": {
+  "en_US": "Preparing the profile",
+  "de_DE": "Profil wird vorbereitet"
+ },
+ "Perfil (%)": {
+  "en_US": "Profile (%)",
+  "de_DE": "Profil (%)"
+ },
+ "Reflexões fortes encontradas / esperadas acima do limite de detecção.": {
+  "en_US": "Strong reflections found / expected above the detection limit.",
+  "de_DE": "Gefundene / erwartete starke Reflexe oberhalb der Nachweisgrenze."
+ },
+ "Parte da intensidade dos picos explicada pelo candidato. Com fases aceitas, parte do que sobrou.": {
+  "en_US": "Share of the peak intensity explained by the candidate. With accepted phases, share of what remains.",
+  "de_DE": "Anteil der Peakintensität, den der Kandidat erklärt. Mit akzeptierten Phasen: Anteil des Rests."
+ },
+ "Parte do difratograma sem fundo explicada pelo padrão simulado do candidato (score de perfil).": {
+  "en_US": "Share of the background-subtracted diffractogram explained by the candidate's simulated pattern (profile score).",
+  "de_DE": "Anteil des untergrundkorrigierten Diffraktogramms, den das simulierte Muster des Kandidaten erklärt (Profil-Score)."
+ },
+ "Deslocamento de zero que alinha a referência aos picos.": {
+  "en_US": "Zero shift that aligns the reference with the peaks.",
+  "de_DE": "Nullpunktverschiebung, die die Referenz an die Peaks angleicht."
+ },
+ "Fator de escala da rede aplicado à referência (1 = sem mudança).": {
+  "en_US": "Lattice scale factor applied to the reference (1 = unchanged).",
+  "de_DE": "Auf die Referenz angewandter Gitterskalenfaktor (1 = unverändert)."
+ },
+ "Fase": {
+  "en_US": "Phase",
+  "de_DE": "Phase"
+ },
+ "Massa (%)": {
+  "en_US": "Mass (%)",
+  "de_DE": "Masse (%)"
+ },
+ "Escala": {
+  "en_US": "Scale",
+  "de_DE": "Skala"
+ },
+ "Score do candidato quando foi aceito.": {
+  "en_US": "Candidate score when it was accepted.",
+  "de_DE": "Score des Kandidaten bei der Akzeptanz."
+ },
+ "Fração em massa semiquantitativa pelo método RIR (I/Ic calculado da estrutura). É uma estimativa: textura, microabsorção e fase amorfa não entram.": {
+  "en_US": "Semi-quantitative mass fraction by the RIR method (I/Ic computed from the structure). It is an estimate: texture, microabsorption and amorphous phase are not taken into account.",
+  "de_DE": "Semiquantitativer Massenanteil nach der RIR-Methode (I/Ic aus der Struktur berechnet). Nur eine Schätzung: Textur, Mikroabsorption und amorphe Phase werden nicht berücksichtigt."
+ },
+ "Altura observada por unidade de intensidade da referência (ajuste conjunto das fases aceitas).": {
+  "en_US": "Observed height per unit of reference intensity (joint fit of the accepted phases).",
+  "de_DE": "Beobachtete Höhe pro Einheit Referenzintensität (gemeinsame Anpassung der akzeptierten Phasen)."
+ },
+ "Picos em que esta fase é a maior contribuição.": {
+  "en_US": "Peaks where this phase is the largest contribution.",
+  "de_DE": "Peaks, bei denen diese Phase den größten Beitrag liefert."
+ },
+ "Aceitar fase": {
+  "en_US": "Accept phase",
+  "de_DE": "Phase akzeptieren"
+ },
+ "Aceita o candidato selecionado. As escalas das fases aceitas são ajustadas juntas e os outros candidatos são pontuados de novo contra os picos que sobraram.": {
+  "en_US": "Accepts the selected candidate. The scales of the accepted phases are fitted together and the other candidates are rescored against the remaining peaks.",
+  "de_DE": "Akzeptiert den ausgewählten Kandidaten. Die Skalen der akzeptierten Phasen werden gemeinsam angepasst und die übrigen Kandidaten gegen die verbleibenden Peaks neu bewertet."
+ },
+ "Fases aceitas": {
+  "en_US": "Accepted phases",
+  "de_DE": "Akzeptierte Phasen"
+ },
+ "Remover fase": {
+  "en_US": "Remove phase",
+  "de_DE": "Phase entfernen"
+ },
+ "Remove as fases selecionadas (tecla Delete) e pontua os candidatos de novo.": {
+  "en_US": "Removes the selected phases (Delete key) and rescores the candidates.",
+  "de_DE": "Entfernt die ausgewählten Phasen (Entf-Taste) und bewertet die Kandidaten neu."
+ },
+ "Enviar fases aceitas para a lista": {
+  "en_US": "Send accepted phases to the list",
+  "de_DE": "Akzeptierte Phasen in die Liste übernehmen"
+ },
+ "Carrega os CIFs das fases aceitas na aba de simulação e cria uma combinação com as proporções ajustadas.": {
+  "en_US": "Loads the CIFs of the accepted phases into the simulation tab and creates a combination with the fitted proportions.",
+  "de_DE": "Lädt die CIFs der akzeptierten Phasen in den Simulations-Tab und erstellt eine Kombination mit den angepassten Anteilen."
+ },
+ "Nenhuma fase aceita. Selecione um candidato e clique em Aceitar fase.": {
+  "en_US": "No accepted phase. Select a candidate and click Accept phase.",
+  "de_DE": "Keine akzeptierte Phase. Wählen Sie einen Kandidaten und klicken Sie auf Phase akzeptieren."
+ },
+ "A radiação mudou: busque os candidatos de novo.": {
+  "en_US": "The radiation changed: search the candidates again.",
+  "de_DE": "Die Strahlung hat sich geändert: Suchen Sie die Kandidaten erneut."
+ },
+ "Fase enviada para a lista.": {
+  "en_US": "Phase sent to the list.",
+  "de_DE": "Phase in die Liste übernommen."
+ },
+ "Nenhuma fase foi enviada.": {
+  "en_US": "No phase was sent.",
+  "de_DE": "Es wurde keine Phase übernommen."
+ },
+ "pontuados contra os picos que sobraram": {
+  "en_US": "scored against the remaining peaks",
+  "de_DE": "gegen die verbleibenden Peaks bewertet"
+ },
+ "Fases enviadas para a lista, com a combinação {}.": {
+  "en_US": "Phases sent to the list, with the combination {}.",
+  "de_DE": "Phasen in die Liste übernommen, mit der Kombination {}."
+ },
+ "Não foi possível simular esta fase.": {
+  "en_US": "This phase could not be simulated.",
+  "de_DE": "Diese Phase konnte nicht simuliert werden."
+ },
+ "calculando o RIR...": {
+  "en_US": "computing RIR...",
+  "de_DE": "RIR wird berechnet..."
+ },
+ "pontuação: {}": {
+  "en_US": "scoring: {}",
+  "de_DE": "Bewertung: {}"
+ },
+ "RIR (I/Ic) calculado da estrutura: {}": {
+  "en_US": "RIR (I/Ic) computed from the structure: {}",
+  "de_DE": "RIR (I/Ic) aus der Struktur berechnet: {}"
+ },
+ "As fases aceitas explicam {}% da intensidade dos picos": {
+  "en_US": "The accepted phases explain {}% of the peak intensity",
+  "de_DE": "Die akzeptierten Phasen erklären {}% der Peakintensität"
+ },
+ "picos sem fase: {}": {
+  "en_US": "peaks without a phase: {}",
+  "de_DE": "Peaks ohne Phase: {}"
+ },
+ "zero global {}°": {
+  "en_US": "global zero {}°",
+  "de_DE": "globaler Nullpunkt {}°"
+ },
+ "perfil explicado: {}%": {
+  "en_US": "profile explained: {}%",
+  "de_DE": "erklärtes Profil: {}%"
  }
 }

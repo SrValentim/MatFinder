@@ -90,6 +90,7 @@ nav:
       - guide/index.md
       - Database search: guide/database-search.md
       - Analysis (PhaseDRX): guide/analysis.md
+      - Phase identification: guide/search-match.md
       - 3D structure viewer: guide/structure-viewer.md
       - Tools & calculators: guide/tools.md
   - Tutorials & Videos: tutorial.md

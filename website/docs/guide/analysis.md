@@ -43,6 +43,10 @@ Overlay the calculated patterns on the experimental data:
   phase form.
 - Click any peak to read its **2θ**, **intensity** and **d-spacing**.
 
+To find candidate phases automatically in COD and the Materials Project, use the
+**Peaks** and **Identification** tabs described in
+[Phase identification (search-match)](search-match.md).
+
 ## 5. Export
 
 Use **Save Plot…** to export a publication-ready figure of the comparison.

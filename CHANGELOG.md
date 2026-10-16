@@ -24,6 +24,46 @@ e versionamento [Semantic Versioning](https://semver.org/lang/pt-BR/) (MAJOR.MIN
 ## [Não publicado]
 
 ### Added
+- Ciclo de identificação no estilo do HighScore (PhaseDRX, search-match fase 3): **Aceitar fase**
+  leva o candidato para a tabela de fases aceitas. As escalas das fases aceitas são ajustadas
+  juntas às alturas dos picos e os outros candidatos são pontuados de novo contra a intensidade
+  que sobrou, com o zero fixado pelas fases aceitas. A tabela mostra escala, picos atribuídos e
+  fração em massa semiquantitativa (RIR calculado da estrutura); o resumo mostra quanto da
+  intensidade está explicado, os picos sem fase e o zero global. No gráfico, as reflexões das
+  fases aceitas aparecem na cor de cada fase, cada pico ganha a cor da fase que mais o explica e
+  os picos sem fase ficam com um anel vermelho. Para dados ruins (poucos picos ou picos largos),
+  um score de perfil inteiro ajusta o padrão simulado ao difratograma sem fundo; o modo
+  **Automático** liga esse score quando a lista de picos é pobre. **Enviar fases aceitas para a
+  lista** carrega os CIFs e cria uma combinação com as proporções ajustadas. As fases aceitas
+  ficam salvas no projeto (com o CIF), entram no desfazer/refazer e são recalculadas quando a
+  lista de picos ou a radiação muda.
+- Identificação de fases (PhaseDRX, search-match fase 2): nova aba **Identificação**.
+  Os elementos obrigatórios, possíveis e proibidos são escolhidos numa tabela periódica de
+  três estados (sistema fechado ou aberto) e os candidatos vêm do COD e do Materials
+  Project. Cada candidato é simulado e pontuado de 0 a 100 contra a lista de picos:
+  posições, reflexões fortes achadas (só as esperadas acima do ruído), picos explicados e
+  intensidades, com zero e escala da rede alinhados (faixa maior para as estruturas de DFT
+  do MP). Entradas da mesma fase são agrupadas; a tabela é ordenável, mostra a prévia das
+  reflexões sobre o difratograma, abre a entrada na fonte e envia o CIF para a lista do
+  PhaseDRX. Consultas, CIFs e padrões simulados ficam em cache local; o COD é consultado por
+  sistema químico (respostas menores, sem cortes), com novas tentativas e HTTP quando o HTTPS falha.
+- Busca de picos (PhaseDRX, search-match fase 1): nova aba **Picos** com um detector
+  refeito do zero. Detecção multiescala (segunda derivada suavizada em várias larguras)
+  com ruído calibrado longe dos picos, fundo SNIP robusto a ruído e a bordas, e ajuste
+  por pseudo-Voigt assimétrica com dubleto Kα2, tendência de largura (Caglioti) e
+  seleção de modelo para ombros. Mostra 2θ com incerteza, d, intensidade relativa,
+  altura, área, FWHM e significância; marca possíveis picos de Kβ; no modo "Picos
+  largos / amorfo" separa halos amorfos e estima a cristalinidade. A busca roda em
+  segundo plano, com progresso e cancelamento.
+- Edição da lista de picos (PhaseDRX): adicionar pico com um clique (ajuste local),
+  apagar pico pelo gráfico ou pela tabela (só o pico, nunca os dados), picos apagados
+  continuam apagados numa nova busca até serem restaurados, exportação em CSV. A lista
+  fica salva no projeto e entra no desfazer/refazer.
+- Simulação (PhaseDRX): opções **Kα** e **Kβ** na aba de simulação para escolher as
+  linhas de emissão do tubo que entram no padrão calculado. Pelo menos uma fica sempre
+  marcada. O Kβ1 entra com a razão de intensidade aproximada de um tubo sem filtro, e as
+  opções ficam desativadas com comprimento de onda personalizado. Com só o Kα marcado, o
+  resultado é idêntico ao de antes.
 - Visualizador 3D (PhaseDRX): exibição completa da célula unitária. Átomos em faces,
   arestas e vértices são replicados em todas as imagens de borda dentro de [0, N] e a
   vizinhança ligada imediatamente fora da célula é incluída para fechar anéis e poliedros
@@ -54,6 +94,8 @@ e versionamento [Semantic Versioning](https://semver.org/lang/pt-BR/) (MAJOR.MIN
   documentos vazios.
 
 ### Fixed
+- PhaseDRX: o Desfazer recuava duas ações por clique (e o Refazer devolvia só uma);
+  agora cada clique desfaz ou refaz exatamente uma ação.
 - Visualizador 3D (PhaseDRX): arestas da célula unitária passam a usar
   glOptions='opaque' (antes 'additive', sem teste de profundidade), corrigindo linhas
   desenhadas por cima de ligações e átomos.
