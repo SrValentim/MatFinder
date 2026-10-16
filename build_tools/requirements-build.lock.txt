@@ -4,6 +4,8 @@
 #   py -3.11 -m venv .venv-build
 #   .venv-build\Scripts\python -m pip install -r build_tools\requirements-build.lock.txt
 # IMPORTANTE: inclui setuptools<81 (pkg_resources) e backports.tarfile - criticos.
+# pywinpty leva o marcador sys_platform == "win32": so existe para Windows e quebrava
+# a instalacao no Linux/macOS (CI). Ao refazer o lock com pip freeze, mantenha o marcador.
 #
 aioitertools==0.13.0
 altgraph==0.17.5
@@ -145,7 +147,7 @@ python-json-logger==4.1.0
 pytz==2026.2
 PyWavelets==1.9.0
 pywin32-ctypes==0.2.3
-pywinpty==3.0.5
+pywinpty==3.0.5; sys_platform == "win32"
 PyYAML==6.0.3
 pyzmq==27.1.0
 quantities==0.16.4

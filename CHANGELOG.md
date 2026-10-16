@@ -101,6 +101,11 @@ e versionamento [Semantic Versioning](https://semver.org/lang/pt-BR/) (MAJOR.MIN
   desenhadas por cima de ligações e átomos.
 - *Sobre ▸ Licença* rodando pelo código-fonte: o texto da licença não era encontrado
   (o app procurava `LICENSE_FULL.txt` na raiz, mas o arquivo ficava em `licenses/`).
+- CI: o `requirements-build.lock.txt` volta a instalar no Linux e no macOS (o `pywinpty`,
+  que só existe para Windows, ganhou o marcador `sys_platform == "win32"`), e o selftest
+  não exige mais o `cloudscraper`, que já tinha saído do lock. Os testes e o build de
+  release voltam a rodar no GitHub Actions.
+- `build_tools/release.py`: as notas do Release saíam com `\n` literal no texto.
 
 ---
 
