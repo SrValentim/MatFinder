@@ -290,7 +290,7 @@ This project is licensed under the **GNU General Public License v3.0** - see the
 
 🟢 **Active** — under development and maintenance.
 
-**Current version:** 3.27.0 — see the [`CHANGELOG.md`](CHANGELOG.md) for the full history.
+**Current version:** 3.28.0 — see the [`CHANGELOG.md`](CHANGELOG.md) for the full history.
 
 Recent highlights:
 - Automatic phase identification (search-match) using the open COD and Materials Project databases

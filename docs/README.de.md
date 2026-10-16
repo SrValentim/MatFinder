@@ -292,7 +292,7 @@ Dieses Projekt steht unter der **GNU General Public License v3.0** — Einzelhei
 
 🟢 **Aktiv** — in Entwicklung und Wartung.
 
-**Aktuelle Version:** 3.27.0 — siehe [`CHANGELOG.md`](../CHANGELOG.md) für die vollständige Historie.
+**Aktuelle Version:** 3.28.0 — siehe [`CHANGELOG.md`](../CHANGELOG.md) für die vollständige Historie.
 
 Aktuelle Highlights:
 - Automatische Phasenidentifizierung (Search-Match) mit den offenen Datenbanken COD und Materials Project

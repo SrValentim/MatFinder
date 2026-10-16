@@ -290,7 +290,7 @@ Este projeto está licenciado sob a **GNU General Public License v3.0** — veja
 
 🟢 **Ativo** — em desenvolvimento e manutenção.
 
-**Versão atual:** 3.27.0 — veja o [`CHANGELOG.md`](../CHANGELOG.md) para o histórico completo.
+**Versão atual:** 3.28.0 — veja o [`CHANGELOG.md`](../CHANGELOG.md) para o histórico completo.
 
 Destaques recentes:
 - Identificação automática de fases (search-match) com as bases abertas COD e Materials Project
