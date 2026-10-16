@@ -160,9 +160,11 @@ def main():
     step("6/6  Publicando Release no GitHub")
     token = get_token()
     notes = (f"MatFinder {new} (Windows x64).\n\n"
-             f"- **{setup_name}** - instalador (recomendado).\n"
-             f"- **{zip_name}** - portatil (extrair e rodar MatFinder.exe ou PhaseDRX.exe).\n\n"
-             f"Mudancas: ver CHANGELOG.md.")
+             f"- **{setup_name}**: installer (recommended).\n"
+             f"- **{zip_name}**: portable (extract and run MatFinder.exe or PhaseDRX.exe).\n\n"
+             f"Changes: see CHANGELOG.md.\n"
+             f"Warning: It's normal for Windows to block the setup from running; "
+             f"work around this by clicking \"Run anyway\".")
     rel = api("POST", f"{API}/releases", token,
               payload={"tag_name": tag, "name": f"MatFinder {tag}", "body": notes})
     rel_id = rel["id"]

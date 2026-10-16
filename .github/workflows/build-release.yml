@@ -99,11 +99,13 @@ jobs:
           files: release-assets/*
           fail_on_unmatched_files: true
           body: |
-            Build automatico do MatFinder.
+            Automated MatFinder build.
 
             Downloads:
-            - **Windows**: instalador `*-Setup.exe` (recomendado) ou `*-win64.zip` portatil.
-            - **Linux**: `*-linux-x86_64.tar.gz` (extrair e rodar `MatFinder/MatFinder`).
-            - **macOS**: `*-macos-arm64.zip` (extrair e rodar `MatFinder/MatFinder`).
+            - **Windows**: `*-Setup.exe` installer (recommended) or portable `*-win64.zip`.
+            - **Linux**: `*-linux-x86_64.tar.gz` (extract and run `MatFinder/MatFinder`).
+            - **macOS**: `*-macos-arm64.zip` (extract and run `MatFinder/MatFinder`).
 
-            Rodar de fonte funciona em qualquer SO. Veja o CHANGELOG.md.
+            Running from source works on any OS. Changes: see CHANGELOG.md.
+
+            Warning: It's normal for Windows to block the setup from running; work around this by clicking "Run anyway".
