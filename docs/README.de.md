@@ -32,6 +32,25 @@
 
 MatFinder ist eine vollständige Desktop-Anwendung zum Suchen, Visualisieren und Analysieren kristalliner Materialstrukturen. Entwickelt an der Bundesuniversität von Amazonas (UFAM) in Brasilien, vereint sie mehrere kristallographische Datenbanken und Werkzeuge zur Röntgenbeugungsanalyse.
 
+###  Highlight: automatische Phasenidentifizierung (Search-Match)
+
+PhaseDRX identifiziert die kristallinen Phasen eines Diffraktogramms mit einem
+Search-Match-Ablauf wie in kommerzieller XRD-Software – **kostenlos und nur mit offenen Datenbanken**:
+
+- **Robuste Peaksuche**: Multiskalen-Erkennung, Anpassung des Kα2-Dubletts, Kβ-Markierung und
+  ein Modus für breite oder amorphe Muster. Die Peakliste lässt sich bearbeiten, ohne die Daten zu verändern.
+- **Kandidaten aus offenen Datenbanken**: die [Crystallography Open Database (COD)](https://www.crystallography.net/)
+  und das [Materials Project](https://next-gen.materialsproject.org/) (kostenloser API-Schlüssel),
+  gefiltert über eine Elementauswahl im Periodensystem. Keine kostenpflichtige Datenbank oder Lizenz nötig.
+- **Bewertung von 0 bis 100** nach Peakpositionen, erwarteten starken Reflexen und
+  Intensitäten, mit gruppierten Duplikaten und einer Vorschau der Reflexe über Ihrem Muster.
+- **Akzeptieren und neu bewerten**: Akzeptierte Phasen werden gemeinsam angepasst, die übrigen
+  Kandidaten gegen die noch nicht erklärte Intensität neu bewertet, und Peaks ohne Phase werden markiert.
+- **Halbquantitative Massenanteile** (RIR) und ein Klick, um die akzeptierten Phasen als
+  Mehrphasenkombination an die Simulation zu senden.
+
+Schritt für Schritt (auf Englisch): [Anleitung zur Phasenidentifizierung](https://srvalentim.github.io/MatFinder/guide/search-match/).
+
 ###  Mehrsprachige Unterstützung
 
 MatFinder ist verfügbar in:
@@ -44,6 +63,8 @@ MatFinder ist verfügbar in:
 
 - **Integrierte Suche**: Materials Project, COD (Crystallography Open Database), OQMD, ROD (Raman Open Database)
 - **XRD-Analyse**: Simulation und Vergleich von Beugungsmustern
+- **Phasenidentifizierung (Search-Match)**: automatische Identifizierung der Phasen eines
+  XRD-Musters mit Kandidaten aus COD und dem Materials Project
 - **Analysewerkzeuge**:
   - CIF-Datei-Editor
   - Stöchiometrischer Rechner
@@ -274,6 +295,7 @@ Dieses Projekt steht unter der **GNU General Public License v3.0** — Einzelhei
 **Aktuelle Version:** 3.27.0 — siehe [`CHANGELOG.md`](../CHANGELOG.md) für die vollständige Historie.
 
 Aktuelle Highlights:
+- Automatische Phasenidentifizierung (Search-Match) mit den offenen Datenbanken COD und Materials Project
 - Vollständige Übersetzung der Oberfläche (Portugiesisch, Englisch, Deutsch)
 - PhaseDRX als eigenständige Anwendung (`PhaseDRX.exe`) mit anwendungsübergreifendem CIF-Export
 - Abruf von Open-Access-Artikeln per DOI (OpenAlex/Unpaywall)
