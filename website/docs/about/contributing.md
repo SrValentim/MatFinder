@@ -15,8 +15,8 @@ are available). Helpful things to include:
 
 ## Contribute code
 
-1. Read [`CONTRIBUTING.md`](https://github.com/SrValentim/MatFinder/blob/main/CONTRIBUTING.md)
-   and the [`CODE_OF_CONDUCT.md`](https://github.com/SrValentim/MatFinder/blob/main/CODE_OF_CONDUCT.md).
+1. Read [`CONTRIBUTING.md`](https://github.com/SrValentim/MatFinder/blob/main/.github/CONTRIBUTING.md)
+   and the [`CODE_OF_CONDUCT.md`](https://github.com/SrValentim/MatFinder/blob/main/.github/CODE_OF_CONDUCT.md).
 2. Fork the repository.
 3. Create a feature branch: `git checkout -b feature/AmazingFeature`.
 4. Commit your changes: `git commit -m 'feat: add some AmazingFeature'`.

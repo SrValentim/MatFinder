@@ -1,16 +1,16 @@
 # MatFinder
 
 <div align="center">
-  <img src="matfinder/assets/logos/splash.png" alt="MatFinder Logo" width="200"/>
+  <img src="../matfinder/assets/logos/splash.png" alt="MatFinder Logo" width="200"/>
   
   **Suche und Analyse kristalliner Materialien**
   
   [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20778195.svg)](https://doi.org/10.5281/zenodo.20778195)
-  [![License](https://img.shields.io/badge/license-GPL%20v3-blue.svg)](licenses/LICENSE)
+  [![License](https://img.shields.io/badge/license-GPL%20v3-blue.svg)](../LICENSE)
   [![Python](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/)
   [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey.svg)](#matfinder-beziehen)
   
-  🌐 [English](README.md) · [Português](README.pt-BR.md) · **Deutsch**
+  🌐 [English](../README.md) · [Português](README.pt-BR.md) · **Deutsch**
 
   <br/><br/>
 
@@ -87,24 +87,27 @@ python3.11 -m venv .venv
 
 > Erfordert **Python 3.11 (64-Bit)**. Die gepinnte Datei
 > `build_tools/requirements-build.lock.txt` ist der reproduzierbare Satz an
-> Abhängigkeiten (die `requirements.txt` im Stammverzeichnis ist ein vollständiger
-> Environment-Freeze). Die Ausführung aus dem Quellcode funktioniert auf allen drei
+> Abhängigkeiten. Die Ausführung aus dem Quellcode funktioniert auf allen drei
 > Plattformen; die vorkompilierte `.exe`/der Installer sind nur für Windows.
 
 ###  Option 3 — Eigene optimierte `.exe` kompilieren
 
-1. Doppelklicken Sie auf **`INSTALAR_REQUISITOS.bat`** — installiert Python 3.11 + Abhängigkeiten (einmalig).
-2. Doppelklicken Sie auf **`COMPILAR.bat`** — erzeugt `dist/MatFinder/` mit `MatFinder.exe`
+1. Doppelklicken Sie auf **`build_tools/INSTALAR_REQUISITOS.bat`** — installiert Python 3.11 + Abhängigkeiten (einmalig).
+2. Doppelklicken Sie auf **`build_tools/COMPILAR.bat`** — erzeugt `dist/MatFinder/` mit `MatFinder.exe`
    und `PhaseDRX.exe` (~450 MB, gemeinsam genutztes `_internal`).
 
-Vollständige Anleitung: **[`COMO_COMPILAR.md`](COMO_COMPILAR.md)** · [`docs/compilation/GUIA_COMPILACAO.md`](docs/compilation/GUIA_COMPILACAO.md)
+Vollständige Anleitung: **[`COMO_COMPILAR.md`](compilation/COMO_COMPILAR.md)** · [`GUIA_COMPILACAO.md`](compilation/GUIA_COMPILACAO.md)
 
 ---
 
 ## Dokumentation
 
-- **Kompilierungsanleitung**: [`docs/compilation/`](docs/compilation/)
-- **GPL-v3-Lizenz**: [`licenses/LICENSE_FULL.txt`](licenses/LICENSE_FULL.txt)
+- **Benutzerhandbuch (Website)**: <https://srvalentim.github.io/MatFinder/> — Quelle in [`website/`](../website/)
+- **Screenshots**: [`docs/SCREENSHOTS.md`](SCREENSHOTS.md)
+- **Kompilierungsanleitungen** (PT): [`docs/compilation/`](compilation/)
+- **Technische Notizen und Validierungsberichte** (PT): [`docs/dev/`](dev/)
+- **Beispiele** (Beispiel-CIFs + echte XRD-Daten): [`examples/`](../examples/)
+- **GPL-v3-Lizenz**: [`LICENSE`](../LICENSE)
 
 ---
 
@@ -114,48 +117,62 @@ Vollständige Anleitung: **[`COMO_COMPILAR.md`](COMO_COMPILAR.md)** · [`docs/co
 
 ```
 MatFinder/
-├── matfinder/                       # Haupt-Quellcode
-│   ├── core/                       # Kernmodule
-│   ├── data/                       # Datenverarbeitung (CIF, APIs)
-│   ├── tools/                      # Werkzeuge (Rechner, XRD usw.)
-│   └── assets/                     # Ressourcen (Symbole, Logos, Konfigurationen)
-├── build_tools/
-│   ├── MatFinder.spec              # PyInstaller-Konfiguration (collect_all + Qt-DLL-Filter)
-│   ├── build_clean.py              # Build-Pipeline: Imports abbilden + kompilieren + Selftest
-│   ├── gen_hiddenimports.py        # Bildet den tatsächlichen Import-Abschluss der App ab
-│   ├── requirements-build.lock.txt # Exakte, reproduzierbare Abhängigkeiten (Python 3.11)
-│   └── requirements-build.txt      # Lesbare/minimale Abhängigkeiten
-├── .github/workflows/
-│   └── build-release.yml           # CI: Build (Windows/Linux/macOS) + Release veröffentlichen
-├── docs/                           # Dokumentation (inkl. Kompilierungsanleitung)
-├── licenses/                       # Lizenzdateien
-├── tests/                          # Tests
-├── INSTALAR_REQUISITOS.bat         # 1 Klick: Python 3.11 + Abhängigkeiten installieren
-├── COMPILAR.bat                    # 1 Klick: die .exe kompilieren
-├── COMO_COMPILAR.md                # Build-Anleitung (PT)
-├── run_matfinder.py                # Einstiegspunkt (unterstützt --selftest)
-└── requirements.txt                # Vollständiger Environment-Freeze (nicht zum Bauen)
+├── matfinder/                       # Quellcode
+│   ├── core/                        # Kernmodule (Datenbank-APIs, Übersetzung, Favoriten, Verlauf)
+│   ├── data/                        # Datenverarbeitung (CIF-Editor/-Handler, COD-API)
+│   ├── tools/                       # Werkzeuge: Rechner, Periodensystem, XRD-Suite (PhaseDRX)
+│   └── assets/                      # Symbole, Logos und Übersetzungen
+├── tests/                           # Automatisierte Tests (pytest) + deren requirements.txt
+├── examples/                        # Beispiel-CIFs und echte XRD-Daten (auch von den Tests genutzt)
+├── docs/                            # Dokumentation
+│   ├── README.pt-BR.md              # Diese README auf Portugiesisch
+│   ├── README.de.md                 # Diese README auf Deutsch
+│   ├── SCREENSHOTS.md               # Visuelle Tour (Bilder in screenshots/)
+│   ├── compilation/                 # Build-Anleitungen (PT)
+│   └── dev/                         # Technische Notizen und Validierungsberichte (PT)
+├── website/                         # Dokumentationsseite (MkDocs -> GitHub Pages)
+├── build_tools/                     # Build-, Installer- und Release-Werkzeuge
+│   ├── INSTALAR_REQUISITOS.bat      # 1 Klick: Python 3.11 + Abhängigkeiten installieren
+│   ├── COMPILAR.bat                 # 1 Klick: die .exe kompilieren
+│   ├── build_clean.py               # Build-Pipeline: Imports abbilden + kompilieren + Selftest
+│   ├── gen_hiddenimports.py         # Bildet den tatsächlichen Import-Abschluss der App ab
+│   ├── MatFinder.spec               # PyInstaller-Konfiguration (collect_all + Qt-DLL-Filter)
+│   ├── MatFinder.iss                # Windows-Installer (Inno Setup)
+│   ├── release.py                   # Lokales Release mit einem Befehl
+│   ├── version_manager.py           # Synchronisiert die Versionsnummer in allen Dateien
+│   ├── requirements-build.lock.txt  # Exakte, reproduzierbare Abhängigkeiten (Python 3.11)
+│   └── requirements-build.txt       # Lesbare/minimale Abhängigkeiten
+├── .github/                         # CI-Workflows, Issue-Vorlagen, Beitragsleitfaden, Verhaltenskodex
+├── run_matfinder.py                 # Einstiegspunkt: MatFinder (unterstützt --selftest)
+├── run_phasedrx.py                  # Einstiegspunkt: PhaseDRX (eigenständige XRD-Suite)
+├── CHANGELOG.md                     # Versionshistorie
+├── CITATION.cff                     # Zitationsmetadaten (Zenodo)
+├── LICENSE                          # GPL-v3-Lizenz
+├── pytest.ini                       # Testkonfiguration
+└── VERSION                          # Aktuelle Versionsnummer
 ```
 
 ### Kompilierung
 
 Optimierter Build (~450 MB, zwei ausführbare Dateien, die sich `_internal` teilen, ohne
 die "fehlendes Modul"-Schleife). Einmalige Einrichtung mit `INSTALAR_REQUISITOS.bat`,
-danach `COMPILAR.bat` zum Bauen:
+danach `COMPILAR.bat` zum Bauen (beide liegen in `build_tools/`):
 
 ```bat
-INSTALAR_REQUISITOS.bat       :: 1x: Python 3.11 + Abhängigkeiten (aus dem Lock)
-COMPILAR.bat                  :: Build -> dist\MatFinder\MatFinder.exe
-COMPILAR.bat --clean          :: sauberer Neubau (leert den Cache)
+build_tools\INSTALAR_REQUISITOS.bat   :: 1x: Python 3.11 + Abhängigkeiten (aus dem Lock)
+build_tools\COMPILAR.bat              :: Build -> dist\MatFinder\MatFinder.exe
+build_tools\COMPILAR.bat --clean      :: sauberer Neubau (leert den Cache)
 ```
 
 - Selbstprüfung nach einem Build (listet fehlende Module auf einmal auf): `MatFinder.exe --selftest`
+- **Tests:** `python -m pip install -r tests/requirements.txt`, danach `python -m pytest`
+  (siehe [`tests/README.md`](../tests/README.md)).
 - **CI:** Das Pushen eines Tags `vX.Y.Z` löst `.github/workflows/build-release.yml` aus,
   das unter **Windows, Linux und macOS** baut und ein Release mit dem Windows-Installer
   + `.zip`, einem Linux-`.tar.gz` und einem macOS-`.zip` veröffentlicht.
 
-Für Details siehe **[`COMO_COMPILAR.md`](COMO_COMPILAR.md)** und
-[`docs/compilation/GUIA_COMPILACAO.md`](docs/compilation/GUIA_COMPILACAO.md).
+Für Details siehe **[`COMO_COMPILAR.md`](compilation/COMO_COMPILAR.md)** und
+[`GUIA_COMPILACAO.md`](compilation/GUIA_COMPILACAO.md).
 
 ### Verwendete Technologien
 
@@ -173,9 +190,9 @@ Für Details siehe **[`COMO_COMPILAR.md`](COMO_COMPILAR.md)** und
 ##  Mitwirken
 
 Beiträge sind willkommen — Fehlerberichte, Funktionsideen, Dokumentation,
-Übersetzungen und Code. Bitte lesen Sie **[`CONTRIBUTING.md`](CONTRIBUTING.md)**
+Übersetzungen und Code. Bitte lesen Sie **[`CONTRIBUTING.md`](../.github/CONTRIBUTING.md)**
 (Dev-Einrichtung, Code- und Übersetzungsrichtlinien, PR-Prozess) und unseren
-**[`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md)**.
+**[`CODE_OF_CONDUCT.md`](../.github/CODE_OF_CONDUCT.md)**.
 
 Kurzfassung:
 
@@ -211,13 +228,13 @@ Wenn Sie MatFinder in Ihrer Forschung verwenden, zitieren Sie es bitte (archivie
 ```
 </details>
 
-> 💡 GitHub erzeugt außerdem eine Schaltfläche **"Cite this repository"** (in der Seitenleiste der Repo-Seite) aus der [`CITATION.cff`](CITATION.cff).
+> 💡 GitHub erzeugt außerdem eine Schaltfläche **"Cite this repository"** (in der Seitenleiste der Repo-Seite) aus der [`CITATION.cff`](../CITATION.cff).
 
 ---
 
 ##  Lizenz
 
-Dieses Projekt steht unter der **GNU General Public License v3.0** — Einzelheiten finden Sie in der Datei [`licenses/LICENSE`](licenses/LICENSE).
+Dieses Projekt steht unter der **GNU General Public License v3.0** — Einzelheiten finden Sie in der Datei [`LICENSE`](../LICENSE).
 
 ### Lizenzübersicht
 
@@ -254,7 +271,7 @@ Dieses Projekt steht unter der **GNU General Public License v3.0** — Einzelhei
 
 🟢 **Aktiv** — in Entwicklung und Wartung.
 
-**Aktuelle Version:** 3.25.0 — siehe [`CHANGELOG.md`](CHANGELOG.md) für die vollständige Historie.
+**Aktuelle Version:** 3.27.0 — siehe [`CHANGELOG.md`](../CHANGELOG.md) für die vollständige Historie.
 
 Aktuelle Highlights:
 - Vollständige Übersetzung der Oberfläche (Portugiesisch, Englisch, Deutsch)
@@ -267,7 +284,7 @@ Aktuelle Highlights:
 ## Probleme melden
 
 Einen Fehler gefunden? Einen Vorschlag? Öffnen Sie eine [Issue](https://github.com/SrValentim/MatFinder/issues)
-(Vorlagen verfügbar) — siehe [`CONTRIBUTING.md`](CONTRIBUTING.md) für die anzugebenden Informationen.
+(Vorlagen verfügbar) — siehe [`CONTRIBUTING.md`](../.github/CONTRIBUTING.md) für die anzugebenden Informationen.
 
 ---
 

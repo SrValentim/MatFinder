@@ -35,8 +35,8 @@ for _s in (sys.stdout, sys.stderr):
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
-sys.path.insert(0, ROOT)
-import version_manager as vm  # noqa: E402
+sys.path.insert(0, HERE)
+import version_manager as vm  # noqa: E402  (fica aqui mesmo, em build_tools/)
 
 REPO = "SrValentim/MatFinder"
 API = f"https://api.github.com/repos/{REPO}"

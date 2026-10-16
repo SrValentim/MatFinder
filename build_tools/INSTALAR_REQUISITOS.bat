@@ -1,6 +1,7 @@
 @echo off
 title MatFinder - Instalar requisitos
-cd /d "%~dp0"
+REM Este .bat fica em build_tools\; tudo roda a partir da raiz do projeto.
+cd /d "%~dp0.."
 
 echo(
 echo ============================================================
@@ -45,6 +46,7 @@ echo(
 
 REM ------------------------------------------------------------
 REM 2) Ambiente de build + dependencias
+REM    .venv-build na raiz do projeto (ou ..\.venv-build, se ja existir fora dela)
 REM ------------------------------------------------------------
 set "VENV=.venv-build"
 if exist "..\.venv-build\Scripts\python.exe" set "VENV=..\.venv-build"
@@ -67,7 +69,7 @@ if errorlevel 1 (
 
 echo(
 echo ============================================================
-echo   PRONTO!  Agora de duplo clique em  COMPILAR.bat
+echo   PRONTO!  Agora de duplo clique em  build_tools\COMPILAR.bat
 echo ============================================================
 echo(
 pause

@@ -3,9 +3,7 @@
 MatFinder is licensed under the **GNU General Public License v3.0 (GPL-3.0)**.
 
 The full text is in the repository:
-[`licenses/LICENSE`](https://github.com/SrValentim/MatFinder/blob/main/licenses/LICENSE)
-·
-[`licenses/LICENSE_FULL.txt`](https://github.com/SrValentim/MatFinder/blob/main/licenses/LICENSE_FULL.txt).
+[`LICENSE`](https://github.com/SrValentim/MatFinder/blob/main/LICENSE).
 
 ## What this means
 

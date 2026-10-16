@@ -1,15 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-version_manager.py
+build_tools/version_manager.py
 Gerenciador de versões do MatFinder
 
-Uso:
-    python version_manager.py --show          # Mostra versão atual
-    python version_manager.py --set 4.5.0     # Define nova versão
-    python version_manager.py --bump patch    # Incrementa patch (4.4.0 -> 4.4.1)
-    python version_manager.py --bump minor    # Incrementa minor (4.4.0 -> 4.5.0)
-    python version_manager.py --bump major    # Incrementa major (4.4.0 -> 5.0.0)
+Uso (a partir da raiz do projeto):
+    python build_tools/version_manager.py --show          # Mostra versão atual
+    python build_tools/version_manager.py --set 4.5.0     # Define nova versão
+    python build_tools/version_manager.py --bump patch    # Incrementa patch (4.4.0 -> 4.4.1)
+    python build_tools/version_manager.py --bump minor    # Incrementa minor (4.4.0 -> 4.5.0)
+    python build_tools/version_manager.py --bump major    # Incrementa major (4.4.0 -> 5.0.0)
 
 Copyright (C) 2025 Raynner Valentim (UFAM)
 """
@@ -30,8 +30,8 @@ for _stream in (sys.stdout, sys.stderr):
 
 
 def get_root_dir():
-    """Retorna o diretório raiz do projeto."""
-    return os.path.dirname(os.path.abspath(__file__))
+    """Retorna o diretório raiz do projeto (este arquivo fica em build_tools/)."""
+    return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 def read_version():
@@ -86,7 +86,7 @@ def update_init_file(version):
     init_file = os.path.join(get_root_dir(), 'matfinder', '__init__.py')
     major, minor, patch = parse_version(version)
 
-    # Sempre X.Y.Z completo (consistência entre VERSION/setup/.iss/__init__/CITATION).
+    # Sempre X.Y.Z completo (consistência entre VERSION/.iss/__init__/CITATION).
     simple_version = f"{major}.{minor}.{patch}"
 
     content = f'''"""
@@ -96,7 +96,7 @@ Copyright (C) 2025 Raynner Valentim (UFAM)
 Sistema centralizado de versionamento
 """
 
-# Versão do programa - ALTERE APENAS AQUI OU USE version_manager.py
+# Versão do programa - ALTERE APENAS AQUI OU USE build_tools/version_manager.py
 __version__ = "{simple_version}"
 __version_info__ = ({major}, {minor}, {patch})  # (major, minor, patch)
 
@@ -145,31 +145,6 @@ def update_translation_files(version):
                 print(f"✗ Erro ao atualizar {filepath}: {e}")
 
 
-def update_setup_file(version):
-    """Atualiza o arquivo setup.py com a nova versão."""
-    setup_file = os.path.join(get_root_dir(), 'setup.py')
-    if not os.path.exists(setup_file):
-        return
-
-    try:
-        with open(setup_file, 'r', encoding='utf-8') as f:
-            content = f.read()
-
-        # Atualiza version="X.X.X"
-        content = re.sub(
-            r'version\s*=\s*["\'][\d.]+["\']',
-            f'version="{version}"',
-            content
-        )
-
-        with open(setup_file, 'w', encoding='utf-8') as f:
-            f.write(content)
-
-        print(f"✓ Atualizado: {setup_file}")
-    except Exception as e:
-        print(f"✗ Erro ao atualizar {setup_file}: {e}")
-
-
 def update_iss_file(version):
     """Atualiza build_tools/MatFinder.iss (#define AppVersion)."""
     iss_file = os.path.join(get_root_dir(), 'build_tools', 'MatFinder.iss')
@@ -210,25 +185,34 @@ def update_citation_file(version):
         print(f"✗ Erro ao atualizar {cff_file}: {e}")
 
 
-def update_readme_file(version):
-    """Atualiza a linha '**Current version:** X.Y.Z' do README.md."""
-    readme = os.path.join(get_root_dir(), 'README.md')
-    if not os.path.exists(readme):
-        return
-    try:
-        with open(readme, 'r', encoding='utf-8') as f:
-            content = f.read()
-        new_content = re.sub(
-            r'(\*\*Current version:\*\*\s*)[\d.]+',
-            rf'\g<1>{version}',
-            content
-        )
-        if new_content != content:
-            with open(readme, 'w', encoding='utf-8') as f:
-                f.write(new_content)
-            print(f"✓ Atualizado: {readme}")
-    except Exception as e:
-        print(f"✗ Erro ao atualizar {readme}: {e}")
+# README principal e traduções: (caminho relativo à raiz, rótulo da linha de versão).
+READMES = [
+    ('README.md', 'Current version:'),
+    (os.path.join('docs', 'README.pt-BR.md'), 'Versão atual:'),
+    (os.path.join('docs', 'README.de.md'), 'Aktuelle Version:'),
+]
+
+
+def update_readme_files(version):
+    """Atualiza a linha '**<rótulo>** X.Y.Z' do README.md e das traduções em docs/."""
+    for rel_path, label in READMES:
+        readme = os.path.join(get_root_dir(), rel_path)
+        if not os.path.exists(readme):
+            continue
+        try:
+            with open(readme, 'r', encoding='utf-8') as f:
+                content = f.read()
+            new_content = re.sub(
+                rf'(\*\*{re.escape(label)}\*\*\s*)[\d.]+',
+                rf'\g<1>{version}',
+                content
+            )
+            if new_content != content:
+                with open(readme, 'w', encoding='utf-8') as f:
+                    f.write(new_content)
+                print(f"✓ Atualizado: {readme}")
+        except Exception as e:
+            print(f"✗ Erro ao atualizar {readme}: {e}")
 
 
 def update_all(version):
@@ -243,10 +227,9 @@ def update_all(version):
 
     update_init_file(version)
     update_translation_files(version)
-    update_setup_file(version)
     update_iss_file(version)
     update_citation_file(version)
-    update_readme_file(version)
+    update_readme_files(version)
 
     print(f"\n✅ Versão atualizada com sucesso para {version}!")
     print("\nPróximos passos (fluxo profissional — a tag dispara o build no GitHub Actions):")
@@ -263,11 +246,11 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Exemplos:
-  python version_manager.py --show
-  python version_manager.py --set 4.5.0
-  python version_manager.py --bump patch
-  python version_manager.py --bump minor
-  python version_manager.py --bump major
+  python build_tools/version_manager.py --show
+  python build_tools/version_manager.py --set 4.5.0
+  python build_tools/version_manager.py --bump patch
+  python build_tools/version_manager.py --bump minor
+  python build_tools/version_manager.py --bump major
         """
     )
 

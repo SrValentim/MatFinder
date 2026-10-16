@@ -7,15 +7,19 @@
 ## TL;DR — como compilar
 
 ```bat
-REM 1x: criar o venv de build (fora da pasta do repo), Python 3.11
-py -3.11 -m venv ..\.venv-build
+REM 1x: criar o venv de build na raiz do projeto, Python 3.11
+REM (ou duplo clique em build_tools\INSTALAR_REQUISITOS.bat, que faz o mesmo)
+py -3.11 -m venv .venv-build
 REM use o LOCK para reproduzir EXATAMENTE o ambiente (recomendado):
-..\.venv-build\Scripts\python -m pip install -r build_tools\requirements-build.lock.txt
+.venv-build\Scripts\python -m pip install -r build_tools\requirements-build.lock.txt
 
 REM sempre que for compilar:
-build_tools\COMPILE.bat
-REM (ou:  ..\.venv-build\Scripts\python build_tools\build_clean.py)
+build_tools\COMPILAR.bat
+REM (ou:  .venv-build\Scripts\python build_tools\build_clean.py)
 ```
+
+Os `.bat` também aceitam o venv um nível acima da pasta do repositório
+(`..\.venv-build`), para quem prefere manter o ambiente fora do projeto.
 
 ### Reprodutibilidade ("dá o mesmo resultado em outra máquina?")
 
@@ -35,10 +39,11 @@ O `build_clean.py` faz tudo: compila → roda `MatFinder.exe --selftest` (headle
 
 ## Por que o build inchava e dava "módulo faltando" (causas-raiz)
 
-1. **Venv poluído.** O `requirements.txt` da raiz é um `pip freeze` do ambiente
-   inteiro do PyCharm (jupyter, jax, opencv, PyQt5, boto3, tensorflow...). O
-   PyInstaller seguia esses imports e empacotava tudo → 1,5 GB. **Solução:** o
-   `.venv-build` tem só o que o app usa (`requirements-build.txt`).
+1. **Venv poluído.** O build usava o ambiente inteiro do PyCharm (o antigo
+   `requirements.txt` da raiz, um `pip freeze` com jupyter, jax, opencv, PyQt5,
+   boto3, tensorflow..., já removido). O PyInstaller seguia esses imports e
+   empacotava tudo → 1,5 GB. **Solução:** o `.venv-build` tem só o que o app usa
+   (`requirements-build.txt`).
 
 2. **Imports dinâmicos/lazy** (pymatgen, mp_api, emmet, monty, chempy, plotly):
    a análise estática do PyInstaller não os enxerga. **Solução:** `collect_all()`
@@ -60,13 +65,17 @@ O `build_clean.py` faz tudo: compila → roda `MatFinder.exe --selftest` (headle
 
 | Arquivo | Papel |
 |---|---|
+| `build_tools/INSTALAR_REQUISITOS.bat` | 1x: instala o Python 3.11 e cria o `.venv-build` a partir do lock |
+| `build_tools/COMPILAR.bat` | atalho: confere o venv e chama o `build_clean.py` |
+| `build_tools/requirements-build.lock.txt` | lock completo (ambiente exato) |
 | `build_tools/requirements-build.txt` | deps mínimas, versões casadas |
-| `build_tools/MatFinder.spec` | spec novo (collect_all + filtro DLL Qt + lê o gerado) |
+| `build_tools/MatFinder.spec` | spec (collect_all + filtro DLL Qt + lê o gerado) |
 | `build_tools/gen_hiddenimports.py` | mede o fecho real de imports → `hiddenimports_generated.txt` |
 | `build_tools/build_clean.py` | pipeline: compila + smoke test + tamanho |
-| `build_tools/COMPILE.bat` | atalho que chama o venv limpo + build_clean.py |
-| `run_matfinder.py --selftest` | importa tudo headless; sai 0/1; grava `selftest_report.txt` |
-| `MatFinder.spec.legacy.bak` | spec antigo (referência) |
+| `build_tools/MatFinder.iss` + `installer_terms.txt` | instalador do Windows (Inno Setup) |
+| `build_tools/release.py` | release local completo (versão → build → instalador → zip → GitHub) |
+| `build_tools/version_manager.py` | sincroniza o número da versão em todos os arquivos |
+| `run_matfinder.py --selftest` | importa tudo headless; sai 0/1; grava `selftest_report.txt` (o `build_clean.py` grava em `build/`) |
 
 ## Diagnóstico (quebrar o ciclo, não tentativa-e-erro)
 
@@ -93,5 +102,5 @@ O `build_clean.py` faz tudo: compila → roda `MatFinder.exe --selftest` (headle
 - Otimizações aplicadas: `collect_all` **sem tests/examples** (cortou centenas de
   `pyqtgraph.examples.*`); build **sem `--clean`** por padrão (reusa cache);
   o gerador de imports **só roda na 1ª vez** (pula se o arquivo já existe).
-- Rebuild do zero (pristine): `build_clean.py --clean` (ou `COMPILAR.bat --clean`).
+- Rebuild do zero (pristine): `build_clean.py --clean` (ou `build_tools\COMPILAR.bat --clean`).
 - 1ª compilação ~5–6 min; repetidas um pouco mais rápidas.

@@ -10,8 +10,8 @@ e versionamento [Semantic Versioning](https://semver.org/lang/pt-BR/) (MAJOR.MIN
 
 ## Fluxo de release (mantenedores)
 
-1. `python version_manager.py --bump patch|minor|major` (sincroniza VERSION, `__init__.py`,
-   traduções, `setup.py`, `MatFinder.iss`, `CITATION.cff` e a versão no README).
+1. `python build_tools/version_manager.py --bump patch|minor|major` (sincroniza VERSION,
+   `__init__.py`, traduções, `MatFinder.iss`, `CITATION.cff` e a versão nos READMEs).
 2. Mover as entradas de **[Não publicado]** para a nova versão abaixo.
 3. `git commit -am "chore: release vX.Y.Z"` e `git tag vX.Y.Z`.
 4. Enviar a tag; o CI compila os pacotes e publica o Release.
@@ -36,10 +36,29 @@ e versionamento [Semantic Versioning](https://semver.org/lang/pt-BR/) (MAJOR.MIN
 - Visualizador 3D (PhaseDRX): botões de orientação da câmera ao longo dos eixos
   cristalográficos a, b e c, e botão de vista isométrica.
 
+### Changed
+- Organização do repositório: a raiz ficou só com o essencial. Os READMEs em português e
+  alemão, a página de capturas de tela e o `COMO_COMPILAR.md` foram para `docs/`;
+  `CONTRIBUTING.md` e `CODE_OF_CONDUCT.md` para `.github/`; `COMPILAR.bat`,
+  `INSTALAR_REQUISITOS.bat` e `version_manager.py` para `build_tools/`. A licença passou a
+  ser `LICENSE` na raiz e as dependências de teste ficam em `tests/requirements.txt`. O
+  relatório do selftest do build agora é gravado em `build/selftest_report.txt`.
+- `version_manager.py` também atualiza a versão nos READMEs em português e alemão.
+
+### Removed
+- Arquivos obsoletos: `setup.py` (cx_Freeze), a pasta `scripts/` (hooks antigos do
+  PyInstaller, build MSI e um `.iss` antigo), `build_tools/COMPILE.bat`,
+  `build_tools/build_optimized.py`, o `requirements.txt` da raiz (freeze do ambiente
+  inteiro, sem uso), a cópia duplicada da licença, os scripts de `tests/manual/`, assets
+  sem uso (`cod_logo.png`, a cópia de `polvo.ico` em `logos/`, `language.json`) e dois
+  documentos vazios.
+
 ### Fixed
 - Visualizador 3D (PhaseDRX): arestas da célula unitária passam a usar
   glOptions='opaque' (antes 'additive', sem teste de profundidade), corrigindo linhas
   desenhadas por cima de ligações e átomos.
+- *Sobre ▸ Licença* rodando pelo código-fonte: o texto da licença não era encontrado
+  (o app procurava `LICENSE_FULL.txt` na raiz, mas o arquivo ficava em `licenses/`).
 
 ---
 

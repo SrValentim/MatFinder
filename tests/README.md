@@ -6,8 +6,8 @@ without the GUI.
 ## Running
 
 ```bash
-python -m pip install -r requirements-dev.txt   # pytest
-python -m pytest                                 # from the project root
+python -m pip install -r tests/requirements.txt   # pytest
+python -m pytest                                   # from the project root
 ```
 
 Tests run headless (`QT_QPA_PLATFORM=offscreen`, set in `conftest.py`).
@@ -28,8 +28,3 @@ Tests run headless (`QT_QPA_PLATFORM=offscreen`, set in `conftest.py`).
 GUI dialogs/widgets are intentionally not unit-tested here; a headless smoke
 check of the whole frozen app is available via `MatFinder.exe --selftest`
 (see `build_tools/build_clean.py`).
-
-## `manual/`
-
-Older ad-hoc/visual scripts (require a display and manual inspection) live in
-`manual/` and are **not** collected by pytest (`norecursedirs = manual`).
