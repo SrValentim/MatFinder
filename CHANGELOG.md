@@ -23,6 +23,10 @@ e versionamento [Semantic Versioning](https://semver.org/lang/pt-BR/) (MAJOR.MIN
 
 ## [Não publicado]
 
+### Changed
+- As notas automáticas das releases (`build-release.yml` e `build_tools/release.py`) passam a
+  ser em inglês, com o aviso de que o Windows pode bloquear o instalador.
+
 ---
 
 ## [3.28.0] - 2026-10-16
